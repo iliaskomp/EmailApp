@@ -44,21 +44,28 @@ public class InboxArrayAdapter extends ArrayAdapter<EmailForInbox> {
         TextView messageView = (TextView) itemView.findViewById(R.id.textViewMessage);
 
 
-        String date = mEmails.get(position).getSentDate().toString();
-        SimpleDateFormat spf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
-        try {
-            Date newDate=spf.parse(date);
-            spf= new SimpleDateFormat("dd MMM yyyy");
-            date = spf.format(newDate);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+
 
         senderView.setText(mEmails.get(position).getSender());
-        dateView.setText(date);
+        dateView.setText(formatDateForInbox(mEmails.get(position).getSentDate()));
         subjectView.setText(mEmails.get(position).getSubject());
         messageView.setText(mEmails.get(position).getMessage());
 
         return itemView;
+    }
+
+    private String formatDateForInbox(Date date) {
+        String dateString = date.toString();
+        SimpleDateFormat spf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+
+        try {
+            Date newDate=spf.parse(dateString);
+            spf= new SimpleDateFormat("dd MMM yyyy");
+            dateString = spf.format(newDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return dateString;
     }
 }
