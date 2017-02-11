@@ -1,4 +1,4 @@
-package com.iliaskomp.emailapp;
+package com.iliaskomp.emailapp.Activities;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -6,6 +6,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import com.iliaskomp.emailapp.Data.Config;
+import com.iliaskomp.emailapp.Data.Email;
+import com.iliaskomp.emailapp.R;
+import com.iliaskomp.emailapp.Functionality.SendMail;
 
 /**
  * Created by elias on 11/02/17.

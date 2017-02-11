@@ -1,8 +1,11 @@
-package com.iliaskomp.emailapp;
+package com.iliaskomp.emailapp.Activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
+
+import com.iliaskomp.emailapp.Functionality.FetchMail;
+import com.iliaskomp.emailapp.R;
 
 /**
  * Created by iliaskomp on 11/02/17.

@@ -1,9 +1,12 @@
-package com.iliaskomp.emailapp;
+package com.iliaskomp.emailapp.Functionality;
 
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
+
+import com.iliaskomp.emailapp.Data.Config;
+import com.iliaskomp.emailapp.Data.Email;
 
 import java.util.Properties;
 

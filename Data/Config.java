@@ -1,4 +1,4 @@
-package com.iliaskomp.emailapp;
+package com.iliaskomp.emailapp.Data;
 
 /**
  * Created by iliaskomp on 11/02/17.
