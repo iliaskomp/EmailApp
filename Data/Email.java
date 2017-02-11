@@ -9,6 +9,9 @@ public class Email {
     private String subject;
     private String message;
 
+    private String headers;
+
+
     public Email(String recipient, String subject, String message) {
         this.recipient = recipient;
         this.subject = subject;
@@ -25,5 +28,17 @@ public class Email {
 
     public String getMessage() {
         return message;
+    }
+
+    public void setRecipient(String recipient) {
+        this.recipient = recipient;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

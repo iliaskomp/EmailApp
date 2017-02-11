@@ -7,7 +7,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.iliaskomp.emailapp.Data.Config;
+import com.iliaskomp.emailapp.Data.EmailForInbox;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import javax.mail.Folder;
@@ -21,8 +24,10 @@ import javax.mail.Store;
  * Created by iliaskomp on 11/02/17.
  */
 
-public class FetchMail extends AsyncTask<Void, Void, Void> {
+public class FetchMail extends AsyncTask<Void, Void, List<EmailForInbox>> {
     private static final String LOG_TAG = "FetchMail";
+
+    public AsyncResponseForFetchEmail delegate = null;
 
     private Context context;
     private String host;
@@ -44,20 +49,19 @@ public class FetchMail extends AsyncTask<Void, Void, Void> {
     }
 
     @Override
-    protected void onPostExecute(Void aVoid) {
-        super.onPostExecute(aVoid);
-        //Dismissing the progress dialog
+    protected void onPostExecute(List<EmailForInbox> emails) {
+        super.onPostExecute(emails);
+        delegate.processFinish(emails);
+
         progressDialog.dismiss();
-        //Showing a success message
         Toast.makeText(context,"Messages Fetched",Toast.LENGTH_LONG).show();
     }
 
     @Override
-    protected Void doInBackground(Void... voids) {
-        Log.d(LOG_TAG, "doInBackground starts");
+    protected List<EmailForInbox> doInBackground(Void... voids) {
+        List<EmailForInbox> emails = new ArrayList<>();
         //create properties field
         Properties properties = new Properties();
-
         properties.put("mail.pop3.host", host);
         properties.put("mail.pop3.port", "995");
         properties.put("mail.pop3.starttls.enable", "true");
@@ -72,19 +76,28 @@ public class FetchMail extends AsyncTask<Void, Void, Void> {
             emailFolder.open(Folder.READ_ONLY);
 
             // retrieve the messages from the folder in an array and print it
-            Log.d(LOG_TAG, "Before retrieving messages");
             Message[] messages = emailFolder.getMessages();
-            Log.d(LOG_TAG, "After retrieving messages");
             Log.d(LOG_TAG, "messages.length---" + messages.length);
 
             for (int i = 0, n = messages.length; i < n; i++) {
                 Message message = messages[i];
-                Log.d(LOG_TAG, "------------------------");
-                Log.d(LOG_TAG, "Email Number: " + (i + 1));
-                Log.d(LOG_TAG, "Subject: " + message.getSubject());
-                Log.d(LOG_TAG, "From: " + message.getFrom()[0]);
-                Log.d(LOG_TAG, "Text: " + message.getContent().toString());
+                EmailForInbox email = new EmailForInbox();
 
+                email.setSender(message.getFrom()[0].toString());
+                email.setSubject(message.getSubject());
+                email.setMessage(message.getContent().toString());
+                email.setHeaders(message.getAllHeaders().toString());
+                email.setRecipient(message.getAllRecipients()[0].toString());
+                email.setSentDate(message.getSentDate());
+
+                emails.add(email);
+                Log.d(LOG_TAG, email.toString());
+
+//                Log.d(LOG_TAG, "------------------------");
+//                Log.d(LOG_TAG, "Email Number: " + (i + 1));
+//                Log.d(LOG_TAG, "Subject: " + message.getSubject());
+//                Log.d(LOG_TAG, "From: " + message.getFrom()[0]);
+//                Log.d(LOG_TAG, "Text: " + message.getContent().toString());
             }
 
             //close the store and folder objects
@@ -98,8 +111,7 @@ public class FetchMail extends AsyncTask<Void, Void, Void> {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        return null;
+        return emails;
     }
 
 
