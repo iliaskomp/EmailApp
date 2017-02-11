@@ -21,27 +21,27 @@ import javax.mail.internet.MimeMessage;
 
 public class SendMail extends AsyncTask<Void, Void, Void>{
 
-    private Context context;
-    private Session session;
+    private Context mContext;
+    private Session mSession;
 
-    private String recipient;
-    private String subject;
-    private String message;
+    private String mRecipient;
+    private String mSubject;
+    private String mMessage;
 
-    private ProgressDialog progressDialog;
+    private ProgressDialog mProgressDialog;
 
     public SendMail(Context context, Email email) {
-        this.context = context;
-        this.recipient = email.getRecipient();
-        this.subject = email.getSubject();
-        this.message = email.getMessage();
+        mContext = context;
+        this.mRecipient = email.getRecipient();
+        this.mSubject = email.getSubject();
+        this.mMessage = email.getMessage();
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
         //Showing progress dialog while sending email
-        progressDialog = ProgressDialog.show(context,"Sending message","Please wait...",false,false);
+        mProgressDialog = ProgressDialog.show(mContext,"Sending message","Please wait...",false,false);
 
     }
 
@@ -49,9 +49,9 @@ public class SendMail extends AsyncTask<Void, Void, Void>{
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
         //Dismissing the progress dialog
-        progressDialog.dismiss();
+        mProgressDialog.dismiss();
         //Showing a success message
-        Toast.makeText(context,"Message Sent",Toast.LENGTH_LONG).show();
+        Toast.makeText(mContext,"Message Sent",Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -67,7 +67,7 @@ public class SendMail extends AsyncTask<Void, Void, Void>{
         props.put("mail.smtp.port", "465");
 
         //Creating a new session
-        session = Session.getDefaultInstance(props, new javax.mail.Authenticator(){
+        mSession = Session.getDefaultInstance(props, new javax.mail.Authenticator(){
             //Authenticating the password
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(Config.EMAIL, Config.PASSWORD);
@@ -76,16 +76,16 @@ public class SendMail extends AsyncTask<Void, Void, Void>{
 
         try {
             //Creating MimeMessage object
-            MimeMessage mm = new MimeMessage(session);
+            MimeMessage mm = new MimeMessage(mSession);
 
             //Setting sender address
             mm.setFrom(new InternetAddress(Config.EMAIL));
             //Adding receiver
-            mm.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
+            mm.addRecipient(Message.RecipientType.TO, new InternetAddress(mRecipient));
             //Adding subject
-            mm.setSubject(subject);
+            mm.setSubject(mSubject);
             //Adding message
-            mm.setText(message);
+            mm.setText(mMessage);
 
 
             //Sending email
