@@ -16,7 +16,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 /**
- * Created by elias on 11/02/17.
+ * Created by iliaskomp on 11/02/17.
  */
 
 public class SendMail extends AsyncTask<Void, Void, Void>{
@@ -24,17 +24,17 @@ public class SendMail extends AsyncTask<Void, Void, Void>{
     private Context context;
     private Session session;
 
-    private String email;
+    private String recipient;
     private String subject;
     private String message;
 
     private ProgressDialog progressDialog;
 
-    public SendMail(Context context, String email, String subject, String message) {
+    public SendMail(Context context, Email email) {
         this.context = context;
-        this.email = email;
-        this.subject = subject;
-        this.message = message;
+        this.recipient = email.getRecipient();
+        this.subject = email.getSubject();
+        this.message = email.getMessage();
     }
 
     @Override
@@ -81,11 +81,12 @@ public class SendMail extends AsyncTask<Void, Void, Void>{
             //Setting sender address
             mm.setFrom(new InternetAddress(Config.EMAIL));
             //Adding receiver
-            mm.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
+            mm.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
             //Adding subject
             mm.setSubject(subject);
             //Adding message
             mm.setText(message);
+
 
             //Sending email
             Transport.send(mm);
