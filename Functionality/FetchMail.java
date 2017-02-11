@@ -9,6 +9,7 @@ import android.widget.Toast;
 import com.iliaskomp.emailapp.Data.Config;
 import com.iliaskomp.emailapp.Data.EmailForInbox;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -16,7 +17,9 @@ import java.util.Properties;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
+import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
 
@@ -82,26 +85,16 @@ public class FetchMail extends AsyncTask<Void, Void, List<EmailForInbox>> {
                 Message message = messages[i];
                 EmailForInbox email = new EmailForInbox();
 
-                if (message.getContentType().contains("text/plain")
-                        || message.getContentType().contains("text/html")) {
-                    try {
-                        email.setMessage(message.getContent().toString());
-                    } catch (Exception e) {
-                        email.setMessage("Error downloading message.");
-                        e.printStackTrace();
-                    }
-                }
-
-
                 email.setSender(message.getFrom()[0].toString());
                 email.setSubject(message.getSubject());
                 email.setHeaders(message.getAllHeaders().toString());
                 email.setRecipient(message.getAllRecipients()[0].toString());
                 email.setSentDate(message.getSentDate());
-                email.setMessage(message.getContent().toString());
+//                email.setMessage(message.getContent().toString());
+                email.setMessage(getMessage(message));
 
                 emails.add(email);
-                Log.d(LOG_TAG, email.toString());
+//                Log.d(LOG_TAG, email.toString());
             }
 
             //close the store and folder objects
@@ -131,12 +124,37 @@ public class FetchMail extends AsyncTask<Void, Void, List<EmailForInbox>> {
                 properties.put("mail.pop3.port", Config.POP_PORT);
                 break;
         }
-
 //      properties.put("mail.pop3.port", "995");
         properties.put(String.format("mail.%s.starttls.enable", mProtocol), "true");
 
         return properties;
     }
 
+    private String getMessage(Part messageObject) throws MessagingException, IOException {
+        Log.d(LOG_TAG, "getMessage");
+
+        Message message = (Message) messageObject;
+        String type = message.getContentType();
+        String messageString = "";
+
+        if (type.contains("TEXT/PLAIN") || type.contains("TEXT/HTML")) {
+                messageString = message.getContent().toString();
+        } else if (type.contains("multipart/")) {
+            Log.d(LOG_TAG, "MULTIPART TYPE");
+            Multipart mp = (Multipart) message.getContent();
+            String messageParts = "";
+            for (int i = 0; i < mp.getCount(); i++) {
+//                Log.d(LOG_TAG, "MULTIPART PART¨: " + mp.getBodyPart(i).getContentType());
+                messageParts += mp.getBodyPart(i).getContent();
+            }
+            return messageParts;
+        } else {
+            messageString = "invalid";
+        }
+
+
+
+        return messageString;
+    }
 }
 

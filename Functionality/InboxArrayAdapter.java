@@ -21,6 +21,8 @@ import java.util.List;
  */
 
 public class InboxArrayAdapter extends ArrayAdapter<EmailForInbox> {
+    private static final int MESSAGE_SUBSTRING_LENGTH = 35;
+
     private Context mContext;
     private List<EmailForInbox> mEmails;
 
@@ -43,13 +45,13 @@ public class InboxArrayAdapter extends ArrayAdapter<EmailForInbox> {
         TextView subjectView = (TextView) itemView.findViewById(R.id.textViewSubject);
         TextView messageView = (TextView) itemView.findViewById(R.id.textViewMessage);
 
-
-
+        String messageString = mEmails.get(position).getMessage();
 
         senderView.setText(mEmails.get(position).getSender());
         dateView.setText(formatDateForInbox(mEmails.get(position).getSentDate()));
         subjectView.setText(mEmails.get(position).getSubject());
-        messageView.setText(mEmails.get(position).getMessage());
+        messageView.setText(messageString.length() >= MESSAGE_SUBSTRING_LENGTH
+                ? messageString.substring(0, MESSAGE_SUBSTRING_LENGTH) : messageString);
 
         return itemView;
     }
