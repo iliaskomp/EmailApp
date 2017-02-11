@@ -29,23 +29,21 @@ public class FetchMail extends AsyncTask<Void, Void, List<EmailForInbox>> {
 
     public AsyncResponseForFetchEmail delegate = null;
 
-    private Context context;
-    private String host;
-    private String storeType;
+    private Context mContext;
+    private String mProtocol;
 
     private ProgressDialog progressDialog;
 
-    public FetchMail(Context context, String host, String storeType) {
-        this.context = context;
-        this.host = host;
-        this.storeType = storeType;
+    public FetchMail(Context context, String protocol) {
+        mContext = context;
+        mProtocol = protocol;
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
         //Showing progress dialog while sending email
-        progressDialog = ProgressDialog.show(context,"Fetching messages","Please wait...",false,false);
+        progressDialog = ProgressDialog.show(mContext,"Fetching messages","Please wait...",false,false);
     }
 
     @Override
@@ -54,23 +52,24 @@ public class FetchMail extends AsyncTask<Void, Void, List<EmailForInbox>> {
         delegate.processFinish(emails);
 
         progressDialog.dismiss();
-        Toast.makeText(context,"Messages Fetched",Toast.LENGTH_LONG).show();
+        Toast.makeText(mContext,"Messages Fetched",Toast.LENGTH_LONG).show();
     }
 
     @Override
     protected List<EmailForInbox> doInBackground(Void... voids) {
         List<EmailForInbox> emails = new ArrayList<>();
         //create properties field
-        Properties properties = new Properties();
-        properties.put("mail.pop3.host", host);
-        properties.put("mail.pop3.port", "995");
-        properties.put("mail.pop3.starttls.enable", "true");
+        Properties properties = getProperties();
+
         Session emailSession = Session.getDefaultInstance(properties);
 
         try {
             //create the POP3 store object and connect with the pop server
-            Store store = emailSession.getStore("pop3s");
-            store.connect(host, Config.EMAIL, Config.PASSWORD);
+//            Store store = emailSession.getStore("pop3s");
+            Store store = emailSession.getStore(mProtocol + "s");
+
+            store.connect(mProtocol == Config.IMAP_NAME ? Config.IMAP_HOST : Config.POP_HOST,
+                    Config.EMAIL, Config.PASSWORD);
             //create the folder object and open it
             Folder emailFolder = store.getFolder("INBOX");
             emailFolder.open(Folder.READ_ONLY);
@@ -83,21 +82,26 @@ public class FetchMail extends AsyncTask<Void, Void, List<EmailForInbox>> {
                 Message message = messages[i];
                 EmailForInbox email = new EmailForInbox();
 
+                if (message.getContentType().contains("text/plain")
+                        || message.getContentType().contains("text/html")) {
+                    try {
+                        email.setMessage(message.getContent().toString());
+                    } catch (Exception e) {
+                        email.setMessage("Error downloading message.");
+                        e.printStackTrace();
+                    }
+                }
+
+
                 email.setSender(message.getFrom()[0].toString());
                 email.setSubject(message.getSubject());
-                email.setMessage(message.getContent().toString());
                 email.setHeaders(message.getAllHeaders().toString());
                 email.setRecipient(message.getAllRecipients()[0].toString());
                 email.setSentDate(message.getSentDate());
+                email.setMessage(message.getContent().toString());
 
                 emails.add(email);
                 Log.d(LOG_TAG, email.toString());
-
-//                Log.d(LOG_TAG, "------------------------");
-//                Log.d(LOG_TAG, "Email Number: " + (i + 1));
-//                Log.d(LOG_TAG, "Subject: " + message.getSubject());
-//                Log.d(LOG_TAG, "From: " + message.getFrom()[0]);
-//                Log.d(LOG_TAG, "Text: " + message.getContent().toString());
             }
 
             //close the store and folder objects
@@ -114,6 +118,25 @@ public class FetchMail extends AsyncTask<Void, Void, List<EmailForInbox>> {
         return emails;
     }
 
+    private Properties getProperties() {
+        Properties properties = new Properties();
+
+        switch (mProtocol) {
+            case Config.IMAP_NAME:
+                properties.put("mail.imap.host", Config.IMAP_HOST);
+                properties.put("mail.imap.port", Config.IMAP_PORT);
+                break;
+            case Config.POP_NAME:
+                properties.put("mail.pop3.host", Config.POP_HOST);
+                properties.put("mail.pop3.port", Config.POP_PORT);
+                break;
+        }
+
+//      properties.put("mail.pop3.port", "995");
+        properties.put(String.format("mail.%s.starttls.enable", mProtocol), "true");
+
+        return properties;
+    }
 
 }
 

@@ -7,6 +7,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.iliaskomp.emailapp.Data.Config;
 import com.iliaskomp.emailapp.Data.EmailForInbox;
 import com.iliaskomp.emailapp.Functionality.AsyncResponseForFetchEmail;
 import com.iliaskomp.emailapp.Functionality.FetchMail;
@@ -43,7 +44,8 @@ public class InboxActivity extends ListActivity implements AsyncResponseForFetch
     }
 
     private void fetchMail() {
-        fm = new FetchMail(InboxActivity.this, "pop.gmail.com", "pop3");
+        fm = new FetchMail(InboxActivity.this, Config.IMAP_NAME);
+//        fm = new FetchMail(InboxActivity.this, "imap", "imap.gmail.com", "993");
         fm.delegate = this;
         fm.execute();
 
