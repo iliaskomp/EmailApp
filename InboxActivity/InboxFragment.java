@@ -1,5 +1,6 @@
-package com.iliaskomp.emailapp.Activities;
+package com.iliaskomp.emailapp.InboxActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -9,13 +10,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.iliaskomp.emailapp.Data.Config;
+import com.iliaskomp.emailapp.Data.EmailDB;
 import com.iliaskomp.emailapp.Data.EmailForInbox;
+import com.iliaskomp.emailapp.EmailActivity.EmailActivity;
 import com.iliaskomp.emailapp.Functionality.AsyncResponseForFetchEmail;
 import com.iliaskomp.emailapp.Functionality.FetchMail;
-import com.iliaskomp.emailapp.InboxHelper;
 import com.iliaskomp.emailapp.R;
 
 import java.util.List;
@@ -36,25 +37,22 @@ public class InboxFragment extends Fragment implements AsyncResponseForFetchEmai
         mInboxRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         fetchMail();
-//        updateUI();
 
         return view;
     }
-//
-//    private void updateUI() {
-//        mAdapter = new EmailAdapter(mEmails);
-//        mInboxRecyclerView.setAdapter(mAdapter);
-//    }
 
     @Override
     public void processFinish(List<EmailForInbox> emails) {
+//        EmailDB emailDB = EmailDB.
+        EmailDB db = new EmailDB();
+        db.set(emails);
+
         mAdapter = new EmailAdapter(emails);
         mInboxRecyclerView.setAdapter(mAdapter);
     }
 
         private void fetchMail() {
         FetchMail fetchMail = new FetchMail(getActivity(), Config.IMAP_NAME);
-//        fm = new FetchMail(InboxActivity.this, "imap", "imap.gmail.com", "993");
         fetchMail.delegate = this;
         fetchMail.execute();
 
@@ -79,9 +77,8 @@ public class InboxFragment extends Fragment implements AsyncResponseForFetchEmai
 
         @Override
         public void onClick(View view) {
-            Toast.makeText(getActivity(),
-                    mEmail.getSubject() + " clicked!", Toast.LENGTH_SHORT)
-                    .show();
+            Intent intent = EmailActivity.newIntent(getActivity(), mEmail.getId());
+            startActivity(intent);
         }
 
         public void bindEmail(EmailForInbox email) {

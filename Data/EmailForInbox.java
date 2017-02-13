@@ -1,19 +1,20 @@
 package com.iliaskomp.emailapp.Data;
 
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Created by elias on 11/02/17.
  */
 
 public class EmailForInbox {
+    private UUID id;
     private String sender;
     private String recipient;
     private String subject;
     private String message;
-    private String headers;
-
     private Date sentDate;
+    private String headers;
 
     public EmailForInbox(String sender, String recipient, String subject, String message, String headers) {
         this.sender = sender;
@@ -21,10 +22,12 @@ public class EmailForInbox {
         this.subject = subject;
         this.message = message;
         this.headers = headers;
+        id = UUID.randomUUID();
+
     }
 
     public EmailForInbox() {
-
+        id = UUID.randomUUID();
     }
 
     @Override
@@ -86,4 +89,7 @@ public class EmailForInbox {
         this.sentDate = sentDate;
     }
 
+    public UUID getId() {
+        return id;
+    }
 }
