@@ -27,7 +27,7 @@ public class InboxArrayAdapter extends ArrayAdapter<EmailForInbox> {
     private List<EmailForInbox> mEmails;
 
     public InboxArrayAdapter(Context context, List<EmailForInbox> emails) {
-        super(context, R.layout.list_view_email_item, emails);
+        super(context, R.layout.list_item_email, emails);
         mContext = context;
         mEmails = emails;
     }
@@ -38,7 +38,7 @@ public class InboxArrayAdapter extends ArrayAdapter<EmailForInbox> {
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) getContext()
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View itemView = inflater.inflate(R.layout.list_view_email_item, parent, false);
+        View itemView = inflater.inflate(R.layout.list_item_email, parent, false);
 
         TextView senderView = (TextView) itemView.findViewById(R.id.textViewSender);
         TextView dateView = (TextView) itemView.findViewById(R.id.textViewDate);

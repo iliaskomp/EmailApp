@@ -25,6 +25,7 @@ import javax.mail.Store;
 
 /**
  * Created by iliaskomp on 11/02/17.
+ * TODO fix asynctask error when sending a message, then going to inbox
  */
 
 public class FetchMail extends AsyncTask<Void, Void, List<EmailForInbox>> {
