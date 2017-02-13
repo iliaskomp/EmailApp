@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.iliaskomp.emailapp.Data.EmailDB;
 import com.iliaskomp.emailapp.Data.EmailForInbox;
-import com.iliaskomp.emailapp.InboxActivity.InboxHelper;
+import com.iliaskomp.emailapp.InboxActivity.FormatHelper;
 import com.iliaskomp.emailapp.R;
 
 import java.util.UUID;
@@ -48,9 +48,9 @@ public class EmailFragment extends Fragment {
             emailSubjectTextView.setText(mEmail.getSubject());
             emailSenderTextView.setText(mEmail.getSender());
             emailRecipientTextView.setText(mEmail.getRecipient());
-            emailDateTextView.setText(InboxHelper.formatDateForInbox(mEmail.getSentDate()));
+            emailDateTextView.setText(FormatHelper.formatDateForInbox(mEmail.getSentDate()));
             emailMessageTextView.setText(mEmail.getMessage());
-            emailHeadersTextView.setText(mEmail.getHeaders());
+            emailHeadersTextView.setText(mEmail.getHeadersText());
         }
         return view;
     }

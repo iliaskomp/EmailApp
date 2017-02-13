@@ -85,9 +85,9 @@ public class InboxFragment extends Fragment implements AsyncResponseForFetchEmai
             mEmail = email;
 
             mTextViewSender.setText(mEmail.getSender());
-            mTextViewDate.setText(InboxHelper.formatDateForInbox(mEmail.getSentDate()));
+            mTextViewDate.setText(FormatHelper.formatDateForInbox(mEmail.getSentDate()));
             mTextViewSubject.setText(mEmail.getSubject());
-            mTextViewMessage.setText(InboxHelper.formatMessageShortForInbox(mEmail.getMessage()));
+            mTextViewMessage.setText(FormatHelper.formatMessageShortForInbox(mEmail.getMessage()));
         }
     }
 

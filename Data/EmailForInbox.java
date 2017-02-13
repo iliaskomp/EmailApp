@@ -1,6 +1,8 @@
 package com.iliaskomp.emailapp.Data;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -14,17 +16,17 @@ public class EmailForInbox {
     private String subject;
     private String message;
     private Date sentDate;
-    private String headers;
+    private HashMap<String, String> headers;
 
-    public EmailForInbox(String sender, String recipient, String subject, String message, String headers) {
-        this.sender = sender;
-        this.recipient = recipient;
-        this.subject = subject;
-        this.message = message;
-        this.headers = headers;
-        id = UUID.randomUUID();
-
-    }
+//    public EmailForInbox(String sender, String recipient, String subject, String message, String headers) {
+//        this.sender = sender;
+//        this.recipient = recipient;
+//        this.subject = subject;
+//        this.message = message;
+//        this.headers = headers;
+//        id = UUID.randomUUID();
+//
+//    }
 
     public EmailForInbox() {
         id = UUID.randomUUID();
@@ -73,11 +75,11 @@ public class EmailForInbox {
         this.sender = sender;
     }
 
-    public String getHeaders() {
+    public HashMap<String, String> getHeaders() {
         return headers;
     }
 
-    public void setHeaders(String headers) {
+    public void setHeaders(HashMap<String, String> headers) {
         this.headers = headers;
     }
 
@@ -91,5 +93,15 @@ public class EmailForInbox {
 
     public UUID getId() {
         return id;
+    }
+
+    public String getHeadersText() {
+        String output = "";
+
+        for (Map.Entry<String,String> entry : headers.entrySet()) {
+            output += entry.getKey() + ": " + entry.getValue() + "\n";
+        }
+
+        return output;
     }
 }

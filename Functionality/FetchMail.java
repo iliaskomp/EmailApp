@@ -8,20 +8,24 @@ import android.widget.Toast;
 
 import com.iliaskomp.emailapp.Data.Config;
 import com.iliaskomp.emailapp.Data.EmailForInbox;
+import com.iliaskomp.emailapp.InboxActivity.FormatHelper;
+
+import org.jsoup.Jsoup;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import javax.mail.BodyPart;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.internet.MimeMultipart;
 
 /**
  * Created by iliaskomp on 11/02/17.
@@ -88,14 +92,12 @@ public class FetchMail extends AsyncTask<Void, Void, List<EmailForInbox>> {
 
                 email.setSender(message.getFrom()[0].toString());
                 email.setSubject(message.getSubject());
-                email.setHeaders(message.getAllHeaders().toString());
                 email.setRecipient(message.getAllRecipients()[0].toString());
                 email.setSentDate(message.getSentDate());
-//                email.setMessage(message.getContent().toString());
                 email.setMessage(getMessage(message));
+                email.setHeaders(FormatHelper.getHeaders(message.getAllHeaders()));
 
                 emails.add(email);
-//                Log.d(LOG_TAG, email.toString());
             }
 
             //close the store and folder objects
@@ -135,27 +137,34 @@ public class FetchMail extends AsyncTask<Void, Void, List<EmailForInbox>> {
         Log.d(LOG_TAG, "getMessage");
 
         Message message = (Message) messageObject;
-        String type = message.getContentType();
-        String messageString = "";
+       // String type = message.getContentType();
+        String result = "";
 
-        if (type.contains("TEXT/PLAIN") || type.contains("TEXT/HTML")) {
-                messageString = message.getContent().toString();
-        } else if (type.contains("multipart/")) {
-            Log.d(LOG_TAG, "MULTIPART TYPE");
-            Multipart mp = (Multipart) message.getContent();
-            String messageParts = "";
-            for (int i = 0; i < mp.getCount(); i++) {
-//                Log.d(LOG_TAG, "MULTIPART PART¨: " + mp.getBodyPart(i).getContentType());
-                messageParts += mp.getBodyPart(i).getContent();
+
+        if (message.isMimeType("text/plain")) {
+            result = message.getContent().toString();
+        } else if (message.isMimeType("text/plain")) {
+            String html = (String) messageObject.getContent();
+            result = result + "\n" + Jsoup.parse(html).text();
+        } else if (message.isMimeType("multipart/*")) {
+            MimeMultipart mimeMultipart = (MimeMultipart)message.getContent();
+            int count = mimeMultipart.getCount();
+            for (int i = 0; i < count; i ++){
+                BodyPart bodyPart = mimeMultipart.getBodyPart(i);
+                if (bodyPart.isMimeType("text/plain")){
+                    result = result + "\n" + bodyPart.getContent();
+                    break;  //without break same text appears twice in my tests
+                } else if (bodyPart.isMimeType("text/html")){
+                    String html = (String) bodyPart.getContent();
+                    result = result + "\n" + Jsoup.parse(html).text();
+                }
             }
-            return messageParts;
         } else {
-            messageString = "invalid";
+            result = "invalid";
         }
 
 
-
-        return messageString;
+        return result;
     }
 }
 
