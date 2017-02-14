@@ -8,18 +8,18 @@ import java.util.UUID;
  */
 
 public class EmailDB {
-    private static List<EmailForInbox> sEmails;
+    private static List<InboxEmail> sEmails;
 
     public EmailDB() {
 
     }
 
-    public static void set(List<EmailForInbox> emails) {
+    public static void set(List<InboxEmail> emails) {
         sEmails = emails;
     }
 
-    public static EmailForInbox getEmailFromId (UUID id) {
-        for (EmailForInbox email : sEmails) {
+    public static InboxEmail getEmailFromId (UUID id) {
+        for (InboxEmail email : sEmails) {
             if (email.getId().equals(id)) {
                 return email;
             }
@@ -27,7 +27,7 @@ public class EmailDB {
         return null;
     }
 
-    public static List<EmailForInbox> getEmails() {
+    public static List<InboxEmail> getEmails() {
         return sEmails;
     }
 }

@@ -1,18 +1,22 @@
 package com.iliaskomp.emailapp.EmailActivity;
 
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.iliaskomp.emailapp.Activities.NewMailActivity;
 import com.iliaskomp.emailapp.Data.EmailDB;
-import com.iliaskomp.emailapp.Data.EmailForInbox;
+import com.iliaskomp.emailapp.Data.InboxEmail;
 import com.iliaskomp.emailapp.InboxActivity.FormatHelper;
 import com.iliaskomp.emailapp.R;
 
@@ -26,18 +30,19 @@ public class EmailFragment extends Fragment {
     private static final String ARG_EMAIL_ID = "email_id";
     private static final String DIALOG_HEADERS = "HeadersDialog";
     
-    private EmailForInbox mEmail;
+    private InboxEmail mEmail;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+
         UUID emailId = (UUID) getArguments().getSerializable(ARG_EMAIL_ID);
         mEmail = EmailDB.getEmailFromId(emailId);
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_email, container, false);
 
         if (mEmail != null) {
@@ -63,6 +68,23 @@ public class EmailFragment extends Fragment {
             });
         }
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_email_list, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_new_email:
+                Intent intent = NewMailActivity.newIntent(getActivity(), mEmail.getId());
+                startActivity(intent);
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     public static EmailFragment newInstance(UUID emailId) {

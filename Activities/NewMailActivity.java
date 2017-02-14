@@ -1,23 +1,30 @@
 package com.iliaskomp.emailapp.Activities;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.iliaskomp.emailapp.Data.Config;
 import com.iliaskomp.emailapp.Data.Email;
+import com.iliaskomp.emailapp.Data.EmailDB;
+import com.iliaskomp.emailapp.Data.InboxEmail;
 import com.iliaskomp.emailapp.Functionality.SendMail;
 import com.iliaskomp.emailapp.R;
+
+import java.util.UUID;
 
 /**
  * Created by elias on 11/02/17.
  */
 
 public class NewMailActivity extends AppCompatActivity{
+    private static final String EXTRA_EMAIL_ID = "com.iliaskomp.email_id";
+
     private EditText mEditTextSender;
-    private EditText mEditTextMail;
+    private EditText mEditTextRecipient;
     private EditText mEditTextSubject;
     private EditText mEditTextMessage;
     private Button mButtonSend;
@@ -27,9 +34,10 @@ public class NewMailActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_mail);
 
-        //init
+        UUID emailId = (UUID) getIntent().getSerializableExtra(EXTRA_EMAIL_ID);
+
         mEditTextSender = (EditText) findViewById(R.id.editTextSender);
-        mEditTextMail = (EditText) findViewById(R.id.editTextEmail);
+        mEditTextRecipient = (EditText) findViewById(R.id.editTextRecipient);
         mEditTextSubject = (EditText) findViewById(R.id.editTextSubject);
         mEditTextMessage = (EditText) findViewById(R.id.editTextMessage);
         mButtonSend = (Button) findViewById(R.id.buttonSend);
@@ -40,12 +48,20 @@ public class NewMailActivity extends AppCompatActivity{
             }
         });
 
-        populateDataForTestPurposes();
+        // If emailId is not null, it means that the intent passed an id,
+        // meaning the source was from reading the email, ergo replying to email
+        if (emailId != null) {
+            InboxEmail email = EmailDB.getEmailFromId(emailId);
+            mEditTextSender.setText(email.getRecipient());
+            mEditTextRecipient.setText(email.getSender());
+            mEditTextSubject.setText("Re:" + email.getSubject());
+        }
+//        populateDataForTestPurposes();
     }
 
     private void sendEmail() {
         //Getting content for email
-        String recipient = mEditTextMail.getText().toString().trim();
+        String recipient = mEditTextRecipient.getText().toString().trim();
         String subject = mEditTextSubject.getText().toString().trim();
         String message = mEditTextMessage.getText().toString().trim();
 
@@ -55,10 +71,20 @@ public class NewMailActivity extends AppCompatActivity{
         sm.execute();
     }
 
-    private void populateDataForTestPurposes() {
-        mEditTextSender.setText(Config.EMAIL);
-        mEditTextMail.setText(Config.EMAIL);
-        mEditTextSubject.setText("email test subject");
-        mEditTextMessage.setText("email test message");
+    public static Intent newIntent(Context contextPackage) {
+        return new Intent(contextPackage, NewMailActivity.class);
     }
+
+    public static Intent newIntent(Context contextPackage, UUID emailId) {
+        Intent intent = new Intent(contextPackage, NewMailActivity.class);
+        intent.putExtra(EXTRA_EMAIL_ID, emailId);
+        return intent;
+    }
+
+//    private void populateDataForTestPurposes() {
+//        mEditTextSender.setText(Config.EMAIL);
+//        mEditTextRecipient.setText(Config.EMAIL);
+//        mEditTextSubject.setText("email test subject");
+//        mEditTextMessage.setText("email test message");
+//    }
 }

@@ -7,13 +7,17 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.iliaskomp.emailapp.Activities.NewMailActivity;
 import com.iliaskomp.emailapp.Data.Config;
 import com.iliaskomp.emailapp.Data.EmailDB;
-import com.iliaskomp.emailapp.Data.EmailForInbox;
+import com.iliaskomp.emailapp.Data.InboxEmail;
 import com.iliaskomp.emailapp.EmailActivity.EmailPagerActivity;
 import com.iliaskomp.emailapp.Functionality.AsyncResponseForFetchEmail;
 import com.iliaskomp.emailapp.Functionality.FetchMail;
@@ -29,29 +33,57 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
     private RecyclerView mInboxRecyclerView;
     private EmailAdapter mAdapter;
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_inbox, container, false);
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_email_list, container, false);
         mInboxRecyclerView = (RecyclerView) view.findViewById(R.id.inbox_recycler_view);
         mInboxRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         fetchMail();
-//        updateUI();
         return view;
     }
 
     @Override
-    public void processFinish(List<EmailForInbox> emails) {
-        EmailDB db = new EmailDB();
-        db.set(emails);
-        updateUI(emails);
+    public void onResume() {
+        super.onResume();
+        fetchMail();
     }
 
-    public void updateUI(List<EmailForInbox> emails) {
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_email_list, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_new_email:
+                Intent intent = NewMailActivity.newIntent(getActivity());
+                startActivity(intent);
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void processFinish(List<InboxEmail> emails) {
+        EmailDB db = new EmailDB();
+        db.set(emails);
         mAdapter = new EmailAdapter(emails);
         mInboxRecyclerView.setAdapter(mAdapter);
     }
+
+//    public void updateUI(List<InboxEmail> emails) {
+//        mAdapter = new EmailAdapter(emails);
+//        mInboxRecyclerView.setAdapter(mAdapter);
+//    }
 
     private void fetchMail() {
         FetchMail fetchMail = new FetchMail(getActivity(), Config.IMAP_NAME);
@@ -61,7 +93,7 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
 
 
     private class EmailHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private EmailForInbox mEmail;
+        private InboxEmail mEmail;
 
         private TextView mTextViewSender;
         private TextView mTextViewDate;
@@ -83,7 +115,7 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
             startActivity(intent);
         }
 
-        public void bindEmail(EmailForInbox email) {
+        public void bindEmail(InboxEmail email) {
             mEmail = email;
 
             mTextViewSender.setText(mEmail.getSender());
@@ -94,9 +126,9 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
     }
 
     private class EmailAdapter extends RecyclerView.Adapter<EmailHolder> {
-        private List<EmailForInbox> mEmails;
+        private List<InboxEmail> mEmails;
 
-        public EmailAdapter(List<EmailForInbox> emails) {
+        public EmailAdapter(List<InboxEmail> emails) {
             mEmails = emails;
         }
 
@@ -110,7 +142,7 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
 
         @Override
         public void onBindViewHolder(EmailHolder holder, int position) {
-            EmailForInbox email = mEmails.get(position);
+            InboxEmail email = mEmails.get(position);
             holder.bindEmail(email);
         }
 

@@ -9,7 +9,7 @@ import java.util.UUID;
  * Created by elias on 11/02/17.
  */
 
-public class EmailForInbox {
+public class InboxEmail {
     private UUID id;
     private String sender;
     private String recipient;
@@ -18,7 +18,7 @@ public class EmailForInbox {
     private Date sentDate;
     private HashMap<String, String> headers;
 
-//    public EmailForInbox(String sender, String recipient, String subject, String message, String headers) {
+//    public InboxEmail(String sender, String recipient, String subject, String message, String headers) {
 //        this.sender = sender;
 //        this.recipient = recipient;
 //        this.subject = subject;
@@ -28,7 +28,7 @@ public class EmailForInbox {
 //
 //    }
 
-    public EmailForInbox() {
+    public InboxEmail() {
         id = UUID.randomUUID();
     }
 

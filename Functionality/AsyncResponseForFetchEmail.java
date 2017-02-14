@@ -1,6 +1,6 @@
 package com.iliaskomp.emailapp.Functionality;
 
-import com.iliaskomp.emailapp.Data.EmailForInbox;
+import com.iliaskomp.emailapp.Data.InboxEmail;
 
 import java.util.List;
 
@@ -9,5 +9,5 @@ import java.util.List;
  */
 
 public interface AsyncResponseForFetchEmail {
-    void processFinish(List<EmailForInbox> emails);
+    void processFinish(List<InboxEmail> emails);
 }

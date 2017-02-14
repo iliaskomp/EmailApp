@@ -7,7 +7,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.iliaskomp.emailapp.Data.Config;
-import com.iliaskomp.emailapp.Data.EmailForInbox;
+import com.iliaskomp.emailapp.Data.InboxEmail;
 import com.iliaskomp.emailapp.InboxActivity.FormatHelper;
 
 import org.jsoup.Jsoup;
@@ -29,10 +29,10 @@ import javax.mail.internet.MimeMultipart;
 
 /**
  * Created by iliaskomp on 11/02/17.
- * TODO fix asynctask error when sending a message, then going to inbox
+ * TODO fix asynctask error when sending a message, then going to inbox or the other way around
  */
 
-public class FetchMail extends AsyncTask<Void, Void, List<EmailForInbox>> {
+public class FetchMail extends AsyncTask<Void, Void, List<InboxEmail>> {
     private static final String LOG_TAG = "FetchMail";
 
     public AsyncResponseForFetchEmail delegate = null;
@@ -55,7 +55,7 @@ public class FetchMail extends AsyncTask<Void, Void, List<EmailForInbox>> {
     }
 
     @Override
-    protected void onPostExecute(List<EmailForInbox> emails) {
+    protected void onPostExecute(List<InboxEmail> emails) {
         super.onPostExecute(emails);
         delegate.processFinish(emails);
 
@@ -64,12 +64,13 @@ public class FetchMail extends AsyncTask<Void, Void, List<EmailForInbox>> {
     }
 
     @Override
-    protected List<EmailForInbox> doInBackground(Void... voids) {
-        List<EmailForInbox> emails = new ArrayList<>();
+    protected List<InboxEmail> doInBackground(Void... voids) {
+        List<InboxEmail> emails = new ArrayList<>();
         //create properties field
         Properties properties = getProperties();
 
-        Session emailSession = Session.getDefaultInstance(properties);
+//        Session emailSession = Session.getDefaultInstance(properties);
+        Session emailSession = Session.getInstance(properties);
 
         try {
             //create the POP3 store object and connect with the pop server
@@ -88,7 +89,7 @@ public class FetchMail extends AsyncTask<Void, Void, List<EmailForInbox>> {
 
             for (int i = 0, n = messages.length; i < n; i++) {
                 Message message = messages[i];
-                EmailForInbox email = new EmailForInbox();
+                InboxEmail email = new InboxEmail();
 
                 email.setSender(message.getFrom()[0].toString());
                 email.setSubject(message.getSubject());
@@ -96,7 +97,7 @@ public class FetchMail extends AsyncTask<Void, Void, List<EmailForInbox>> {
                 email.setSentDate(message.getSentDate());
                 email.setMessage(getMessage(message));
                 email.setHeaders(FormatHelper.getHeaders(message.getAllHeaders()));
-
+                // TODO reverse email order so recent ones appear first
                 emails.add(email);
             }
 
