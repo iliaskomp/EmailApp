@@ -4,9 +4,11 @@ package com.iliaskomp.emailapp.EmailActivity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.iliaskomp.emailapp.Data.EmailDB;
@@ -22,7 +24,8 @@ import java.util.UUID;
 
 public class EmailFragment extends Fragment {
     private static final String ARG_EMAIL_ID = "email_id";
-
+    private static final String DIALOG_HEADERS = "HeadersDialog";
+    
     private EmailForInbox mEmail;
 
     @Override
@@ -43,14 +46,21 @@ public class EmailFragment extends Fragment {
             TextView emailRecipientTextView = (TextView) view.findViewById(R.id.email_text_view_recipient);
             TextView emailDateTextView = (TextView) view.findViewById(R.id.email_text_view_date);
             TextView emailMessageTextView = (TextView) view.findViewById(R.id.email_text_view_message);
-            TextView emailHeadersTextView = (TextView) view.findViewById(R.id.email_text_view_headers);
+            Button emailHeadersButton = (Button) view.findViewById(R.id.email_button_headers);
 
             emailSubjectTextView.setText(mEmail.getSubject());
             emailSenderTextView.setText(mEmail.getSender());
             emailRecipientTextView.setText(mEmail.getRecipient());
             emailDateTextView.setText(FormatHelper.formatDateForInbox(mEmail.getSentDate()));
             emailMessageTextView.setText(mEmail.getMessage());
-            emailHeadersTextView.setText(mEmail.getHeadersText());
+            emailHeadersButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    FragmentManager manager = getFragmentManager();
+                    EmailHeadersFragment dialog = EmailHeadersFragment.newInstance(mEmail.getId());
+                    dialog.show(manager, DIALOG_HEADERS);
+                }
+            });
         }
         return view;
     }
