@@ -8,12 +8,12 @@ import com.iliaskomp.emailapp.Activities.SingleFragmentActivity;
  * Created by iliaskomp on 11/02/17.
  */
 
-public class InboxActivity extends SingleFragmentActivity {
-    private static final String LOG_TAG = "InboxActivity";
+public class EmailListActivity extends SingleFragmentActivity {
+    private static final String LOG_TAG = "EmailListActivity";
 
     @Override
     protected Fragment createFragment() {
-        return new InboxFragment();
+        return new EmailListFragment();
     }
 
 }

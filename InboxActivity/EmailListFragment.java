@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.iliaskomp.emailapp.Data.Config;
 import com.iliaskomp.emailapp.Data.EmailDB;
 import com.iliaskomp.emailapp.Data.EmailForInbox;
-import com.iliaskomp.emailapp.EmailActivity.EmailActivity;
+import com.iliaskomp.emailapp.EmailActivity.EmailPagerActivity;
 import com.iliaskomp.emailapp.Functionality.AsyncResponseForFetchEmail;
 import com.iliaskomp.emailapp.Functionality.FetchMail;
 import com.iliaskomp.emailapp.R;
@@ -25,7 +25,7 @@ import java.util.List;
  * Created by IliasKomp on 13/02/17.
  */
 
-public class InboxFragment extends Fragment implements AsyncResponseForFetchEmail {
+public class EmailListFragment extends Fragment implements AsyncResponseForFetchEmail {
     private RecyclerView mInboxRecyclerView;
     private EmailAdapter mAdapter;
 
@@ -37,26 +37,28 @@ public class InboxFragment extends Fragment implements AsyncResponseForFetchEmai
         mInboxRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         fetchMail();
-
+//        updateUI();
         return view;
     }
 
     @Override
     public void processFinish(List<EmailForInbox> emails) {
-//        EmailDB emailDB = EmailDB.
         EmailDB db = new EmailDB();
         db.set(emails);
+        updateUI(emails);
+    }
 
+    public void updateUI(List<EmailForInbox> emails) {
         mAdapter = new EmailAdapter(emails);
         mInboxRecyclerView.setAdapter(mAdapter);
     }
 
-        private void fetchMail() {
+    private void fetchMail() {
         FetchMail fetchMail = new FetchMail(getActivity(), Config.IMAP_NAME);
         fetchMail.delegate = this;
         fetchMail.execute();
-
     }
+
 
     private class EmailHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private EmailForInbox mEmail;
@@ -77,7 +79,7 @@ public class InboxFragment extends Fragment implements AsyncResponseForFetchEmai
 
         @Override
         public void onClick(View view) {
-            Intent intent = EmailActivity.newIntent(getActivity(), mEmail.getId());
+            Intent intent = EmailPagerActivity.newIntent(getActivity(), mEmail.getId());
             startActivity(intent);
         }
 

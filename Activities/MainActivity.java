@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import com.iliaskomp.emailapp.InboxActivity.InboxActivity;
+import com.iliaskomp.emailapp.InboxActivity.EmailListActivity;
 import com.iliaskomp.emailapp.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         mButtonInbox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(MainActivity.this, InboxActivity.class);
+                Intent i = new Intent(MainActivity.this, EmailListActivity.class);
                 startActivity(i);
             }
         });

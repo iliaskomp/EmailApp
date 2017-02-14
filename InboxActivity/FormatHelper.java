@@ -40,8 +40,6 @@ public class FormatHelper {
         while (headers.hasMoreElements()) {
             Header h = (Header) headers.nextElement();
             headersMap.put(h.getName(), h.getValue());
-
-            System.out.println(h.getName() + ": " + h.getValue());
         }
         return headersMap;
     }
