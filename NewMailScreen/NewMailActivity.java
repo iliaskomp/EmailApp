@@ -1,4 +1,4 @@
-package com.iliaskomp.emailapp.Activities;
+package com.iliaskomp.emailapp.NewMailScreen;
 
 import android.content.Context;
 import android.content.Intent;
@@ -8,10 +8,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.iliaskomp.emailapp.Data.Email;
-import com.iliaskomp.emailapp.Data.EmailDB;
-import com.iliaskomp.emailapp.Data.InboxEmail;
-import com.iliaskomp.emailapp.Functionality.SendMail;
+import com.iliaskomp.emailapp.Models.EmailToSend;
+import com.iliaskomp.emailapp.Models.EmailDB;
+import com.iliaskomp.emailapp.Models.InboxEmail;
+import com.iliaskomp.emailapp.Network.SendMail;
 import com.iliaskomp.emailapp.R;
 
 import java.util.UUID;
@@ -60,14 +60,14 @@ public class NewMailActivity extends AppCompatActivity{
     }
 
     private void sendEmail() {
-        //Getting content for email
+        //Getting content for emailToSend
         String recipient = mEditTextRecipient.getText().toString().trim();
         String subject = mEditTextSubject.getText().toString().trim();
         String message = mEditTextMessage.getText().toString().trim();
 
         //Create SendMail object
-        Email email = new Email(recipient, subject, message);
-        SendMail sm = new SendMail(NewMailActivity.this, email);
+        EmailToSend emailToSend = new EmailToSend(recipient, subject, message);
+        SendMail sm = new SendMail(NewMailActivity.this, emailToSend);
         sm.execute();
     }
 

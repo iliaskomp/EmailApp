@@ -1,4 +1,4 @@
-package com.iliaskomp.emailapp.EmailActivity;
+package com.iliaskomp.emailapp.EmailScreen;
 
 
 import android.content.Intent;
@@ -14,10 +14,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.iliaskomp.emailapp.Activities.NewMailActivity;
-import com.iliaskomp.emailapp.Data.EmailDB;
-import com.iliaskomp.emailapp.Data.InboxEmail;
-import com.iliaskomp.emailapp.InboxActivity.FormatHelper;
+import com.iliaskomp.emailapp.NewMailScreen.NewMailActivity;
+import com.iliaskomp.emailapp.Models.EmailDB;
+import com.iliaskomp.emailapp.Models.InboxEmail;
+import com.iliaskomp.emailapp.Utils.FormatHelper;
 import com.iliaskomp.emailapp.R;
 
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package com.iliaskomp.emailapp.EmailActivity;
+package com.iliaskomp.emailapp.EmailScreen;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,8 +9,8 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
-import com.iliaskomp.emailapp.Data.EmailDB;
-import com.iliaskomp.emailapp.Data.InboxEmail;
+import com.iliaskomp.emailapp.Models.EmailDB;
+import com.iliaskomp.emailapp.Models.InboxEmail;
 import com.iliaskomp.emailapp.R;
 
 import java.util.List;

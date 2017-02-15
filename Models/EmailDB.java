@@ -1,4 +1,4 @@
-package com.iliaskomp.emailapp.Data;
+package com.iliaskomp.emailapp.Models;
 
 import java.util.List;
 import java.util.UUID;

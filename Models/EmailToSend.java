@@ -1,10 +1,10 @@
-package com.iliaskomp.emailapp.Data;
+package com.iliaskomp.emailapp.Models;
 
 /**
  * Created by iliaskomp on 11/02/17.
  */
 
-public class Email {
+public class EmailToSend {
     private String recipient;
     private String subject;
     private String message;
@@ -12,7 +12,7 @@ public class Email {
     private String headers;
 
 
-    public Email(String recipient, String subject, String message) {
+    public EmailToSend(String recipient, String subject, String message) {
         this.recipient = recipient;
         this.subject = subject;
         this.message = message;

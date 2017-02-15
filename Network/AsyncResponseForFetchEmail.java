@@ -1,6 +1,6 @@
-package com.iliaskomp.emailapp.Functionality;
+package com.iliaskomp.emailapp.Network;
 
-import com.iliaskomp.emailapp.Data.InboxEmail;
+import com.iliaskomp.emailapp.Models.InboxEmail;
 
 import java.util.List;
 

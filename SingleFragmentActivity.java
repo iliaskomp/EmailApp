@@ -1,4 +1,4 @@
-package com.iliaskomp.emailapp.Activities;
+package com.iliaskomp.emailapp;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;

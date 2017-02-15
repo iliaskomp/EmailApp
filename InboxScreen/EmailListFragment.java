@@ -1,4 +1,4 @@
-package com.iliaskomp.emailapp.InboxActivity;
+package com.iliaskomp.emailapp.InboxScreen;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,14 +14,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.iliaskomp.emailapp.Activities.NewMailActivity;
-import com.iliaskomp.emailapp.Data.Config;
-import com.iliaskomp.emailapp.Data.EmailDB;
-import com.iliaskomp.emailapp.Data.InboxEmail;
-import com.iliaskomp.emailapp.EmailActivity.EmailPagerActivity;
-import com.iliaskomp.emailapp.Functionality.AsyncResponseForFetchEmail;
-import com.iliaskomp.emailapp.Functionality.FetchMail;
+import com.iliaskomp.emailapp.NewMailScreen.NewMailActivity;
+import com.iliaskomp.emailapp.Utils.Config;
+import com.iliaskomp.emailapp.Models.EmailDB;
+import com.iliaskomp.emailapp.Models.InboxEmail;
+import com.iliaskomp.emailapp.EmailScreen.EmailPagerActivity;
+import com.iliaskomp.emailapp.Network.AsyncResponseForFetchEmail;
+import com.iliaskomp.emailapp.Network.FetchMail;
 import com.iliaskomp.emailapp.R;
+import com.iliaskomp.emailapp.Utils.FormatHelper;
 
 import java.util.List;
 

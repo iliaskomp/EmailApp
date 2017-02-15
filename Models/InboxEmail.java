@@ -1,4 +1,4 @@
-package com.iliaskomp.emailapp.Data;
+package com.iliaskomp.emailapp.Models;
 
 import java.util.Date;
 import java.util.HashMap;

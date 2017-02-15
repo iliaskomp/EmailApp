@@ -1,8 +1,8 @@
-package com.iliaskomp.emailapp.InboxActivity;
+package com.iliaskomp.emailapp.InboxScreen;
 
 import android.support.v4.app.Fragment;
 
-import com.iliaskomp.emailapp.Activities.SingleFragmentActivity;
+import com.iliaskomp.emailapp.SingleFragmentActivity;
 
 /**
  * Created by iliaskomp on 11/02/17.

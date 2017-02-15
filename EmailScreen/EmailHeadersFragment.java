@@ -1,4 +1,4 @@
-package com.iliaskomp.emailapp.EmailActivity;
+package com.iliaskomp.emailapp.EmailScreen;
 
 
 import android.app.Dialog;
@@ -9,7 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
-import com.iliaskomp.emailapp.Data.EmailDB;
+import com.iliaskomp.emailapp.Models.EmailDB;
 import com.iliaskomp.emailapp.R;
 
 import java.util.UUID;

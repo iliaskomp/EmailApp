@@ -1,12 +1,12 @@
-package com.iliaskomp.emailapp.Functionality;
+package com.iliaskomp.emailapp.Network;
 
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
-import com.iliaskomp.emailapp.Data.Config;
-import com.iliaskomp.emailapp.Data.Email;
+import com.iliaskomp.emailapp.Utils.Config;
+import com.iliaskomp.emailapp.Models.EmailToSend;
 
 import java.util.Properties;
 
@@ -33,11 +33,11 @@ public class SendMail extends AsyncTask<Void, Void, Void>{
 
     private ProgressDialog mProgressDialog;
 
-    public SendMail(Context context, Email email) {
+    public SendMail(Context context, EmailToSend emailToSend) {
         mContext = context;
-        this.mRecipient = email.getRecipient();
-        this.mSubject = email.getSubject();
-        this.mMessage = email.getMessage();
+        this.mRecipient = emailToSend.getRecipient();
+        this.mSubject = emailToSend.getSubject();
+        this.mMessage = emailToSend.getMessage();
     }
 
     @Override

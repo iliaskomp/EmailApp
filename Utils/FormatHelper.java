@@ -1,4 +1,4 @@
-package com.iliaskomp.emailapp.InboxActivity;
+package com.iliaskomp.emailapp.Utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

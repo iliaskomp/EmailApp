@@ -1,4 +1,4 @@
-package com.iliaskomp.emailapp.Functionality;
+package com.iliaskomp.emailapp.Network;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -6,9 +6,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.iliaskomp.emailapp.Data.Config;
-import com.iliaskomp.emailapp.Data.InboxEmail;
-import com.iliaskomp.emailapp.InboxActivity.FormatHelper;
+import com.iliaskomp.emailapp.Utils.Config;
+import com.iliaskomp.emailapp.Models.InboxEmail;
+import com.iliaskomp.emailapp.Utils.FormatHelper;
 
 import org.jsoup.Jsoup;
 
