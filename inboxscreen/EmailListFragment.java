@@ -1,8 +1,8 @@
 package com.iliaskomp.emailapp.inboxscreen;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,14 +14,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.iliaskomp.emailapp.R;
 import com.iliaskomp.emailapp.models.EmailDb;
 import com.iliaskomp.emailapp.models.EmailModel;
-import com.iliaskomp.emailapp.newmailscreen.NewMailActivity;
-import com.iliaskomp.emailapp.utils.Config;
-import com.iliaskomp.emailapp.emailscreen.EmailPagerActivity;
 import com.iliaskomp.emailapp.network.AsyncResponseForFetchEmail;
 import com.iliaskomp.emailapp.network.FetchMail;
-import com.iliaskomp.emailapp.R;
+import com.iliaskomp.emailapp.newmailscreen.NewMailActivity;
+import com.iliaskomp.emailapp.utils.Config;
 import com.iliaskomp.emailapp.utils.DateFormatHelper;
 
 import java.util.List;
@@ -35,11 +34,24 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
 
     private RecyclerView mInboxRecyclerView;
     private EmailAdapter mAdapter;
+    private Callbacks mCallbacks;
+
+    public interface Callbacks {
+        void onEmailSelected(EmailModel email);
+    }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mCallbacks = (Callbacks) activity;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+        if (getActivity().findViewById(R.id.detail_fragment_container) == null) {
+            setHasOptionsMenu(true);
+        }
     }
 
     @Override
@@ -74,6 +86,12 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
     }
 
     @Override
@@ -113,8 +131,15 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
 
         @Override
         public void onClick(View view) {
-            Intent intent = EmailPagerActivity.newIntent(getActivity(), mEmail.getId());
-            startActivity(intent);
+            mCallbacks.onEmailSelected(mEmail);
+//            Fragment fragment = EmailFragment.newInstance(mEmail.getId());
+//            FragmentManager fm = getActivity().getSupportFragmentManager();
+//            fm.beginTransaction()
+//                    .add(R.id.detail_fragment_container, fragment)
+//                    .commit();
+
+//            Intent intent = EmailPagerActivity.newIntent(getActivity(), mEmail.getId());
+//            startActivity(intent);
         }
 
         public void bindEmail(EmailModel email) {
