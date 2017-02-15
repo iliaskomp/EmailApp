@@ -6,10 +6,10 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.iliaskomp.emailapp.emailscreen.EmailHelper;
-import com.iliaskomp.emailapp.models.EmailDB;
+import com.iliaskomp.emailapp.models.EmailDb;
 import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.utils.Config;
+import com.iliaskomp.emailapp.utils.HeadersFormatHelper;
 
 import org.jsoup.Jsoup;
 
@@ -30,7 +30,7 @@ import javax.mail.internet.MimeMultipart;
  * Created by iliaskomp on 11/02/17.
  */
 
-public class FetchMail extends AsyncTask<Void, Void, EmailDB> {
+public class FetchMail extends AsyncTask<Void, Void, EmailDb> {
     private static final String LOG_TAG = "FetchMail";
 
     public AsyncResponseForFetchEmail delegate = null;
@@ -49,56 +49,54 @@ public class FetchMail extends AsyncTask<Void, Void, EmailDB> {
     protected void onPreExecute() {
         super.onPreExecute();
         //Showing progress dialog while sending email
-        progressDialog = ProgressDialog.show(mContext,"Fetching messages","Please wait...",false,false);
+        progressDialog = ProgressDialog.show(mContext, "Fetching messages", "Please wait...", false, false);
     }
 
     @Override
-    protected void onPostExecute(EmailDB db) {
+    protected void onPostExecute(EmailDb db) {
         super.onPostExecute(db);
         delegate.processFinish(db);
 
         progressDialog.dismiss();
-        Toast.makeText(mContext,"Messages Fetched",Toast.LENGTH_LONG).show();
+        Toast.makeText(mContext, "Messages Fetched", Toast.LENGTH_LONG).show();
     }
 
     @Override
-    protected EmailDB doInBackground(Void... voids) {
-//        List<EmailModel> emails = new ArrayList<>();
-        EmailDB db = new EmailDB(mContext);
+    protected EmailDb doInBackground(Void... voids) {
+        EmailDb db = EmailDb.get(mContext);
+
         //create properties field
         Properties properties = getProperties();
-
-//        Session emailSession = Session.getDefaultInstance(properties);
-        Session emailSession = Session.getInstance(properties);
+        Session emailSession = Session.getInstance(properties); //Session.getDefaultInstance(properties);
 
         try {
             //create the POP3 store object and connect with the pop server
             Store store = emailSession.getStore(mProtocol + "s");
+            String host = mProtocol == Config.IMAP_NAME ? Config.IMAP_HOST : Config.POP_HOST;
+            store.connect(host, Config.EMAIL, Config.PASSWORD);
 
-            store.connect(mProtocol == Config.IMAP_NAME ? Config.IMAP_HOST : Config.POP_HOST,
-                    Config.EMAIL, Config.PASSWORD);
             //create the folder object and open it
             Folder emailFolder = store.getFolder("INBOX");
             emailFolder.open(Folder.READ_ONLY);
 
-            // retrieve the messages from the folder in an array and print it
-            Message[] messages = emailFolder.getMessages();
-            Log.d(LOG_TAG, "messages.length---" + messages.length);
 
-            for (int i = 0, n = messages.length; i < n; i++) {
-                Message message = messages[i];
-                EmailModel email = new EmailModel();
-
-                email.setSender(message.getFrom()[0].toString());
-                email.setSubject(message.getSubject());
-                email.setRecipient(message.getAllRecipients()[0].toString());
-                email.setFullDate(message.getSentDate());
-                email.setMessage(getMessage(message));
-                email.setHeaders(EmailHelper.getHeadersStringFromEnumeration(message.getAllHeaders()));
-                // TODO reverse email order so recent ones appear first
-                db.addEmail(email);
-//                emails.add(email);
+            // if db has no emails get all message emails
+            // else get only unseen messages
+            if (db.getEmailCount() == 0) {
+                Message[] messages = emailFolder.getMessages();
+                for (Message message : messages) {
+                    db.addEmail(buildEmailFromMessage(message));
+                    Log.d(LOG_TAG, "DB email count: " + db.getEmailCount());
+                }
+            } else if (db.getEmailCount() < emailFolder.getMessageCount()) {
+                // TODO What happens if I add delete functionality
+                for (int i = db.getEmailCount(); i < emailFolder.getMessageCount(); i++) {
+                    Message message = emailFolder.getMessage(i);
+                    db.addEmail(buildEmailFromMessage(message));
+                    Log.d(LOG_TAG, "DB email count from UNREAD: " + db.getEmailCount());
+                }
             }
+//            Message[] unreadMessages = emailFolder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
 
             //close the store and folder objects
             emailFolder.close(false);
@@ -112,6 +110,19 @@ public class FetchMail extends AsyncTask<Void, Void, EmailDB> {
             e.printStackTrace();
         }
         return db;
+    }
+
+    private EmailModel buildEmailFromMessage(Message message) throws MessagingException, IOException {
+        EmailModel email = new EmailModel();
+
+        email.setSender(message.getFrom()[0].toString());
+        email.setSubject(message.getSubject());
+        email.setRecipient(message.getAllRecipients()[0].toString());
+        email.setFullDate(message.getSentDate());
+        email.setMessage(getMessage(message));
+        email.setHeaders(HeadersFormatHelper.getHeadersStringFromEnumeration(message.getAllHeaders()));
+
+        return email;
     }
 
     private Properties getProperties() {
@@ -137,7 +148,7 @@ public class FetchMail extends AsyncTask<Void, Void, EmailDB> {
         Log.d(LOG_TAG, "getMessage");
 
         Message message = (Message) messageObject;
-       // String type = message.getContentType();
+        // String type = message.getContentType();
         String result = "";
 
 
@@ -147,14 +158,14 @@ public class FetchMail extends AsyncTask<Void, Void, EmailDB> {
             String html = (String) messageObject.getContent();
             result = result + "\n" + Jsoup.parse(html).text();
         } else if (message.isMimeType("multipart/*")) {
-            MimeMultipart mimeMultipart = (MimeMultipart)message.getContent();
+            MimeMultipart mimeMultipart = (MimeMultipart) message.getContent();
             int count = mimeMultipart.getCount();
-            for (int i = 0; i < count; i ++){
+            for (int i = 0; i < count; i++) {
                 BodyPart bodyPart = mimeMultipart.getBodyPart(i);
-                if (bodyPart.isMimeType("text/plain")){
+                if (bodyPart.isMimeType("text/plain")) {
                     result = result + "\n" + bodyPart.getContent();
                     break;  //without break same text appears twice in my tests
-                } else if (bodyPart.isMimeType("text/html")){
+                } else if (bodyPart.isMimeType("text/html")) {
                     String html = (String) bodyPart.getContent();
                     result = result + "\n" + Jsoup.parse(html).text();
                 }

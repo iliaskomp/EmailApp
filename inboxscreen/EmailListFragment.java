@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,7 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.iliaskomp.emailapp.models.EmailDB;
+import com.iliaskomp.emailapp.models.EmailDb;
 import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.newmailscreen.NewMailActivity;
 import com.iliaskomp.emailapp.utils.Config;
@@ -46,6 +45,7 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_email_list, container, false);
+
         mInboxRecyclerView = (RecyclerView) view.findViewById(R.id.inbox_recycler_view);
         mInboxRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
@@ -77,9 +77,7 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
     }
 
     @Override
-    public void processFinish(EmailDB db) {
-        //db.set(emails);
-        Log.d(LOG_CAT, db.getEmails().get(0).toString());
+    public void processFinish(EmailDb db) {
         mAdapter = new EmailAdapter(db.getEmails());
         mInboxRecyclerView.setAdapter(mAdapter);
     }
@@ -129,6 +127,8 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
         }
     }
 
+
+
     private class EmailAdapter extends RecyclerView.Adapter<EmailHolder> {
         private List<EmailModel> mEmails;
 
@@ -140,6 +140,7 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
         public EmailHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
             View view = layoutInflater.inflate(R.layout.list_item_email, parent, false);
+
 
             return new EmailHolder(view);
         }

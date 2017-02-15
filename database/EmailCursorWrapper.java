@@ -32,7 +32,6 @@ public class EmailCursorWrapper extends CursorWrapper {
         email.setRecipient(recipientString);
         email.setSubject(subjectString);
         email.setMessage(messageString);
-        //TODO change date/headers format
         email.setFullDate(DateFormatHelper.getFullDateFromFullDateString(dateString));
         email.setHeaders(headersString);
 

@@ -1,4 +1,4 @@
-package com.iliaskomp.emailapp.emailscreen;
+package com.iliaskomp.emailapp.utils;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import javax.mail.Header;
 /**
  * Created by IliasKomp on 15/02/17.
  */
-public class EmailHelper {
+public class HeadersFormatHelper {
     public static HashMap<String, String> getHeadersMapFromEnumeration(Enumeration headers) {
         HashMap<String, String> headersMap = new HashMap<>();
         while (headers.hasMoreElements()) {

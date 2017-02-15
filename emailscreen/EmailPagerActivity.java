@@ -10,6 +10,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
 import com.iliaskomp.emailapp.R;
+import com.iliaskomp.emailapp.models.EmailDb;
 import com.iliaskomp.emailapp.models.EmailModel;
 
 import java.util.List;
@@ -34,8 +35,7 @@ public class EmailPagerActivity extends AppCompatActivity {
         UUID emailId = (UUID) getIntent().getSerializableExtra(EXTRA_EMAIL_ID);
 
         mViewPager = (ViewPager) findViewById(R.id.activity_email_pager_view_pager);
-//        TODO static for email screen
-//        mEmails = EmailDB.getEmails();
+        mEmails = EmailDb.getEmails();
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         mViewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {

@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.iliaskomp.emailapp.R;
+import com.iliaskomp.emailapp.models.EmailDb;
 import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.newmailscreen.NewMailActivity;
 import com.iliaskomp.emailapp.utils.DateFormatHelper;
@@ -37,8 +38,7 @@ public class EmailFragment extends Fragment {
         setHasOptionsMenu(true);
 
         UUID emailId = (UUID) getArguments().getSerializable(ARG_EMAIL_ID);
-        //TODO FIX STATIC
-//        mEmail = EmailDB.getEmailFromId(emailId);
+        mEmail = EmailDb.getEmailFromId(emailId);
     }
 
     @Override

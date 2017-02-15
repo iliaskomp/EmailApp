@@ -11,10 +11,6 @@ import java.util.Locale;
  */
 
 public class DateFormatHelper {
-    //TODO add this method
-//    public static Date getFormatDateFromFullDate(Date date) {
-//
-//    }
 
     public static String getFormatttedDateStringFromFullDate(Date date) {
         String dateString = date.toString();
@@ -59,9 +55,9 @@ public class DateFormatHelper {
     }
 
     // format date from full date
-    //xxx format date from format date string
+    // xxx format date from format date string
     // format date string from format date
     // xxx format date string from full date
-    // full date from full date string
+    // xxx full date from full date string
 
 }

@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.iliaskomp.emailapp.R;
+import com.iliaskomp.emailapp.models.EmailDb;
 
 import java.util.UUID;
 
@@ -28,8 +29,7 @@ public class EmailHeadersFragment extends DialogFragment {
         UUID emailId = (UUID) getArguments().getSerializable(ARG_EMAIL_ID);
 
         TextView headersText = (TextView) v.findViewById(R.id.text_view_headers);
-//        TODO static context email screen
-//        headersText.setText(EmailDB.getEmailFromId(emailId).getHeadersText());
+        headersText.setText(EmailDb.getEmailFromId(emailId).getHeaders());
 
         return new AlertDialog.Builder(getActivity())
                 .setView(v)
