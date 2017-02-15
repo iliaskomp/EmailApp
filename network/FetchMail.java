@@ -6,15 +6,14 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.iliaskomp.emailapp.emailscreen.EmailHelper;
+import com.iliaskomp.emailapp.models.EmailDB;
+import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.utils.Config;
-import com.iliaskomp.emailapp.models.InboxEmail;
-import com.iliaskomp.emailapp.utils.FormatHelper;
 
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 import javax.mail.BodyPart;
@@ -29,10 +28,9 @@ import javax.mail.internet.MimeMultipart;
 
 /**
  * Created by iliaskomp on 11/02/17.
- * TODO fix asynctask error when sending a message, then going to inbox or the other way around
  */
 
-public class FetchMail extends AsyncTask<Void, Void, List<InboxEmail>> {
+public class FetchMail extends AsyncTask<Void, Void, EmailDB> {
     private static final String LOG_TAG = "FetchMail";
 
     public AsyncResponseForFetchEmail delegate = null;
@@ -55,17 +53,18 @@ public class FetchMail extends AsyncTask<Void, Void, List<InboxEmail>> {
     }
 
     @Override
-    protected void onPostExecute(List<InboxEmail> emails) {
-        super.onPostExecute(emails);
-        delegate.processFinish(emails);
+    protected void onPostExecute(EmailDB db) {
+        super.onPostExecute(db);
+        delegate.processFinish(db);
 
         progressDialog.dismiss();
         Toast.makeText(mContext,"Messages Fetched",Toast.LENGTH_LONG).show();
     }
 
     @Override
-    protected List<InboxEmail> doInBackground(Void... voids) {
-        List<InboxEmail> emails = new ArrayList<>();
+    protected EmailDB doInBackground(Void... voids) {
+//        List<EmailModel> emails = new ArrayList<>();
+        EmailDB db = new EmailDB(mContext);
         //create properties field
         Properties properties = getProperties();
 
@@ -74,7 +73,6 @@ public class FetchMail extends AsyncTask<Void, Void, List<InboxEmail>> {
 
         try {
             //create the POP3 store object and connect with the pop server
-//            Store store = emailSession.getStore("pop3s");
             Store store = emailSession.getStore(mProtocol + "s");
 
             store.connect(mProtocol == Config.IMAP_NAME ? Config.IMAP_HOST : Config.POP_HOST,
@@ -89,16 +87,17 @@ public class FetchMail extends AsyncTask<Void, Void, List<InboxEmail>> {
 
             for (int i = 0, n = messages.length; i < n; i++) {
                 Message message = messages[i];
-                InboxEmail email = new InboxEmail();
+                EmailModel email = new EmailModel();
 
                 email.setSender(message.getFrom()[0].toString());
                 email.setSubject(message.getSubject());
                 email.setRecipient(message.getAllRecipients()[0].toString());
-                email.setSentDate(message.getSentDate());
+                email.setFullDate(message.getSentDate());
                 email.setMessage(getMessage(message));
-                email.setHeaders(FormatHelper.getHeaders(message.getAllHeaders()));
+                email.setHeaders(EmailHelper.getHeadersStringFromEnumeration(message.getAllHeaders()));
                 // TODO reverse email order so recent ones appear first
-                emails.add(email);
+                db.addEmail(email);
+//                emails.add(email);
             }
 
             //close the store and folder objects
@@ -112,7 +111,7 @@ public class FetchMail extends AsyncTask<Void, Void, List<InboxEmail>> {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return emails;
+        return db;
     }
 
     private Properties getProperties() {

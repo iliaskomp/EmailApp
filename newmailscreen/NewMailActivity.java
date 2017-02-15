@@ -8,9 +8,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.models.EmailToSend;
 import com.iliaskomp.emailapp.models.EmailDB;
-import com.iliaskomp.emailapp.models.InboxEmail;
 import com.iliaskomp.emailapp.network.SendMail;
 import com.iliaskomp.emailapp.R;
 
@@ -51,10 +51,11 @@ public class NewMailActivity extends AppCompatActivity{
         // If emailId is not null, it means that the intent passed an id,
         // meaning the source was from reading the email, ergo replying to email
         if (emailId != null) {
-            InboxEmail email = EmailDB.getEmailFromId(emailId);
-            mEditTextSender.setText(email.getRecipient());
-            mEditTextRecipient.setText(email.getSender());
-            mEditTextSubject.setText("Re:" + email.getSubject());
+            // TODO new mail static context
+//            EmailModel email = EmailDB.getEmailFromId(emailId);
+//            mEditTextSender.setText(email.getRecipient());
+//            mEditTextRecipient.setText(email.getSender());
+//            mEditTextSubject.setText("Re:" + email.getSubject());
         }
 //        populateDataForTestPurposes();
     }

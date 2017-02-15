@@ -14,11 +14,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.iliaskomp.emailapp.newmailscreen.NewMailActivity;
-import com.iliaskomp.emailapp.models.EmailDB;
-import com.iliaskomp.emailapp.models.InboxEmail;
-import com.iliaskomp.emailapp.utils.FormatHelper;
 import com.iliaskomp.emailapp.R;
+import com.iliaskomp.emailapp.models.EmailModel;
+import com.iliaskomp.emailapp.newmailscreen.NewMailActivity;
+import com.iliaskomp.emailapp.utils.DateFormatHelper;
 
 import java.util.UUID;
 
@@ -30,7 +29,7 @@ public class EmailFragment extends Fragment {
     private static final String ARG_EMAIL_ID = "email_id";
     private static final String DIALOG_HEADERS = "HeadersDialog";
     
-    private InboxEmail mEmail;
+    private EmailModel mEmail;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,7 +37,8 @@ public class EmailFragment extends Fragment {
         setHasOptionsMenu(true);
 
         UUID emailId = (UUID) getArguments().getSerializable(ARG_EMAIL_ID);
-        mEmail = EmailDB.getEmailFromId(emailId);
+        //TODO FIX STATIC
+//        mEmail = EmailDB.getEmailFromId(emailId);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class EmailFragment extends Fragment {
             emailSubjectTextView.setText(mEmail.getSubject());
             emailSenderTextView.setText(mEmail.getSender());
             emailRecipientTextView.setText(mEmail.getRecipient());
-            emailDateTextView.setText(FormatHelper.formatDateForInbox(mEmail.getSentDate()));
+            emailDateTextView.setText(DateFormatHelper.getFormatttedDateStringFromFullDate(mEmail.getFullDate()));
             emailMessageTextView.setText(mEmail.getMessage());
             emailHeadersButton.setOnClickListener(new View.OnClickListener() {
                 @Override

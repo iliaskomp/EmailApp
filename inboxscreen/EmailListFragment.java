@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,15 +15,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.iliaskomp.emailapp.models.EmailDB;
+import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.newmailscreen.NewMailActivity;
 import com.iliaskomp.emailapp.utils.Config;
-import com.iliaskomp.emailapp.models.EmailDB;
-import com.iliaskomp.emailapp.models.InboxEmail;
 import com.iliaskomp.emailapp.emailscreen.EmailPagerActivity;
 import com.iliaskomp.emailapp.network.AsyncResponseForFetchEmail;
 import com.iliaskomp.emailapp.network.FetchMail;
 import com.iliaskomp.emailapp.R;
-import com.iliaskomp.emailapp.utils.FormatHelper;
+import com.iliaskomp.emailapp.utils.DateFormatHelper;
 
 import java.util.List;
 
@@ -31,6 +32,8 @@ import java.util.List;
  */
 
 public class EmailListFragment extends Fragment implements AsyncResponseForFetchEmail {
+    private static final String LOG_CAT = "EmailListFragment";
+
     private RecyclerView mInboxRecyclerView;
     private EmailAdapter mAdapter;
 
@@ -74,14 +77,14 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
     }
 
     @Override
-    public void processFinish(List<InboxEmail> emails) {
-        EmailDB db = new EmailDB();
-        db.set(emails);
-        mAdapter = new EmailAdapter(emails);
+    public void processFinish(EmailDB db) {
+        //db.set(emails);
+        Log.d(LOG_CAT, db.getEmails().get(0).toString());
+        mAdapter = new EmailAdapter(db.getEmails());
         mInboxRecyclerView.setAdapter(mAdapter);
     }
 
-//    public void updateUI(List<InboxEmail> emails) {
+//    public void updateUI(List<EmailModel> emails) {
 //        mAdapter = new EmailAdapter(emails);
 //        mInboxRecyclerView.setAdapter(mAdapter);
 //    }
@@ -94,7 +97,7 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
 
 
     private class EmailHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private InboxEmail mEmail;
+        private EmailModel mEmail;
 
         private TextView mTextViewSender;
         private TextView mTextViewDate;
@@ -116,20 +119,20 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
             startActivity(intent);
         }
 
-        public void bindEmail(InboxEmail email) {
+        public void bindEmail(EmailModel email) {
             mEmail = email;
 
             mTextViewSender.setText(mEmail.getSender());
-            mTextViewDate.setText(FormatHelper.formatDateForInbox(mEmail.getSentDate()));
+            mTextViewDate.setText(DateFormatHelper.getFormatttedDateStringFromFullDate(mEmail.getFullDate()));
             mTextViewSubject.setText(mEmail.getSubject());
-            mTextViewMessage.setText(FormatHelper.formatMessageShortForInbox(mEmail.getMessage()));
+            mTextViewMessage.setText(InboxHelper.formatMessageShortForInbox(mEmail.getMessage()));
         }
     }
 
     private class EmailAdapter extends RecyclerView.Adapter<EmailHolder> {
-        private List<InboxEmail> mEmails;
+        private List<EmailModel> mEmails;
 
-        public EmailAdapter(List<InboxEmail> emails) {
+        public EmailAdapter(List<EmailModel> emails) {
             mEmails = emails;
         }
 
@@ -143,13 +146,17 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
 
         @Override
         public void onBindViewHolder(EmailHolder holder, int position) {
-            InboxEmail email = mEmails.get(position);
+            EmailModel email = mEmails.get(position);
             holder.bindEmail(email);
         }
 
         @Override
         public int getItemCount() {
             return mEmails.size();
+        }
+
+        public void setEmails(List<EmailModel> emails) {
+            mEmails = emails;
         }
     }
 
