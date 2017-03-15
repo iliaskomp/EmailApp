@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">EmailApp</string>
+    <string name="headers_dialog_title">Headers</string>
+
+    <!-- TOOLBAR MENUS -->
+    <string name="menu_item_new_mail">+</string>
+</resources>
