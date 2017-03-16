@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -100,7 +101,11 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
 
     @Override
     public void processFinish(EmailDb db) {
-        mAdapter = new EmailAdapter(db.getEmails());
+        Log.d("FetchMail", "EmailListFragment processFinish");
+        mAdapter = new EmailAdapter(EmailDb.getEmails());
+        Log.d("FetchMail", "Last email: " + EmailDb.getEmails().get(0));
+        Log.d("FetchMail", "First email: " + EmailDb.getEmails().get(EmailDb.getEmails().size()-1));
+
         mInboxRecyclerView.setAdapter(mAdapter);
     }
 

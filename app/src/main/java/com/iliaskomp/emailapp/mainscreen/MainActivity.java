@@ -6,9 +6,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import com.iliaskomp.emailapp.newmailscreen.NewMailActivity;
-import com.iliaskomp.emailapp.inboxscreen.EmailListActivity;
 import com.iliaskomp.emailapp.R;
+import com.iliaskomp.emailapp.inboxscreen.EmailListActivity;
+import com.iliaskomp.emailapp.newmailscreen.NewMailActivity;
 
 public class MainActivity extends AppCompatActivity {
 
