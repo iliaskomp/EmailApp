@@ -61,7 +61,7 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
         mInboxRecyclerView = (RecyclerView) view.findViewById(R.id.inbox_recycler_view);
         mInboxRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-//        fetchMail();
+        fetchMail();
         return view;
     }
 

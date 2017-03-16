@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.iliaskomp.emailapp.database.EmailDbSchema;
 import com.iliaskomp.emailapp.models.EmailDb;
 import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.utils.Config;
@@ -63,6 +64,7 @@ public class FetchMail extends AsyncTask<Void, Void, EmailDb> {
 
     @Override
     protected EmailDb doInBackground(Void... voids) {
+        Log.d(LOG_TAG, "doInBackground starts");
         EmailDb db = EmailDb.get(mContext);
 
         //create properties field
@@ -78,24 +80,42 @@ public class FetchMail extends AsyncTask<Void, Void, EmailDb> {
             //create the folder object and open it
             Folder emailFolder = store.getFolder("INBOX");
             emailFolder.open(Folder.READ_ONLY);
+            mContext.deleteDatabase(EmailDbSchema.EmailTable.NAME);
 
+            Log.d(LOG_TAG, "db.getEmailCount(): " + db.getEmailCount());
+            Log.d(LOG_TAG, "emailFolder.getMessageCount(): " + emailFolder.getMessageCount());
 
-            // if db has no emails get all message emails
-            // else get only unseen messages
-            if (db.getEmailCount() == 0) {
-                Message[] messages = emailFolder.getMessages();
-                for (Message message : messages) {
-                    db.addEmail(buildEmailFromMessage(message));
-                    Log.d(LOG_TAG, "DB email count: " + db.getEmailCount());
-                }
-            } else if (db.getEmailCount() < emailFolder.getMessageCount()) {
-                // TODO What happens if I add delete functionality
-                for (int i = db.getEmailCount(); i < emailFolder.getMessageCount(); i++) {
-                    Message message = emailFolder.getMessage(i);
-                    db.addEmail(buildEmailFromMessage(message));
-                    Log.d(LOG_TAG, "DB email count from UNREAD: " + db.getEmailCount());
-                }
+//            Log.d(LOG_TAG, "first email from emaildb: " + db.getEmails().get(0).toString());
+//            Log.d(LOG_TAG, "first javamail message subject: " + emailFolder.getMessage(0).getSubject());
+
+//================================================================================================
+//            // if db has no emails get all message emails
+//            // else get only unseen messages
+//            if (db.getEmailCount() == 0) {
+//                Message[] messages = emailFolder.getMessages();
+//                for (Message message : messages) {
+//                    db.addEmail(buildEmailFromMessage(message));
+//                    Log.d(LOG_TAG, "DB email count: " + db.getEmailCount());
+//                }
+//            } else if (db.getEmailCount() <= emailFolder.getMessageCount()) {
+//                // TODO What happens if I add delete functionality
+//                for (int i = db.getEmailCount(); i < emailFolder.getMessageCount(); i++) {
+//                    Message message = emailFolder.getMessage(i);
+//                    db.addEmail(buildEmailFromMessage(message));
+//                }
+//                Log.d(LOG_TAG, "DB email count from UNREAD: " + db.getEmailCount());
+//            }
+//================================================================================================
+            Message[] messages = emailFolder.getMessages();
+            for (Message message : messages) {
+                db.addEmail(buildEmailFromMessage(message));
             }
+            Log.d(LOG_TAG, "DB email count: " + db.getEmailCount());
+
+
+
+
+//================================================================================================
 //            Message[] unreadMessages = emailFolder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
 
             //close the store and folder objects
@@ -122,6 +142,8 @@ public class FetchMail extends AsyncTask<Void, Void, EmailDb> {
         email.setMessage(getMessage(message));
         email.setHeaders(HeadersFormatHelper.getHeadersStringFromEnumeration(message.getAllHeaders()));
 
+        Log.d(LOG_TAG, email.toString());
+
         return email;
     }
 
@@ -145,7 +167,6 @@ public class FetchMail extends AsyncTask<Void, Void, EmailDb> {
     }
 
     private String getMessage(Part messageObject) throws MessagingException, IOException {
-        Log.d(LOG_TAG, "getMessage");
 
         Message message = (Message) messageObject;
         // String type = message.getContentType();

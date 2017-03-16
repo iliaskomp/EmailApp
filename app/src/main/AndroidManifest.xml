@@ -22,12 +22,6 @@
         <activity android:name=".newmailscreen.NewMailActivity"/>
         <activity android:name=".emailscreen.EmailPagerActivity"/>
 
-        <receiver android:name=".inboxscreen.InboxReceiver"
-                  android:process=":remote"
-                  android:exported="true">
-        </receiver>
-
-        <service android:name=".inboxscreen.InboxService"/>
     </application>
 
 </manifest>

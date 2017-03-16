@@ -44,7 +44,7 @@ public class EmailModel {
                 "\nRecipient: " + mRecipient +
                 "\nSubject: " + mSubject +
                 "\nMessage: " + mMessage +
-                "\nHeaders: " + mHeaders +
+//                "\nHeaders: " + mHeaders +
                 "\nSent Date: " + mFullDate;
     }
 

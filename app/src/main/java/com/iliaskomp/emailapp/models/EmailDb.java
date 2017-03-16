@@ -122,7 +122,7 @@ public class EmailDb {
         values.put(EmailTable.Cols.UUID, email.getId().toString());
         values.put(EmailTable.Cols.SENDER, email.getSender());
         values.put(EmailTable.Cols.RECIPIENT, email.getRecipient());
-        values.put(EmailTable.Cols.SUBJECT, email.getSender());
+        values.put(EmailTable.Cols.SUBJECT, email.getSubject());
         values.put(EmailTable.Cols.MESSAGE, email.getMessage());
         values.put(EmailTable.Cols.DATE, email.getFullDate().toString());
         values.put(EmailTable.Cols.HEADERS, email.getHeaders());
