@@ -61,14 +61,14 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
         mInboxRecyclerView = (RecyclerView) view.findViewById(R.id.inbox_recycler_view);
         mInboxRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        fetchMail();
+//        fetchMail();
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        fetchMail();
+//        fetchMail();
     }
 
     @Override
@@ -83,6 +83,10 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
             case R.id.menu_item_new_email:
                 Intent intent = NewMailActivity.newIntent(getActivity());
                 startActivity(intent);
+                break;
+            case R.id.menu_item_refresh:
+                fetchMail();
+                break;
         }
 
         return super.onOptionsItemSelected(item);
