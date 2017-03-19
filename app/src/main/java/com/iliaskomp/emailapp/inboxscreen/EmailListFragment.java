@@ -16,7 +16,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.iliaskomp.emailapp.R;
-import com.iliaskomp.emailapp.models.EmailDb;
+import com.iliaskomp.emailapp.models.InboxDB;
 import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.network.AsyncResponseForFetchEmail;
 import com.iliaskomp.emailapp.network.FetchMail;
@@ -100,11 +100,11 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
     }
 
     @Override
-    public void processFinish(EmailDb db) {
+    public void processFinish(InboxDB db) {
         Log.d("FetchMail", "EmailListFragment processFinish");
-        mAdapter = new EmailAdapter(EmailDb.getEmails());
-        Log.d("FetchMail", "Last email: " + EmailDb.getEmails().get(0));
-        Log.d("FetchMail", "First email: " + EmailDb.getEmails().get(EmailDb.getEmails().size()-1));
+        mAdapter = new EmailAdapter(InboxDB.get(getActivity()).getEmails());
+        Log.d("FetchMail", "Last email: " + InboxDB.get(getActivity()).getEmails().get(0));
+        Log.d("FetchMail", "First email: " + InboxDB.get(getActivity()).getEmails().get(InboxDB.get(getActivity()).getEmails().size()-1));
 
         mInboxRecyclerView.setAdapter(mAdapter);
     }

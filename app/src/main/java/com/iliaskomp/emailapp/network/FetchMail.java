@@ -6,7 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.iliaskomp.emailapp.models.EmailDb;
+import com.iliaskomp.emailapp.models.InboxDB;
 import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.utils.Config;
 import com.iliaskomp.emailapp.utils.HeadersFormatHelper;
@@ -30,7 +30,7 @@ import javax.mail.internet.MimeMultipart;
  * Created by iliaskomp on 11/02/17.
  */
 
-public class FetchMail extends AsyncTask<Void, Void, EmailDb> {
+public class FetchMail extends AsyncTask<Void, Void, InboxDB> {
     private static final String LOG_TAG = "FetchMail";
 
     public AsyncResponseForFetchEmail delegate = null;
@@ -53,7 +53,7 @@ public class FetchMail extends AsyncTask<Void, Void, EmailDb> {
     }
 
     @Override
-    protected void onPostExecute(EmailDb db) {
+    protected void onPostExecute(InboxDB db) {
         super.onPostExecute(db);
         delegate.processFinish(db);
 
@@ -62,10 +62,10 @@ public class FetchMail extends AsyncTask<Void, Void, EmailDb> {
     }
 
     @Override
-    protected EmailDb doInBackground(Void... voids) {
+    protected InboxDB doInBackground(Void... voids) {
         Log.d(LOG_TAG, "doInBackground starts");
 
-        EmailDb db = EmailDb.get(mContext);
+        InboxDB db = InboxDB.get(mContext);
 
         //create properties field
         Properties properties = getProperties();

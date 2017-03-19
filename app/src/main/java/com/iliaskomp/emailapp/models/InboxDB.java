@@ -17,33 +17,25 @@ import java.util.UUID;
  * Created by IliasKomp on 13/02/17.
  */
 
-public class EmailDb {
-    private static EmailDb sEmailDb;
+public class InboxDB implements EmailDB {
+    private static InboxDB sInboxDB;
     private Context mContext;
-    private static SQLiteDatabase mDatabase;
+    private static SQLiteDatabase sDatabase;
 
-
-//    public static SQLiteDatabase getEmailDB(Context context) {
-//        if (mDatabase == null) {
-//            EmailDb db = new EmailDb(context);
-//        }
-//        return mDatabase;
-//    }
-
-    public static EmailDb get(Context context) {
-        if (sEmailDb == null) {
-            sEmailDb = new EmailDb(context);
+    public static InboxDB get(Context context) {
+        if (sInboxDB == null) {
+            sInboxDB = new InboxDB(context);
         }
 
-        return sEmailDb;
+        return sInboxDB;
     }
 
-    private EmailDb(Context context) {
+    private InboxDB(Context context) {
         mContext = context.getApplicationContext();
-        mDatabase = new EmailBaseHelper(mContext).getWritableDatabase();
+        sDatabase = new EmailBaseHelper(mContext).getWritableDatabase();
     }
 
-    public static EmailModel getEmailFromId (UUID id) {
+    public EmailModel getEmailFromId (UUID id) {
         EmailCursorWrapper cursor = queryEmails(
                 EmailTable.Cols.UUID + " = ?",
                 new String[] {id.toString()}
@@ -60,14 +52,10 @@ public class EmailDb {
         }
     }
 
-    public static List<EmailModel> getEmails() {
+    public List<EmailModel> getEmails() {
         List<EmailModel> emails = new ArrayList<>();
 
         EmailCursorWrapper cursor = queryEmails(null, null);
-
-        for (cursor.moveToLast(); !cursor.isBeforeFirst(); cursor.moveToPrevious()) {
-            // get stuff from the cursor
-        }
 
         try {
             cursor.moveToLast();
@@ -79,17 +67,6 @@ public class EmailDb {
             cursor.close();
         }
 
-
-//        try {
-//            cursor.moveToFirst();
-//            while (!cursor.isAfterLast()) {
-//                emails.add(cursor.getEmail());
-//                cursor.moveToNext();
-//            }
-//        } finally {
-//            cursor.close();
-//        }
-
         return emails;
     }
 
@@ -100,11 +77,11 @@ public class EmailDb {
 
     public void addEmail(EmailModel email) {
         ContentValues values = getContentValues(email);
-        mDatabase.insert(EmailTable.NAME, null, values);
+        sDatabase.insert(EmailTable.NAME, null, values);
     }
 
-    private static EmailCursorWrapper queryEmails(String whereClause, String[] whereArgs) {
-        Cursor cursor = mDatabase.query(
+    private EmailCursorWrapper queryEmails(String whereClause, String[] whereArgs) {
+        Cursor cursor = sDatabase.query(
                 EmailTable.NAME,
                 null,
                 whereClause,

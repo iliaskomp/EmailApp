@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.iliaskomp.emailapp.R;
-import com.iliaskomp.emailapp.models.EmailDb;
+import com.iliaskomp.emailapp.models.InboxDB;
 
 import java.util.UUID;
 
@@ -29,7 +29,7 @@ public class EmailHeadersFragment extends DialogFragment {
         UUID emailId = (UUID) getArguments().getSerializable(ARG_EMAIL_ID);
 
         TextView headersText = (TextView) v.findViewById(R.id.text_view_headers);
-        headersText.setText(EmailDb.getEmailFromId(emailId).getHeaders());
+        headersText.setText(InboxDB.get(getActivity()).getEmailFromId(emailId).getHeaders());
 
         return new AlertDialog.Builder(getActivity())
                 .setView(v)
