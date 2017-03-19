@@ -6,8 +6,11 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.iliaskomp.emailapp.models.InboxDB;
+import com.iliaskomp.emailapp.database.EmailDbSchema;
+import com.iliaskomp.emailapp.models.EmailDB;
 import com.iliaskomp.emailapp.models.EmailModel;
+import com.iliaskomp.emailapp.models.InboxDB;
+import com.iliaskomp.emailapp.models.SentDB;
 import com.iliaskomp.emailapp.utils.Config;
 import com.iliaskomp.emailapp.utils.HeadersFormatHelper;
 
@@ -30,7 +33,7 @@ import javax.mail.internet.MimeMultipart;
  * Created by iliaskomp on 11/02/17.
  */
 
-public class FetchMail extends AsyncTask<Void, Void, InboxDB> {
+public class FetchMail extends AsyncTask<String, Void, EmailDB> {
     private static final String LOG_TAG = "FetchMail";
 
     public AsyncResponseForFetchEmail delegate = null;
@@ -53,7 +56,7 @@ public class FetchMail extends AsyncTask<Void, Void, InboxDB> {
     }
 
     @Override
-    protected void onPostExecute(InboxDB db) {
+    protected void onPostExecute(EmailDB db) {
         super.onPostExecute(db);
         delegate.processFinish(db);
 
@@ -62,10 +65,15 @@ public class FetchMail extends AsyncTask<Void, Void, InboxDB> {
     }
 
     @Override
-    protected InboxDB doInBackground(Void... voids) {
+    protected EmailDB doInBackground(String... folder) throws NullPointerException {
         Log.d(LOG_TAG, "doInBackground starts");
+        EmailDB db = null;
 
-        InboxDB db = InboxDB.get(mContext);
+        if (folder[0].equals(EmailDbSchema.InboxTable.NAME)) {
+            db = InboxDB.get(mContext);
+        } else if (folder[0].equals(EmailDbSchema.SentTable.NAME)) {
+            db = SentDB.get(mContext);
+        }
 
         //create properties field
         Properties properties = getProperties();
@@ -77,9 +85,24 @@ public class FetchMail extends AsyncTask<Void, Void, InboxDB> {
             String host = mProtocol == Config.IMAP_NAME ? Config.IMAP_HOST : Config.POP_HOST;
             store.connect(host, Config.EMAIL, Config.PASSWORD);
 
+            Folder[] folders = store.getDefaultFolder().list("*");
+            for (Folder folder1 : folders) {
+                if ((folder1.getType() & Folder.HOLDS_MESSAGES) != 0) {
+                    Log.d(LOG_TAG, folder1.getFullName() + ": " + folder1.getMessageCount());
+                }
+            }
+
             //create the folder object and open it
-            Folder emailFolder = store.getFolder("INBOX");
-            emailFolder.open(Folder.READ_ONLY);
+            Folder emailFolder = null;
+            if (folder[0].equals(EmailDbSchema.InboxTable.NAME)) {
+                emailFolder = store.getFolder("INBOX");
+            } else if (folder[0].equals(EmailDbSchema.SentTable.NAME)) {
+                emailFolder = store.getFolder("[Gmail]/Sent Mail");
+            }
+
+            if (emailFolder != null) {
+                emailFolder.open(Folder.READ_ONLY);
+            }
 
             Log.d(LOG_TAG, "db.getEmailCount(): " + db.getEmailCount());
             Log.d(LOG_TAG, "emailFolder.getMessageCount(): " + emailFolder.getMessageCount());

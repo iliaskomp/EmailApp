@@ -11,13 +11,19 @@
 
     <Button
         android:id="@+id/buttonNewEmail"
-        android:text="NEW EMAIL"
+        android:text="@string/button_main_new_email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
     <Button
         android:id="@+id/buttonInbox"
-        android:text="Inbox"
+        android:text="@string/button_main_inbox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/buttonSent"
+        android:text="@string/button_main_sent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 </LinearLayout>

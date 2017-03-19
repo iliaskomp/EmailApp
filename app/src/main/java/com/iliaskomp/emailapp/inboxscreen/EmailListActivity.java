@@ -1,5 +1,6 @@
 package com.iliaskomp.emailapp.inboxscreen;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
 
@@ -15,10 +16,13 @@ import com.iliaskomp.emailapp.models.EmailModel;
 
 public class EmailListActivity extends SingleFragmentActivity implements EmailListFragment.Callbacks {
     private static final String LOG_TAG = "EmailListActivity";
+    public static final String EXTRA_FOLDER_NAME = "com.iliaskomp.emailapp.foldername";
+
+    private static String mFolderName;
 
     @Override
     protected Fragment createFragment() {
-        return new EmailListFragment();
+        return EmailListFragment.newInstance(mFolderName);
     }
 
     @Override
@@ -37,5 +41,13 @@ public class EmailListActivity extends SingleFragmentActivity implements EmailLi
                     .replace(R.id.detail_fragment_container, newDetail)
                     .commit();
         }
+    }
+
+    public static Intent newIntent(Context context, String folderName) {
+        mFolderName = folderName;
+
+        Intent intent = new Intent(context, EmailListActivity.class);
+        intent.putExtra(EXTRA_FOLDER_NAME, folderName);
+        return intent;
     }
 }

@@ -7,7 +7,7 @@ import java.util.UUID;
  * Created by IliasKomp on 19/03/17.
  */
 
-interface EmailDB {
+public interface EmailDB {
 
     EmailModel getEmailFromId (UUID id);
 

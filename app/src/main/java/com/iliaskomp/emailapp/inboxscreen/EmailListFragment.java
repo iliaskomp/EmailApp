@@ -16,8 +16,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.iliaskomp.emailapp.R;
-import com.iliaskomp.emailapp.models.InboxDB;
+import com.iliaskomp.emailapp.database.EmailDbSchema;
+import com.iliaskomp.emailapp.models.EmailDB;
 import com.iliaskomp.emailapp.models.EmailModel;
+import com.iliaskomp.emailapp.models.InboxDB;
+import com.iliaskomp.emailapp.models.SentDB;
 import com.iliaskomp.emailapp.network.AsyncResponseForFetchEmail;
 import com.iliaskomp.emailapp.network.FetchMail;
 import com.iliaskomp.emailapp.newmailscreen.NewMailActivity;
@@ -32,10 +35,12 @@ import java.util.List;
 
 public class EmailListFragment extends Fragment implements AsyncResponseForFetchEmail {
     private static final String LOG_CAT = "EmailListFragment";
+    public static final String ARGS_FOLDER = "folderName";
 
-    private RecyclerView mInboxRecyclerView;
+    private RecyclerView mEmailListRecyclerView;
     private EmailAdapter mAdapter;
     private Callbacks mCallbacks;
+    private static String mFolderName;
 
     public interface Callbacks {
         void onEmailSelected(EmailModel email);
@@ -59,8 +64,15 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_email_list, container, false);
 
-        mInboxRecyclerView = (RecyclerView) view.findViewById(R.id.inbox_recycler_view);
-        mInboxRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mEmailListRecyclerView = (RecyclerView) view.findViewById(R.id.inbox_recycler_view);
+        mEmailListRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        TextView textViewTitle = (TextView) view.findViewById(R.id.text_view_email_list_title);
+        if (mFolderName.equals(EmailDbSchema.InboxTable.NAME)) {
+            textViewTitle.setText("Inbox");
+        } else if (mFolderName.equals(EmailDbSchema.SentTable.NAME)) {
+            textViewTitle.setText("Sent");
+        }
 
         fetchMail();
         return view;
@@ -100,26 +112,37 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
     }
 
     @Override
-    public void processFinish(InboxDB db) {
+    public void processFinish(EmailDB db) {
         Log.d("FetchMail", "EmailListFragment processFinish");
-        mAdapter = new EmailAdapter(InboxDB.get(getActivity()).getEmails());
-        Log.d("FetchMail", "Last email: " + InboxDB.get(getActivity()).getEmails().get(0));
-        Log.d("FetchMail", "First email: " + InboxDB.get(getActivity()).getEmails().get(InboxDB.get(getActivity()).getEmails().size()-1));
 
-        mInboxRecyclerView.setAdapter(mAdapter);
+        if (mFolderName.equals(EmailDbSchema.InboxTable.NAME)) {
+            mAdapter = new EmailAdapter(InboxDB.get(getActivity()).getEmails());
+        } else if (mFolderName.equals(EmailDbSchema.SentTable.NAME)) {
+            mAdapter = new EmailAdapter(SentDB.get(getActivity()).getEmails());
+        }
+
+        mEmailListRecyclerView.setAdapter(mAdapter);
     }
 
 //    public void updateUI(List<EmailModel> emails) {
 //        mAdapter = new EmailAdapter(emails);
-//        mInboxRecyclerView.setAdapter(mAdapter);
+//        mEmailListRecyclerView.setAdapter(mAdapter);
 //    }
 
     private void fetchMail() {
         FetchMail fetchMail = new FetchMail(getActivity(), Config.IMAP_NAME);
         fetchMail.delegate = this;
-        fetchMail.execute();
+        fetchMail.execute(mFolderName);
     }
 
+    public static EmailListFragment newInstance(String folder) {
+        mFolderName = folder;
+        EmailListFragment fragment = new EmailListFragment();
+        Bundle args = new Bundle();
+        args.putString(ARGS_FOLDER, folder);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     private class EmailHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private EmailModel mEmail;
@@ -157,11 +180,9 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
             mTextViewSender.setText(mEmail.getSender());
             mTextViewDate.setText(DateFormatHelper.getFormatttedDateStringFromFullDate(mEmail.getFullDate()));
             mTextViewSubject.setText(mEmail.getSubject());
-            mTextViewMessage.setText(InboxHelper.formatMessageShortForInbox(mEmail.getMessage()));
+            mTextViewMessage.setText(EmailListHelper.formatShortMessageForEmailList(mEmail.getMessage()));
         }
     }
-
-
 
     private class EmailAdapter extends RecyclerView.Adapter<EmailHolder> {
         private List<EmailModel> mEmails;
