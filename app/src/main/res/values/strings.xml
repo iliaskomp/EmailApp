@@ -4,4 +4,7 @@
 
     <!-- TOOLBAR MENUS -->
     <string name="menu_item_new_mail">+</string>
+    <string name="button_main_new_email">New email</string>
+    <string name="button_main_inbox">Inbox</string>
+    <string name="button_main_sent">Sent</string>
 </resources>

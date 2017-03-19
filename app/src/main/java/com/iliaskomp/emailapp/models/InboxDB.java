@@ -5,9 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.iliaskomp.emailapp.database.EmailBaseHelper;
+import com.iliaskomp.emailapp.database.InboxBaseHelper;
 import com.iliaskomp.emailapp.database.EmailCursorWrapper;
-import com.iliaskomp.emailapp.database.EmailDbSchema.EmailTable;
+import com.iliaskomp.emailapp.database.EmailDbSchema.InboxTable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,12 +32,13 @@ public class InboxDB implements EmailDB {
 
     private InboxDB(Context context) {
         mContext = context.getApplicationContext();
-        sDatabase = new EmailBaseHelper(mContext).getWritableDatabase();
+        sDatabase = new InboxBaseHelper(mContext).getWritableDatabase();
     }
 
+    @Override
     public EmailModel getEmailFromId (UUID id) {
         EmailCursorWrapper cursor = queryEmails(
-                EmailTable.Cols.UUID + " = ?",
+                InboxTable.Cols.UUID + " = ?",
                 new String[] {id.toString()}
         );
 
@@ -46,12 +47,13 @@ public class InboxDB implements EmailDB {
                 return null;
             }
             cursor.moveToFirst();
-            return cursor.getEmail();
+            return cursor.getInboxEmail();
         } finally {
             cursor.close();
         }
     }
 
+    @Override
     public List<EmailModel> getEmails() {
         List<EmailModel> emails = new ArrayList<>();
 
@@ -60,7 +62,7 @@ public class InboxDB implements EmailDB {
         try {
             cursor.moveToLast();
             while (!cursor.isBeforeFirst()) {
-                emails.add(cursor.getEmail());
+                emails.add(cursor.getInboxEmail());
                 cursor.moveToPrevious();
             }
         } finally {
@@ -70,19 +72,20 @@ public class InboxDB implements EmailDB {
         return emails;
     }
 
+    @Override
+    public void addEmail(EmailModel email) {
+        ContentValues values = getContentValues(email);
+        sDatabase.insert(InboxTable.NAME, null, values);
+    }
+
+    @Override
     public int getEmailCount() {
         return getEmails().size();
     }
 
-
-    public void addEmail(EmailModel email) {
-        ContentValues values = getContentValues(email);
-        sDatabase.insert(EmailTable.NAME, null, values);
-    }
-
     private EmailCursorWrapper queryEmails(String whereClause, String[] whereArgs) {
         Cursor cursor = sDatabase.query(
-                EmailTable.NAME,
+                InboxTable.NAME,
                 null,
                 whereClause,
                 whereArgs,
@@ -96,16 +99,14 @@ public class InboxDB implements EmailDB {
 
     private ContentValues getContentValues(EmailModel email) {
         ContentValues values = new ContentValues();
-        values.put(EmailTable.Cols.UUID, email.getId().toString());
-        values.put(EmailTable.Cols.SENDER, email.getSender());
-        values.put(EmailTable.Cols.RECIPIENT, email.getRecipient());
-        values.put(EmailTable.Cols.SUBJECT, email.getSubject());
-        values.put(EmailTable.Cols.MESSAGE, email.getMessage());
-        values.put(EmailTable.Cols.DATE, email.getFullDate().toString());
-        values.put(EmailTable.Cols.HEADERS, email.getHeaders());
+        values.put(InboxTable.Cols.UUID, email.getId().toString());
+        values.put(InboxTable.Cols.SENDER, email.getSender());
+        values.put(InboxTable.Cols.RECIPIENT, email.getRecipient());
+        values.put(InboxTable.Cols.SUBJECT, email.getSubject());
+        values.put(InboxTable.Cols.MESSAGE, email.getMessage());
+        values.put(InboxTable.Cols.DATE, email.getFullDate().toString());
+        values.put(InboxTable.Cols.HEADERS, email.getHeaders());
 
         return values;
     }
-
-
 }
