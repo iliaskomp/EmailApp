@@ -1,4 +1,7 @@
 package com.iliaskomp.dhalgorithm;
+
+import com.iliaskomp.libs.Base64;
+
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyFactory;
@@ -60,7 +63,29 @@ public class DHHelper {
         return new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES");
 
     }
-    
+
+    public static String publicKeyToString(PublicKey publicKey) {
+        byte[] publicKeyEncodedSender = DHHelper.encodePublicKey(publicKey);
+        return Base64.encodeToString(publicKeyEncodedSender, Base64.NO_WRAP);
+    }
+
+    public static PublicKey stringToPublicKey(String string) {
+
+        try{
+            byte[] stringBytes = Base64.decode(string, Base64.NO_WRAP);
+            X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(stringBytes);
+            KeyFactory kf = KeyFactory.getInstance("DH");
+
+            return kf.generatePublic(X509publicKey);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
 	// Helper methods
 	public String bigIntegerToHex(BigInteger i) {
 		return i.toString(16);

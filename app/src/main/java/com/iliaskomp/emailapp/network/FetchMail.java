@@ -155,7 +155,7 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
 
         email.setSender(message.getFrom()[0].toString());
         email.setSubject(message.getSubject());
-        email.setRecipient(message.getAllRecipients()[0].toString());
+        email.setRecipient(message.getAllRecipients()[0].toString()); // TODO assuming one recipient
         email.setFullDate(message.getSentDate());
         email.setMessage(getMessage(message));
         email.setHeaders(HeadersFormatHelper.getHeadersStringFromEnumeration(message.getAllHeaders()));

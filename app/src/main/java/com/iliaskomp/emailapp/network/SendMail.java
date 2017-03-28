@@ -5,9 +5,14 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
-import com.iliaskomp.emailapp.utils.Config;
+import com.iliaskomp.email.EmailEncryptionSender;
 import com.iliaskomp.emailapp.models.EmailToSend;
+import com.iliaskomp.emailapp.utils.Config;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
 import java.util.Properties;
 
 import javax.mail.Message;
@@ -90,9 +95,20 @@ public class SendMail extends AsyncTask<Void, Void, Void>{
             //Adding message
             mm.setText(mMessage);
 
+            EmailEncryptionSender ees = new EmailEncryptionSender();
+            Message mm2 = null;
+            try {
+                mm2 = ees.getEmailFirstTimeSending(mm, mSession);
+            } catch (InvalidKeySpecException | InvalidAlgorithmParameterException
+                    | InvalidParameterSpecException | NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
 
             //Sending email
-            Transport.send(mm);
+            if (mm2 != null) {
+                Transport.send(mm2);
+            } else
+                throw new NullPointerException("Message to sent is null");
 
         } catch (MessagingException e) {
             e.printStackTrace();

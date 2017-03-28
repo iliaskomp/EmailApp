@@ -24,10 +24,10 @@ public class DHAlgorithm {
     private static final int AES_KEY_SIZE = 128;
     private static final int DH_PARAMETERS_SIZE = 1024;
     
-	public KeyPair generateKeyPair() throws NoSuchAlgorithmException, InvalidParameterSpecException, 
+	public KeyPair generateKeyPair() throws NoSuchAlgorithmException, InvalidParameterSpecException,
 			InvalidAlgorithmParameterException, InvalidKeySpecException {
 		// generate DH parameters
-		DHParameterSpec kp = generateParameters();		
+		DHParameterSpec kp = generateParameters();
 		BigInteger p = kp.getP();
 		BigInteger g = kp.getG();	
 		
@@ -36,7 +36,7 @@ public class DHAlgorithm {
 	}
 	
 	// returns keypair kp.getPublic(), kp.getPrivate()
-	public KeyPair generateKeyPairFromParameters(BigInteger p, BigInteger g) 
+	public KeyPair generateKeyPairFromParameters(BigInteger p, BigInteger g)
 			  throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeySpecException {
 		  
 		    KeyPairGenerator kpg = KeyPairGenerator.getInstance("DH");
@@ -52,7 +52,7 @@ public class DHAlgorithm {
 		    return kp;
 	  }
 	
-    public SecretKey agreeSecretKey(PrivateKey privateKeySelf, PublicKey publicKeyOther) 
+    public SecretKey agreeSecretKey(PrivateKey privateKeySelf, PublicKey publicKeyOther)
     		throws NoSuchAlgorithmException, InvalidKeyException, IllegalStateException {
     	
     	KeyAgreement keyAgreement = KeyAgreement.getInstance("DH");
@@ -100,7 +100,7 @@ public class DHAlgorithm {
 
 	// KeyAgreement =====================================
 	
-	public void initKeyAgreement(KeyAgreement keyAgreement, PrivateKey privateKey) 
+	public void initKeyAgreement(KeyAgreement keyAgreement, PrivateKey privateKey)
 			throws NoSuchAlgorithmException, InvalidKeyException {		
 		keyAgreement.init(privateKey);
 	}
@@ -113,7 +113,7 @@ public class DHAlgorithm {
 		return keyAgreement.generateSecret();
 	}
   
-	public SecretKey generateSecretKey(KeyAgreement keyAgreement) 
+	public SecretKey generateSecretKey(KeyAgreement keyAgreement)
 			throws InvalidKeyException, IllegalStateException, NoSuchAlgorithmException {
 		return keyAgreement.generateSecret("AES");
 	}
