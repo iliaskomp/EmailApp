@@ -27,11 +27,11 @@ public class EmailEncryptionSender {
             "establish encrypted communication. Otherwise, either install the library or contact" +
             "the sender for an unencrypted email";
 
-    private static final String HEADER_FIELD_PUBLIC_KEY = "x-komp-sender-public-key";
+    private static final String HEADER_FIELD_PUBLIC_KEY = "X-komp-sender-public-key";
 
-    private static final String HEADER_FIELD_STATE = "x-komp-state";
+    private static final String HEADER_FIELD_STATE = "X-komp-state";
     // Sender sends this state the first time of establishing a secret key
-    private static final String HEADER_STATE_FIRST_TIME_SEND = "first_time_send";
+    private static final String HEADER_STATE_FIRST_TIME_SEND = "first_interaction_sender_sends";
     // Recipient replies with this header state the first time of establishing a secret key
     private static final String HEADER_STATE_FIRST_TIME_RECEIVE = "first_time_receive";
 

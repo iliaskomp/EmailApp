@@ -87,11 +87,11 @@ public class DHHelper {
     }
 
 	// Helper methods
-	public String bigIntegerToHex(BigInteger i) {
+	public static String bigIntegerToHex(BigInteger i) {
 		return i.toString(16);
 	}
 	
-	public BigInteger hexToBigInteger(String hex) {
+	public static BigInteger hexToBigInteger(String hex) {
 		return new BigInteger(hex, 16);
 	}
     
