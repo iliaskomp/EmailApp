@@ -5,8 +5,6 @@ package com.iliaskomp.emailapp.utils;
  */
 
 public class Config {
-    public static final String EMAIL = "fhcrypto@gmail.com";
-    public static final String PASSWORD = "cryptotest";
 
     public static final String IMAP_NAME = "imap";
     public static final String IMAP_HOST = "imap.gmail.com";

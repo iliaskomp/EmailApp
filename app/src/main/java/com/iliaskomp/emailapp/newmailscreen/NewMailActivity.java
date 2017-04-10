@@ -13,7 +13,7 @@ import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.models.EmailToSend;
 import com.iliaskomp.emailapp.models.InboxDB;
 import com.iliaskomp.emailapp.network.SendMail;
-import com.iliaskomp.emailapp.utils.Config;
+import com.iliaskomp.emailapp.utils.EmailCredentials;
 
 import java.util.UUID;
 
@@ -83,7 +83,7 @@ public class NewMailActivity extends AppCompatActivity{
     }
 
     private void populateDataForTestPurposes() {
-        mEditTextSender.setText(Config.EMAIL);
+        mEditTextSender.setText(EmailCredentials.EMAIL);
         mEditTextRecipient.setText("fhcrypto@yahoo.com");
         mEditTextSubject.setText("email test subject");
         mEditTextMessage.setText("email test message");

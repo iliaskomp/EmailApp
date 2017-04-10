@@ -7,7 +7,7 @@ import android.widget.Toast;
 
 import com.iliaskomp.email.EmailEncryptionSender;
 import com.iliaskomp.emailapp.models.EmailToSend;
-import com.iliaskomp.emailapp.utils.Config;
+import com.iliaskomp.emailapp.utils.EmailCredentials;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -78,7 +78,7 @@ public class SendMail extends AsyncTask<Void, Void, Void>{
         mSession = Session.getDefaultInstance(props, new javax.mail.Authenticator(){
             //Authenticating the password
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(Config.EMAIL, Config.PASSWORD);
+                return new PasswordAuthentication(EmailCredentials.EMAIL, EmailCredentials.PASSWORD);
             }
         });
 
@@ -87,7 +87,7 @@ public class SendMail extends AsyncTask<Void, Void, Void>{
             MimeMessage mm = new MimeMessage(mSession);
 
             //Setting sender address
-            mm.setFrom(new InternetAddress(Config.EMAIL));
+            mm.setFrom(new InternetAddress(EmailCredentials.EMAIL));
             //Adding receiver
             mm.addRecipient(Message.RecipientType.TO, new InternetAddress(mRecipient));
             //Adding subject

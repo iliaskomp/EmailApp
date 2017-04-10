@@ -12,6 +12,7 @@ import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.models.InboxDB;
 import com.iliaskomp.emailapp.models.SentDB;
 import com.iliaskomp.emailapp.utils.Config;
+import com.iliaskomp.emailapp.utils.EmailCredentials;
 import com.iliaskomp.emailapp.utils.HeadersFormatHelper;
 
 import org.jsoup.Jsoup;
@@ -83,7 +84,7 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
             //create the POP3 store object and connect with the pop server
             Store store = emailSession.getStore(mProtocol + "s");
             String host = mProtocol == Config.IMAP_NAME ? Config.IMAP_HOST : Config.POP_HOST;
-            store.connect(host, Config.EMAIL, Config.PASSWORD);
+            store.connect(host, EmailCredentials.EMAIL, EmailCredentials.PASSWORD);
 
             Folder[] folders = store.getDefaultFolder().list("*");
             for (Folder folder1 : folders) {

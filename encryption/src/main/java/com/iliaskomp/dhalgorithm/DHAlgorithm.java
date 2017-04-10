@@ -84,7 +84,7 @@ public class DHAlgorithm {
 
         // use a Key Derivation Function instead
 
-        MessageDigest sha256 = MessageDigest.getInstance("SHA-256"); 
+        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
         byte[] keyEncoded = Arrays.copyOf(sha256.digest(secret), AES_KEY_SIZE / Byte.SIZE);
 
         SecretKey secretKey = new SecretKeySpec(keyEncoded, "AES");
