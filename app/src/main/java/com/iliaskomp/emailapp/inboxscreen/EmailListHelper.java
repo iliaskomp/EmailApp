@@ -5,10 +5,10 @@ package com.iliaskomp.emailapp.inboxscreen;
  */
 
 public class EmailListHelper {
-    private static final int MESSAGE_INBOX_LENGTH = 45;
+    private static final int MESSAGE_INBOX_LENGTH = 50;
 
+    //Gets a string and returns the trimmed first line of that string
     public static String formatShortMessageForEmailList(String message) {
-        return message.trim().length() <= MESSAGE_INBOX_LENGTH
-                ? message.trim() : message.substring(0, MESSAGE_INBOX_LENGTH).trim();
+        return message.trim().split("\r\n|\r|\n", 2)[0];
     }
 }

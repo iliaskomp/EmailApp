@@ -38,7 +38,7 @@ public class EncryptionHelper {
         result[0] = textEncrypted;
         result[1] = ivString;
         
-		return result;              
+		return result;
 	}
 
 	public static String decrypt(String textEncrypted, SecretKey key, String ivString) throws NoSuchAlgorithmException, 
