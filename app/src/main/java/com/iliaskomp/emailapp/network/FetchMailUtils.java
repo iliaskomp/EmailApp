@@ -23,7 +23,7 @@ import javax.mail.internet.MimeMultipart;
 
 public class FetchMailUtils {
 
-    static String getEmailContentFromMessageObjects(Part messageObject) throws MessagingException, IOException {
+    private static String getEmailContentFromMessageObjects(Part messageObject) throws MessagingException, IOException {
 
         Message message = (Message) messageObject;
         // String type = message.getContentType();

@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.iliaskomp.email.EmailEncryptionRecipient;
 import com.iliaskomp.emailapp.database.EmailDbSchema;
 import com.iliaskomp.emailapp.models.EmailDB;
 import com.iliaskomp.emailapp.models.InboxDB;
@@ -21,6 +22,8 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
+
+import static android.R.id.message;
 
 /**
  * Created by iliaskomp on 11/02/17.
@@ -112,10 +115,12 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
             if (db.getEmailCount() == 0) {
                 Message[] messages = emailFolder.getMessages();
                 for (Message message : messages) {
+                    //TODO check for encryption library headers here
                     db.addEmail(FetchMailUtils.buildEmailFromMessage(message));
                     Log.d(LOG_TAG, "DB email count: " + db.getEmailCount());
                 }
             } else if (db.getEmailCount() < emailFolder.getMessageCount()) {
+                EmailEncryptionRecipient.isEncryptionHeader(message);
                 // TODO What happens if I add delete functionality
                 for (int i = db.getEmailCount(); i < emailFolder.getMessageCount(); i++) {
                     Message message = emailFolder.getMessage(i+1);
