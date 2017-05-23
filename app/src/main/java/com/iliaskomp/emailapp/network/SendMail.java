@@ -7,7 +7,6 @@ import android.widget.Toast;
 
 import com.iliaskomp.email.EmailEncryptionSender;
 import com.iliaskomp.emailapp.models.EmailToSend;
-import com.iliaskomp.emailapp.utils.EmailCredentials;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -27,7 +26,7 @@ import javax.mail.internet.MimeMessage;
  * Created by iliaskomp on 11/02/17.
  */
 
-public class SendMail extends AsyncTask<Void, Void, Void>{
+public class SendMail extends AsyncTask<String, Void, Void>{
 
     private Context mContext;
     private Session mSession;
@@ -63,20 +62,22 @@ public class SendMail extends AsyncTask<Void, Void, Void>{
     }
 
     @Override
-    protected Void doInBackground(Void... voids) {
+    protected Void doInBackground(String... parameters) {
+        final String emailName = parameters[0];
+        final String password = parameters[1];
 
-        Properties props = SendMailUtils.getProperties("gmail");
+        Properties props = SendMailUtils.getProperties(emailName);
 
         //Creating a new session
         mSession = Session.getDefaultInstance(props, new javax.mail.Authenticator(){
             //Authenticating the password
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(EmailCredentials.EMAIL_FETCH_INBOX, EmailCredentials.PASSWORD_FETCH_INBOX);
+                return new PasswordAuthentication(emailName, password);
             }
         });
 
         try {
-            MimeMessage mm = SendMailUtils.createMimeMessage(mSession, EmailCredentials.EMAIL_FETCH_INBOX,
+            MimeMessage mm = SendMailUtils.createMimeMessage(mSession, emailName,
                     mRecipient, mSubject, mMessage);
 
             EmailEncryptionSender ees = new EmailEncryptionSender();

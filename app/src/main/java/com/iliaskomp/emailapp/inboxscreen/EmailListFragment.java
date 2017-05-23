@@ -36,11 +36,16 @@ import java.util.List;
 public class EmailListFragment extends Fragment implements AsyncResponseForFetchEmail {
     private static final String LOG_CAT = "EmailListFragment";
     public static final String ARGS_FOLDER = "folderName";
+    private static final String ARGS_EMAIL = "email";
+    private static final String ARGS_PASSWORD = "password";
 
     private RecyclerView mEmailListRecyclerView;
     private EmailAdapter mAdapter;
     private Callbacks mCallbacks;
     private static String mFolderName;
+    private static String mEmail;
+    private static String mPassword;
+
 
     public interface Callbacks {
         void onEmailSelected(EmailModel email);
@@ -55,6 +60,11 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mFolderName = getArguments().getString(ARGS_FOLDER);
+        mEmail = getArguments().getString(ARGS_EMAIL);
+        mPassword = getArguments().getString(ARGS_PASSWORD);
+
         if (getActivity().findViewById(R.id.detail_fragment_container) == null) {
             setHasOptionsMenu(true);
         }
@@ -94,14 +104,13 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_new_email:
-                Intent intent = NewMailActivity.newIntent(getActivity());
+                Intent intent = NewMailActivity.newIntent(getActivity(), null, mEmail, mPassword);
                 startActivity(intent);
                 break;
             case R.id.menu_item_refresh:
                 fetchMail();
                 break;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -130,16 +139,18 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
 //    }
 
     private void fetchMail() {
-        FetchMail fetchMail = new FetchMail(getActivity(), Config.Yahoo.IMAP_NAME);
+        FetchMail fetchMail = new FetchMail(getActivity(), Config.Name.IMAP);
         fetchMail.delegate = this;
-        fetchMail.execute(mFolderName);
+        fetchMail.execute(mFolderName, mEmail, mPassword);
     }
 
-    public static EmailListFragment newInstance(String folder) {
-        mFolderName = folder;
+    public static EmailListFragment newInstance(String folder, String email, String password) {
         EmailListFragment fragment = new EmailListFragment();
         Bundle args = new Bundle();
         args.putString(ARGS_FOLDER, folder);
+        args.putString(ARGS_EMAIL, email);
+        args.putString(ARGS_PASSWORD, password);
+
         fragment.setArguments(args);
         return fragment;
     }

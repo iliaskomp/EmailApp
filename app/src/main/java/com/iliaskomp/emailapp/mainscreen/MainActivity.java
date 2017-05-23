@@ -10,6 +10,7 @@ import com.iliaskomp.emailapp.R;
 import com.iliaskomp.emailapp.database.EmailDbSchema;
 import com.iliaskomp.emailapp.inboxscreen.EmailListActivity;
 import com.iliaskomp.emailapp.newmailscreen.NewMailActivity;
+import com.iliaskomp.emailapp.utils.EmailCredentials;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -18,12 +19,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // retrieve user email/password (static dummy currently)
+        final String email = EmailCredentials.EMAIL_FETCH_INBOX;
+        final String password = EmailCredentials.PASSWORD_FETCH_INBOX;
+
         Button mButtonNewMail = (Button) findViewById(R.id.buttonNewEmail);
         mButtonNewMail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(MainActivity.this, NewMailActivity.class);
-                startActivity(i);
+                Intent intent = NewMailActivity.newIntent(MainActivity.this, null, email, password);
+                startActivity(intent);
             }
         });
 
@@ -33,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 //                Intent i = new Intent(MainActivity.this, EmailListActivity.class);
 //                startActivity(i);
-                Intent intent = EmailListActivity.newIntent(MainActivity.this, EmailDbSchema.InboxTable.NAME);
+                Intent intent = EmailListActivity.newIntent(MainActivity.this, EmailDbSchema.InboxTable.NAME, email, password);
                 startActivity(intent);
             }
         });
@@ -42,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         mButtonSent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = EmailListActivity.newIntent(MainActivity.this, EmailDbSchema.SentTable.NAME);
+                Intent intent = EmailListActivity.newIntent(MainActivity.this, EmailDbSchema.SentTable.NAME, email, password);
                 startActivity(intent);
 
             }

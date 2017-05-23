@@ -19,10 +19,12 @@ public class EmailListActivity extends SingleFragmentActivity implements EmailLi
     public static final String EXTRA_FOLDER_NAME = "com.iliaskomp.emailapp.foldername";
 
     private static String mFolderName;
+    private static String mEmail;
+    private static String mPassword;
 
     @Override
     protected Fragment createFragment() {
-        return EmailListFragment.newInstance(mFolderName);
+        return EmailListFragment.newInstance(mFolderName, mEmail, mPassword);
     }
 
     @Override
@@ -33,18 +35,20 @@ public class EmailListActivity extends SingleFragmentActivity implements EmailLi
     @Override
     public void onEmailSelected(EmailModel email) {
         if (findViewById(R.id.detail_fragment_container) == null) {
-            Intent intent = EmailPagerActivity.newIntent(this, email.getId());
+            Intent intent = EmailPagerActivity.newIntent(this, email.getId(), mEmail, mPassword);
             startActivity(intent);
         } else {
-            Fragment newDetail = EmailFragment.newInstance(email.getId());
+            Fragment newDetail = EmailFragment.newInstance(email.getId(), mEmail, mPassword);
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.detail_fragment_container, newDetail)
                     .commit();
         }
     }
 
-    public static Intent newIntent(Context context, String folderName) {
+    public static Intent newIntent(Context context, String folderName, String email, String password) {
         mFolderName = folderName;
+        mEmail = email;
+        mPassword = password;
 
         Intent intent = new Intent(context, EmailListActivity.class);
         intent.putExtra(EXTRA_FOLDER_NAME, folderName);

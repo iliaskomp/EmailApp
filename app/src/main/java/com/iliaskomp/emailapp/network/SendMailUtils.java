@@ -1,6 +1,6 @@
 package com.iliaskomp.emailapp.network;
 
-import com.iliaskomp.emailapp.utils.EmailCredentials;
+import com.iliaskomp.emailapp.utils.Config;
 
 import java.util.Properties;
 
@@ -16,32 +16,45 @@ import javax.mail.internet.MimeMessage;
 
 class SendMailUtils {
 
-    static Properties getProperties(String service) {
+    static Properties getProperties(String email) {
+        String service = getService(email);
         // Creating properties
         Properties props = new Properties();
 
         //Configuring properties
         switch (service) {
-            case "gmail": {
-                props.put("mail.smtp.host", "smtp.gmail.com");
-                props.put("mail.smtp.socketFactory.port", "465");
+            case Config.Gmail.DOMAIN_NAME: {
+                props.put("mail.smtp.host", Config.Gmail.SMTP_SERVER);
+                props.put("mail.smtp.socketFactory.port", Config.Gmail.SMTP_PORT);
                 props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
                 props.put("mail.smtp.auth", "true");
-                props.put("mail.smtp.port", "465");
+                props.put("mail.smtp.port", Config.Gmail.SMTP_PORT);
             }
             break;
+            case Config.Yahoo.DOMAIN_NAME: {
+                props.put("mail.smtp.host", Config.Yahoo.SMTP_SERVER);
+                props.put("mail.smtp.socketFactory.port", Config.Yahoo.SMTP_PORT);
+                props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+                props.put("mail.smtp.auth", "true");
+                props.put("mail.smtp.port", Config.Yahoo.SMTP_PORT);
+
+            }
         }
         return props;
     }
 
-    static MimeMessage createMimeMessage(Session session, String email, String recipient,
+    static String getService(String emailName) {
+        return  emailName.substring(emailName.indexOf("@") + 1);
+    }
+
+    static MimeMessage createMimeMessage(Session session, String emailName, String recipient,
                                          String subject, String message) throws MessagingException {
 
         //Creating MimeMessage object
         MimeMessage mm = new MimeMessage(session);
 
         //Setting sender address
-        mm.setFrom(new InternetAddress(EmailCredentials.EMAIL_FETCH_INBOX));
+        mm.setFrom(new InternetAddress(emailName));
         //Adding receiver
         mm.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
         //Adding subject

@@ -55,24 +55,32 @@ public class FetchMailUtils {
         return result;
     }
 
-    static Properties getProperties(String protocol) {
+    static Properties getProperties(String server, String protocol) {
         Properties properties = new Properties();
+        properties.put("mail.imap.host", server);
 
-        switch (protocol) {
-            case Config.Yahoo.IMAP_NAME:
-                properties.put("mail.imap.host", Config.Yahoo.IMAP_HOST);
+        switch (server) {
+            case Config.Gmail.IMAP_SERVER:
+                properties.put("mail.imap.port", Config.Gmail.IMAP_PORT);
+                break;
+            case Config.Yahoo.IMAP_SERVER:
                 properties.put("mail.imap.port", Config.Yahoo.IMAP_PORT);
                 break;
-            case Config.Yahoo.POP_NAME:
-                properties.put("mail.pop3.host", Config.Yahoo.POP_HOST);
-                properties.put("mail.pop3.port", Config.Yahoo.POP_PORT);
+            default:
+                properties.put("mail.imap.port", null);
                 break;
         }
-//      properties.put("mail.pop3.port", "995");
+
         properties.put(String.format("mail.%s.starttls.enable", protocol), "true");
 
         return properties;
     }
+
+    //returns null if no known service/service found
+    static String getServiceFromEmail (String email) {
+        return  email.substring(email.indexOf("@") + 1);
+    }
+
 
     static EmailModel buildEmailFromMessage(Message message) throws MessagingException, IOException {
         EmailModel email = new EmailModel();
@@ -87,5 +95,31 @@ public class FetchMailUtils {
         Log.d("FetchMailUtils", email.toString());
 
         return email;
+    }
+
+    static String getServerDomain(String domain, String protocol) {
+
+        switch (domain) {
+            case Config.Gmail.DOMAIN_NAME:
+                return  protocol.equals(Config.Name.IMAP) ?
+                        Config.Gmail.IMAP_SERVER : Config.Gmail.POP_SERVER;
+            case Config.Yahoo.DOMAIN_NAME:
+                return  protocol.equals(Config.Name.IMAP) ?
+                        Config.Yahoo.IMAP_SERVER : Config.Yahoo.POP_SERVER;
+            default:
+                return null;
+        }
+    }
+
+    public static String getSentFolderName(String domain) {
+
+        switch (domain) {
+            case Config.Gmail.DOMAIN_NAME:
+                return "[Gmail]/Sent Mail";
+            case Config.Yahoo.DOMAIN_NAME:
+                return "Sent";
+            default:
+                return null;
+        }
     }
 }

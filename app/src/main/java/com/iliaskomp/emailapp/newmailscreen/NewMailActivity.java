@@ -13,7 +13,6 @@ import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.models.EmailToSend;
 import com.iliaskomp.emailapp.models.InboxDB;
 import com.iliaskomp.emailapp.network.SendMail;
-import com.iliaskomp.emailapp.utils.EmailCredentials;
 
 import java.util.UUID;
 
@@ -23,6 +22,8 @@ import java.util.UUID;
 
 public class NewMailActivity extends AppCompatActivity{
     private static final String EXTRA_EMAIL_ID = "com.iliaskomp.email_id";
+    private static final String EXTRA_EMAIL_NAME = "com.iliaskomp.email_name";
+    private static final String EXTRA_PASSWORD = "com.iliaskomp.password";
 
     private EditText mEditTextSender;
     private EditText mEditTextRecipient;
@@ -36,6 +37,8 @@ public class NewMailActivity extends AppCompatActivity{
         setContentView(R.layout.activity_new_mail);
 
         UUID emailId = (UUID) getIntent().getSerializableExtra(EXTRA_EMAIL_ID);
+        final String emailName = getIntent().getStringExtra(EXTRA_EMAIL_NAME);
+        final String password = getIntent().getStringExtra(EXTRA_PASSWORD);
 
         mEditTextSender = (EditText) findViewById(R.id.editTextSender);
         mEditTextRecipient = (EditText) findViewById(R.id.editTextRecipient);
@@ -45,7 +48,7 @@ public class NewMailActivity extends AppCompatActivity{
         mButtonSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendEmail();
+                sendEmail(emailName, password);
             }
         });
 
@@ -57,10 +60,10 @@ public class NewMailActivity extends AppCompatActivity{
             mEditTextRecipient.setText(email.getSender());
             mEditTextSubject.setText("Re:" + email.getSubject());
         }
-        populateDataForTestPurposes();
+        populateDataForTestPurposes(emailName);
     }
 
-    private void sendEmail() {
+    private void sendEmail(String emailName, String password) {
         //Getting content for emailToSend
         String recipient = mEditTextRecipient.getText().toString().trim();
         String subject = mEditTextSubject.getText().toString().trim();
@@ -69,22 +72,26 @@ public class NewMailActivity extends AppCompatActivity{
         //Create SendMail object
         EmailToSend emailToSend = new EmailToSend(recipient, subject, message);
         SendMail sm = new SendMail(NewMailActivity.this, emailToSend);
-        sm.execute();
+        sm.execute(emailName, password);
     }
 
-    public static Intent newIntent(Context contextPackage) {
-        return new Intent(contextPackage, NewMailActivity.class);
-    }
-
-    public static Intent newIntent(Context contextPackage, UUID emailId) {
+    public static Intent newIntent(Context contextPackage, UUID emailId,  String email, String password) {
         Intent intent = new Intent(contextPackage, NewMailActivity.class);
         intent.putExtra(EXTRA_EMAIL_ID, emailId);
+        intent.putExtra(EXTRA_EMAIL_NAME, email);
+        intent.putExtra(EXTRA_PASSWORD, password);
         return intent;
     }
 
-    private void populateDataForTestPurposes() {
-        mEditTextSender.setText(EmailCredentials.EMAIL_FETCH_INBOX);
-        mEditTextRecipient.setText("fhcrypto@yahoo.com");
+//    public static Intent newIntent(Context contextPackage, UUID emailId) {
+//        Intent intent = new Intent(contextPackage, NewMailActivity.class);
+//        intent.putExtra(EXTRA_EMAIL_ID, emailId);
+//        return intent;
+//    }
+
+    private void populateDataForTestPurposes(String emailName) {
+        mEditTextSender.setText(emailName);
+        mEditTextRecipient.setText("fhcrypto@gmail.com");
         mEditTextSubject.setText("email test subject");
         mEditTextMessage.setText("email test message");
     }

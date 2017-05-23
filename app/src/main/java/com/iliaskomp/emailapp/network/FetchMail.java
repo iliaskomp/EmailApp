@@ -11,8 +11,6 @@ import com.iliaskomp.emailapp.database.EmailDbSchema;
 import com.iliaskomp.emailapp.models.EmailDB;
 import com.iliaskomp.emailapp.models.InboxDB;
 import com.iliaskomp.emailapp.models.SentDB;
-import com.iliaskomp.emailapp.utils.Config;
-import com.iliaskomp.emailapp.utils.EmailCredentials;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -59,27 +57,41 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
     }
 
     @Override
-    protected EmailDB doInBackground(String... folder) throws NullPointerException {
+    protected EmailDB doInBackground(String... parameters) throws NullPointerException {
         Log.d(LOG_TAG, "doInBackground starts");
         EmailDB db = null;
 
+        String folderName = parameters[0];
+        String email = parameters[1];
+        String password = parameters[2];
+
+        String domain = FetchMailUtils.getServiceFromEmail(email); // e.g. gmail.com
+        String server = FetchMailUtils.getServerDomain(domain, mProtocol); //e.g. imap.gmail.com
+
         // check if needing to fetch inbox or sent folder for email db
-        if (folder[0].equals(EmailDbSchema.InboxTable.NAME)) {
+        if (folderName.equals(EmailDbSchema.InboxTable.NAME)) {
             db = InboxDB.get(mContext);
-        } else if (folder[0].equals(EmailDbSchema.SentTable.NAME)) {
+        } else if (folderName.equals(EmailDbSchema.SentTable.NAME)) {
             db = SentDB.get(mContext);
         }
 
         //create properties field
-        Properties properties = FetchMailUtils.getProperties(mProtocol);
+        Properties properties = FetchMailUtils.getProperties(server, mProtocol);
         Session emailSession = Session.getInstance(properties); //Session.getDefaultInstance(properties);
 
         try {
-            //create the POP3 store object and connect with the pop server
+            //create the IMAP/POP3 store object and connect with the pop server
             Store store = emailSession.getStore(mProtocol + "s");
-            String host = mProtocol.equals(Config.Yahoo.IMAP_NAME) ? Config.Yahoo.IMAP_HOST : Config.Yahoo.POP_HOST;
+//
+//            String host;
+//            if (mProtocol.equals(Config.Name.IMAP)) {
+//                host = Config.Yahoo.IMAP_SERVER;
+//            }
+//            else {
+//                host = Config.Yahoo.POP_SERVER
+//            };
 
-            store.connect(host, EmailCredentials.EMAIL_FETCH_INBOX, EmailCredentials.PASSWORD_FETCH_INBOX);
+            store.connect(server, email, password);
 
             Folder[] folders = store.getDefaultFolder().list("*");
             for (Folder folder1 : folders) {
@@ -90,10 +102,10 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
 
             //create the folder object and open it
             Folder emailFolder = null;
-            if (folder[0].equals(EmailDbSchema.InboxTable.NAME)) {
+            if (folderName.equals(EmailDbSchema.InboxTable.NAME)) {
                 emailFolder = store.getFolder("INBOX");
-            } else if (folder[0].equals(EmailDbSchema.SentTable.NAME)) {
-                emailFolder = store.getFolder("[Gmail]/Sent Mail");
+            } else if (folderName.equals(EmailDbSchema.SentTable.NAME)) {
+                emailFolder = store.getFolder(FetchMailUtils.getSentFolderName(domain));
             }
 
             if (db != null) {

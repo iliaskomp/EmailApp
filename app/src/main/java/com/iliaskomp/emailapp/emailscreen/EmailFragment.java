@@ -28,9 +28,13 @@ import java.util.UUID;
 
 public class EmailFragment extends Fragment {
     private static final String ARG_EMAIL_ID = "email_id";
+    private static final String ARG_EMAIL_NAME = "email_name";
+    private static final String ARG_EMAIL_PASSWORD = "email_password";
     private static final String DIALOG_HEADERS = "HeadersDialog";
-    
+
     private EmailModel mEmail;
+    private String mEmailName;
+    private String mEmailPassword;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,6 +42,9 @@ public class EmailFragment extends Fragment {
         setHasOptionsMenu(true);
 
         UUID emailId = (UUID) getArguments().getSerializable(ARG_EMAIL_ID);
+        mEmailName = getArguments().getString(ARG_EMAIL_NAME);
+        mEmailPassword = getArguments().getString(ARG_EMAIL_PASSWORD);
+
         mEmail = InboxDB.get(getActivity()).getEmailFromId(emailId);
     }
 
@@ -80,16 +87,18 @@ public class EmailFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_new_email:
-                Intent intent = NewMailActivity.newIntent(getActivity(), mEmail.getId());
+                Intent intent = NewMailActivity.newIntent(getActivity(), mEmail.getId(), mEmailName, mEmailPassword);
                 startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    public static EmailFragment newInstance(UUID emailId) {
+    public static EmailFragment newInstance(UUID emailId, String email, String password) {
         Bundle args = new Bundle();
         args.putSerializable(ARG_EMAIL_ID, emailId);
+        args.putSerializable(ARG_EMAIL_NAME, email);
+        args.putSerializable(ARG_EMAIL_PASSWORD, password);
 
         EmailFragment fragment = new EmailFragment();
         fragment.setArguments(args);

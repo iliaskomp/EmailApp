@@ -22,6 +22,8 @@ import java.util.UUID;
 
 public class EmailPagerActivity extends AppCompatActivity {
     private static final String EXTRA_EMAIL_ID = "com.iliaskomp.email_id";
+    private static final String EXTRA_EMAIL_NAME = "com.iliaskomp.email_name";
+    private static final String EXTRA_EMAIL_PASSWORD = "com.iliaskomp.email_password";
 
     private ViewPager mViewPager;
     private List<EmailModel> mEmails;
@@ -33,6 +35,8 @@ public class EmailPagerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_email_pager);
 
         UUID emailId = (UUID) getIntent().getSerializableExtra(EXTRA_EMAIL_ID);
+        final String emailName = getIntent().getStringExtra(EXTRA_EMAIL_NAME);
+        final String password = getIntent().getStringExtra(EXTRA_EMAIL_PASSWORD);
 
         mViewPager = (ViewPager) findViewById(R.id.activity_email_pager_view_pager);
         mEmails = InboxDB.get(this).getEmails();
@@ -42,7 +46,7 @@ public class EmailPagerActivity extends AppCompatActivity {
             @Override
             public Fragment getItem(int position) {
                 EmailModel email = mEmails.get(position);
-                return EmailFragment.newInstance(email.getId());
+                return EmailFragment.newInstance(email.getId(), emailName, password);
             }
 
             @Override
@@ -60,9 +64,12 @@ public class EmailPagerActivity extends AppCompatActivity {
     }
 
 
-    public static Intent newIntent(Context contextPackage, UUID emailId) {
+    public static Intent newIntent(Context contextPackage, UUID emailId, String emailName, String password) {
         Intent intent = new Intent(contextPackage, EmailPagerActivity.class);
         intent.putExtra(EXTRA_EMAIL_ID, emailId);
+        intent.putExtra(EXTRA_EMAIL_NAME, emailName);
+        intent.putExtra(EXTRA_EMAIL_PASSWORD, password);
+
         return intent;
     }
 }
