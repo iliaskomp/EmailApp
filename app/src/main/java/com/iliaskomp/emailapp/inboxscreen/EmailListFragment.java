@@ -130,7 +130,7 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
 //    }
 
     private void fetchMail() {
-        FetchMail fetchMail = new FetchMail(getActivity(), Config.IMAP_NAME);
+        FetchMail fetchMail = new FetchMail(getActivity(), Config.Yahoo.IMAP_NAME);
         fetchMail.delegate = this;
         fetchMail.execute(mFolderName);
     }

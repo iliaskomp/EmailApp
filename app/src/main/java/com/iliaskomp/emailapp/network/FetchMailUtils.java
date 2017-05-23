@@ -59,13 +59,13 @@ public class FetchMailUtils {
         Properties properties = new Properties();
 
         switch (protocol) {
-            case Config.IMAP_NAME:
-                properties.put("mail.imap.host", Config.IMAP_HOST);
-                properties.put("mail.imap.port", Config.IMAP_PORT);
+            case Config.Yahoo.IMAP_NAME:
+                properties.put("mail.imap.host", Config.Yahoo.IMAP_HOST);
+                properties.put("mail.imap.port", Config.Yahoo.IMAP_PORT);
                 break;
-            case Config.POP_NAME:
-                properties.put("mail.pop3.host", Config.POP_HOST);
-                properties.put("mail.pop3.port", Config.POP_PORT);
+            case Config.Yahoo.POP_NAME:
+                properties.put("mail.pop3.host", Config.Yahoo.POP_HOST);
+                properties.put("mail.pop3.port", Config.Yahoo.POP_PORT);
                 break;
         }
 //      properties.put("mail.pop3.port", "995");

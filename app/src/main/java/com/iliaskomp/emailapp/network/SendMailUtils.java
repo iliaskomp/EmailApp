@@ -41,7 +41,7 @@ class SendMailUtils {
         MimeMessage mm = new MimeMessage(session);
 
         //Setting sender address
-        mm.setFrom(new InternetAddress(EmailCredentials.EMAIL));
+        mm.setFrom(new InternetAddress(EmailCredentials.EMAIL_FETCH_INBOX));
         //Adding receiver
         mm.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
         //Adding subject

@@ -83,7 +83,7 @@ public class NewMailActivity extends AppCompatActivity{
     }
 
     private void populateDataForTestPurposes() {
-        mEditTextSender.setText(EmailCredentials.EMAIL);
+        mEditTextSender.setText(EmailCredentials.EMAIL_FETCH_INBOX);
         mEditTextRecipient.setText("fhcrypto@yahoo.com");
         mEditTextSubject.setText("email test subject");
         mEditTextMessage.setText("email test message");

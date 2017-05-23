@@ -71,12 +71,12 @@ public class SendMail extends AsyncTask<Void, Void, Void>{
         mSession = Session.getDefaultInstance(props, new javax.mail.Authenticator(){
             //Authenticating the password
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(EmailCredentials.EMAIL, EmailCredentials.PASSWORD);
+                return new PasswordAuthentication(EmailCredentials.EMAIL_FETCH_INBOX, EmailCredentials.PASSWORD_FETCH_INBOX);
             }
         });
 
         try {
-            MimeMessage mm = SendMailUtils.createMimeMessage(mSession, EmailCredentials.EMAIL,
+            MimeMessage mm = SendMailUtils.createMimeMessage(mSession, EmailCredentials.EMAIL_FETCH_INBOX,
                     mRecipient, mSubject, mMessage);
 
             EmailEncryptionSender ees = new EmailEncryptionSender();

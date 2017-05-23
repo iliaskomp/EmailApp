@@ -63,6 +63,7 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
         Log.d(LOG_TAG, "doInBackground starts");
         EmailDB db = null;
 
+        // check if needing to fetch inbox or sent folder for email db
         if (folder[0].equals(EmailDbSchema.InboxTable.NAME)) {
             db = InboxDB.get(mContext);
         } else if (folder[0].equals(EmailDbSchema.SentTable.NAME)) {
@@ -76,9 +77,9 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
         try {
             //create the POP3 store object and connect with the pop server
             Store store = emailSession.getStore(mProtocol + "s");
-            String host = mProtocol.equals(Config.IMAP_NAME) ? Config.IMAP_HOST : Config.POP_HOST;
+            String host = mProtocol.equals(Config.Yahoo.IMAP_NAME) ? Config.Yahoo.IMAP_HOST : Config.Yahoo.POP_HOST;
 
-            store.connect(host, EmailCredentials.EMAIL, EmailCredentials.PASSWORD);
+            store.connect(host, EmailCredentials.EMAIL_FETCH_INBOX, EmailCredentials.PASSWORD_FETCH_INBOX);
 
             Folder[] folders = store.getDefaultFolder().list("*");
             for (Folder folder1 : folders) {
