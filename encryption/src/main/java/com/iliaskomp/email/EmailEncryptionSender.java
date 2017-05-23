@@ -15,7 +15,7 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
-import static com.iliaskomp.email.HeaderFields.FirstInteractionState.FIRST_TIME_SEND;
+import static com.iliaskomp.email.HeaderFields.FirstInteractionState.SENDER_FIRST_TIME;
 import static com.iliaskomp.email.HeaderFields.HeaderX.PUBLIC_KEY_SENDER;
 import static com.iliaskomp.email.HeaderFields.HeaderX.STATE;
 
@@ -66,7 +66,7 @@ public class EmailEncryptionSender {
 //            formattedMessage.setText(FIRST_TIME_MESSAGE + "\n\n" + message.getContent().toString()); //TODO pictures etc?
 
             // Sender encodes his public key in order to send it to recipient
-            formattedMessage.addHeader(STATE, FIRST_TIME_SEND);
+            formattedMessage.addHeader(STATE, SENDER_FIRST_TIME);
             formattedMessage.addHeader(PUBLIC_KEY_SENDER, DHHelper.publicKeyToString(mKeyPair.getPublic()));
         } catch (MessagingException e) {
             e.printStackTrace();
@@ -74,6 +74,8 @@ public class EmailEncryptionSender {
 
         return formattedMessage;
     }
+
+
 
     public KeyPair getKeyPair() {
         return mKeyPair;

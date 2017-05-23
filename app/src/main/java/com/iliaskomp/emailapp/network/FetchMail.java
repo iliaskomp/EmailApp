@@ -23,8 +23,6 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
 
-import static android.R.id.message;
-
 /**
  * Created by iliaskomp on 11/02/17.
  */
@@ -115,16 +113,25 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
             if (db.getEmailCount() == 0) {
                 Message[] messages = emailFolder.getMessages();
                 for (Message message : messages) {
-                    //TODO check for encryption library headers here
+                    //TODO IMPORTANT check for encryption library headers here
                     db.addEmail(FetchMailUtils.buildEmailFromMessage(message));
                     Log.d(LOG_TAG, "DB email count: " + db.getEmailCount());
                 }
             } else if (db.getEmailCount() < emailFolder.getMessageCount()) {
-                EmailEncryptionRecipient.isEncryptionHeader(message);
+
                 // TODO What happens if I add delete functionality
                 for (int i = db.getEmailCount(); i < emailFolder.getMessageCount(); i++) {
                     Message message = emailFolder.getMessage(i+1);
-                    db.addEmail(FetchMailUtils.buildEmailFromMessage(message));
+
+                    // TODO IMPORTANT here check if recipient has library
+                    String headerState = EmailEncryptionRecipient.getHeaderState(message);
+                    Log.d(LOG_TAG, "Header State: " + headerState);
+
+                    if (headerState == null) {
+                        db.addEmail(FetchMailUtils.buildEmailFromMessage(message));
+                    } else {
+
+                    }
                 }
             }
 //================================================================================================

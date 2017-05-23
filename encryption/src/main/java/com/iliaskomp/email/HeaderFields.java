@@ -8,7 +8,7 @@ public class HeaderFields {
     // SENDER ======================================================================
 
     // Header names
-    // possible states: 1. FIRST_TIME_SEND, STATE_FIRST_TIME_RECEIVE, STATE_SENDER_RECEIVES_KEY, STATE_RECIPIENT_RECEIVES_ENCRYPTED_EMAIL
+    // possible states: 1. SENDER_FIRST_TIME, STATE_FIRST_TIME_RECEIVE, STATE_SENDER_RECEIVES_KEY, STATE_RECIPIENT_RECEIVES_ENCRYPTED_EMAIL
     public static final class HeaderX {
         public static final String STATE = "X-komp-state";
         public static final String PUBLIC_KEY_SENDER = "X-komp-sender-public-key";
@@ -19,10 +19,9 @@ public class HeaderFields {
     // Header fields
     // SCENARIO 1: FIRST INTERACTION
     public static final class FirstInteractionState {
-        public static final String FIRST_TIME_SEND = "first_interaction_sender_sends";
-        public static final String FIRST_TIME_RECEIVE = "first_time_receive";
-        public static final String SENDER_RECEIVES_KEY = "sender_receives_key";
-        public static final String RECIPIENT_RECEIVES_ENCRYPTED_EMAIL = "recipient_receives_encrypted_email";
+        public static final String SENDER_FIRST_TIME = "first_interaction_sender_first_time"; // sender sends his public key
+        public static final String RECIPIENT_FIRST_TIME = "first_interaction_recipient_first_time"; // sender receives recipient's key
+        public static final String SENDER_SECOND_TIME = "first_interaction_sender_second_time"; // sender sends encrypted email
     }
 
     // SCENARIO 2: SECOND+ INTERACTION
@@ -34,5 +33,4 @@ public class HeaderFields {
     public static final class RecipientNoLibraryState {
         public static final String RECIPIENT_ANSWER = "recipient_no_library";
     }
-
 }
