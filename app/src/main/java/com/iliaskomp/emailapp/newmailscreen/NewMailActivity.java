@@ -10,7 +10,6 @@ import android.widget.EditText;
 
 import com.iliaskomp.emailapp.R;
 import com.iliaskomp.emailapp.models.EmailModel;
-import com.iliaskomp.emailapp.models.EmailToSend;
 import com.iliaskomp.emailapp.models.InboxDB;
 import com.iliaskomp.emailapp.network.SendMail;
 
@@ -40,6 +39,7 @@ public class NewMailActivity extends AppCompatActivity{
         final String emailName = getIntent().getStringExtra(EXTRA_EMAIL_NAME);
         final String password = getIntent().getStringExtra(EXTRA_PASSWORD);
 
+
         mEditTextSender = (EditText) findViewById(R.id.editTextSender);
         mEditTextRecipient = (EditText) findViewById(R.id.editTextRecipient);
         mEditTextSubject = (EditText) findViewById(R.id.editTextSubject);
@@ -60,7 +60,9 @@ public class NewMailActivity extends AppCompatActivity{
             mEditTextRecipient.setText(email.getSender());
             mEditTextSubject.setText("Re:" + email.getSubject());
         }
+
         populateDataForTestPurposes(emailName);
+
     }
 
     private void sendEmail(String emailName, String password) {
@@ -70,9 +72,8 @@ public class NewMailActivity extends AppCompatActivity{
         String message = mEditTextMessage.getText().toString().trim();
 
         //Create SendMail object
-        EmailToSend emailToSend = new EmailToSend(recipient, subject, message);
-        SendMail sm = new SendMail(NewMailActivity.this, emailToSend);
-        sm.execute(emailName, password);
+        SendMail sm = new SendMail(NewMailActivity.this);
+        sm.execute(emailName, password, recipient, subject, message);
     }
 
     public static Intent newIntent(Context contextPackage, UUID emailId,  String email, String password) {
@@ -91,7 +92,7 @@ public class NewMailActivity extends AppCompatActivity{
 
     private void populateDataForTestPurposes(String emailName) {
         mEditTextSender.setText(emailName);
-        mEditTextRecipient.setText("fhcrypto@gmail.com");
+//        mEditTextRecipient.setText("fhcrypto@gmail.com");
         mEditTextSubject.setText("email test subject");
         mEditTextMessage.setText("email test message");
     }

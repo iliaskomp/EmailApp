@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 import android.widget.Toast;
 
 import com.iliaskomp.email.EmailEncryptionSender;
-import com.iliaskomp.emailapp.models.EmailToSend;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -30,18 +29,10 @@ import javax.mail.internet.MimeMessage;
 public class SendMail extends AsyncTask<String, Void, Void>{
 
     private Context mContext;
-
-    private String mRecipient;
-    private String mSubject;
-    private String mMessage;
-
     private ProgressDialog mProgressDialog;
 
-    public SendMail(Context context, EmailToSend emailToSend) {
+    public SendMail(Context context) {
         mContext = context;
-        this.mRecipient = emailToSend.getRecipient();
-        this.mSubject = emailToSend.getSubject();
-        this.mMessage = emailToSend.getMessage();
     }
 
     @Override
@@ -63,8 +54,12 @@ public class SendMail extends AsyncTask<String, Void, Void>{
 
     @Override
     protected Void doInBackground(String... parameters) {
+
         final String emailName = parameters[0];
         final String password = parameters[1];
+        final String recipient = parameters[2];
+        final String subject = parameters[3];
+        final String message = parameters[4];
 
         Properties props = SendMailUtils.getProperties(emailName);
 
@@ -78,7 +73,7 @@ public class SendMail extends AsyncTask<String, Void, Void>{
 
         try {
             MimeMessage mm = SendMailUtils.createMimeMessage(session, emailName,
-                    mRecipient, mSubject, mMessage);
+                    recipient, subject, message);
 
 
             //============================================================//
