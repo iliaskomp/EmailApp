@@ -31,12 +31,9 @@ public class EmailEncryptionSender {
             "establish encrypted communication. Otherwise, either install the library or contact" +
             "the sender for an unencrypted email";
 
-
-    // Member variables
     private KeyPair mKeyPair;
 
     public EmailEncryptionSender() {
-
         try {
             DHAlgorithm dh = new DHAlgorithm();
             mKeyPair = dh.generateKeyPair();
@@ -46,35 +43,32 @@ public class EmailEncryptionSender {
         }
     }
 
+    // TODO First need to check db for email. No need for message here.
     // TODO multipart messages??
     // Generate message for the first communication between sender/recipient
     // Constructs a message with generic info as message and public key as header.
-    // On the
     public MimeMessage getEmailFirstTimeSending(MimeMessage message, Session session)
             throws InvalidKeySpecException, InvalidAlgorithmParameterException,
-            NoSuchAlgorithmException, InvalidParameterSpecException, IOException {
+            NoSuchAlgorithmException, InvalidParameterSpecException, IOException, MessagingException {
 
         MimeMessage formattedMessage = new MimeMessage(session); //TODO message or mimemessage
 
-        try {
-            formattedMessage.setFrom(message.getFrom()[0]);
-            formattedMessage.setRecipient(Message.RecipientType.TO, message.getAllRecipients()[0]);
-            formattedMessage.setSentDate(message.getSentDate());
-            formattedMessage.setSubject(message.getSubject());
+        formattedMessage.setFrom(message.getFrom()[0]);
+        formattedMessage.setRecipient(Message.RecipientType.TO, message.getAllRecipients()[0]);
+        formattedMessage.setSentDate(message.getSentDate());
+        formattedMessage.setSubject(message.getSubject());
+        formattedMessage.setText(FIRST_TIME_MESSAGE);
 
-            formattedMessage.setText(FIRST_TIME_MESSAGE);
-//            formattedMessage.setText(FIRST_TIME_MESSAGE + "\n\n" + message.getContent().toString()); //TODO pictures etc?
-
-            // Sender encodes his public key in order to send it to recipient
-            formattedMessage.addHeader(STATE, SENDER_FIRST_TIME);
-            formattedMessage.addHeader(PUBLIC_KEY_SENDER, DHHelper.publicKeyToString(mKeyPair.getPublic()));
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
+        // Sender encodes encryption state and his public key in order to send it to recipient
+        formattedMessage.addHeader(STATE, SENDER_FIRST_TIME);
+        formattedMessage.addHeader(PUBLIC_KEY_SENDER, DHHelper.publicKeyToString(mKeyPair.getPublic()));
 
         return formattedMessage;
     }
 
+
+
+//            formattedMessage.setText(FIRST_TIME_MESSAGE + "\n\n" + message.getContent().toString()); //TODO pictures etc?
 
 
     public KeyPair getKeyPair() {

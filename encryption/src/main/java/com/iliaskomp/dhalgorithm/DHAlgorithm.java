@@ -46,16 +46,16 @@ public class DHAlgorithm {
 		// generate DH parameters
 		DHParameterSpec kp = generateParameters();
 		BigInteger p = kp.getP();
-		BigInteger g = kp.getG();	
-		
+		BigInteger g = kp.getG();
+
 		// generates public/private key from p, g
-		return generateKeyPairFromParameters(p, g);	
+		return generateKeyPairFromParameters(p, g);
 	}
-	
+
 	// returns keypair kp.getPublic(), kp.getPrivate()
-	public KeyPair generateKeyPairFromParameters(BigInteger p, BigInteger g)
+	private KeyPair generateKeyPairFromParameters(BigInteger p, BigInteger g)
 			  throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeySpecException {
-		  
+
 		    KeyPairGenerator kpg = KeyPairGenerator.getInstance("DH");
 
 		    DHParameterSpec param = new DHParameterSpec(p, g);
@@ -65,19 +65,19 @@ public class DHAlgorithm {
 		    KeyFactory kfactory = KeyFactory.getInstance("DH");
 
 //		    DHPublicKeySpec kspec = (DHPublicKeySpec) kfactory.getKeySpec(kp.getPublic(),  DHPublicKeySpec.class);
-		    		    
+
 		    return kp;
 	  }
-	
+
     public SecretKey agreeSecretKey(PrivateKey privateKeySelf, PublicKey publicKeyOther)
     		throws NoSuchAlgorithmException, InvalidKeyException, IllegalStateException {
-    	
+
     	KeyAgreement keyAgreement = KeyAgreement.getInstance("DH");
     	keyAgreement.init(privateKeySelf);
-    
+
     	// Computes the KeyAgreement
     	keyAgreement.doPhase(publicKeyOther, true);
-            
+
         // Generates the shared secret
         byte[] secret = keyAgreement.generateSecret();
         // === Generates an AES key ===
@@ -87,37 +87,34 @@ public class DHAlgorithm {
         MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
         byte[] keyEncoded = Arrays.copyOf(sha256.digest(secret), AES_KEY_SIZE / Byte.SIZE);
 
-        SecretKey secretKey = new SecretKeySpec(keyEncoded, "AES");
-
-        return secretKey;
+        return new SecretKeySpec(keyEncoded, "AES");
     }
 
 	// ============================================= HELPER ======================================================
-	
+
 	//    p = dhSpec.getP();;
 	//    g = dhSpec.getG();
 	private DHParameterSpec generateParameters(int bits) throws NoSuchAlgorithmException, InvalidParameterSpecException {
-		
+
 		AlgorithmParameterGenerator generator = AlgorithmParameterGenerator.getInstance("DH");
 		generator.init(bits);
-		
+
 //		AlgorithmParameters params = generator.generateParameters();
 //	    DHParameterSpec dhSpec = (DHParameterSpec) params.getParameterSpec(DHParameterSpec.class);
 //		System.out.println("G: " + dhSpec.getG() + "\nP: " + dhSpec.getP());
 
-		DHParameterSpec dhSpec = new DHParameterSpec(pParameter, gParameter);
-		return dhSpec;
-	    
+		return new DHParameterSpec(pParameter, gParameter);
+
 	}
-	
+
 	// Default 1024 bits
 	private DHParameterSpec generateParameters() throws NoSuchAlgorithmException, InvalidParameterSpecException {
 		return generateParameters(DH_PARAMETERS_SIZE);
-	    
+
 	}
 
 	// KeyAgreement =====================================
-	
+
 //	public void initKeyAgreement(KeyAgreement keyAgreement, PrivateKey privateKey)
 //			throws NoSuchAlgorithmException, InvalidKeyException {
 //		keyAgreement.init(privateKey);

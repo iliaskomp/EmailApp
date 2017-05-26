@@ -80,6 +80,8 @@ public class SendMail extends AsyncTask<String, Void, Void>{
             MimeMessage mm = SendMailUtils.createMimeMessage(mSession, emailName,
                     mRecipient, mSubject, mMessage);
 
+
+            //============================================================//
             EmailEncryptionSender ees = new EmailEncryptionSender();
             Message mm2 = null;
 
