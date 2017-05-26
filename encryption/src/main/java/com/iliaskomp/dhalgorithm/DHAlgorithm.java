@@ -53,7 +53,7 @@ public class DHAlgorithm {
 	}
 
 	// returns keypair kp.getPublic(), kp.getPrivate()
-	private KeyPair generateKeyPairFromParameters(BigInteger p, BigInteger g)
+	public KeyPair generateKeyPairFromParameters(BigInteger p, BigInteger g)
 			  throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeySpecException {
 
 		    KeyPairGenerator kpg = KeyPairGenerator.getInstance("DH");

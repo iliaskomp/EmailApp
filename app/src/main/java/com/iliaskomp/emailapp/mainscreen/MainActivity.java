@@ -20,8 +20,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // retrieve user email/password (static dummy currently)
-        final String email = EmailCredentials.EMAIL_FETCH_INBOX;
-        final String password = EmailCredentials.PASSWORD_FETCH_INBOX;
+        final String email = EmailCredentials.EMAIL_SEND;
+        final String password = EmailCredentials.PASSWORD_SEND;
 
         Button mButtonNewMail = (Button) findViewById(R.id.buttonNewEmail);
         mButtonNewMail.setOnClickListener(new View.OnClickListener() {

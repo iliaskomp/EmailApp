@@ -31,23 +31,31 @@ public class EmailEncryptionSender {
             "establish encrypted communication. Otherwise, either install the library or contact" +
             "the sender for an unencrypted email";
 
-    private KeyPair mKeyPair;
+//    private KeyPair mKeyPair;
 
     public EmailEncryptionSender() {
+
+    }
+
+    public KeyPair createKeyPair() {
+        KeyPair keyPair = null;
         try {
             DHAlgorithm dh = new DHAlgorithm();
-            mKeyPair = dh.generateKeyPair();
+            keyPair = dh.generateKeyPair();
         } catch (NoSuchAlgorithmException | InvalidParameterSpecException |
                 InvalidAlgorithmParameterException | InvalidKeySpecException e) {
             e.printStackTrace();
         }
+
+        return keyPair;
     }
 
     // TODO First need to check db for email. No need for message here.
     // TODO multipart messages??
+    // TODO IMPORTANT remove session as parameter?
     // Generate message for the first communication between sender/recipient
     // Constructs a message with generic info as message and public key as header.
-    public MimeMessage getEmailFirstTimeSending(MimeMessage message, Session session)
+    public MimeMessage getEmailFirstTimeSending(MimeMessage message, Session session, KeyPair keyPairSender)
             throws InvalidKeySpecException, InvalidAlgorithmParameterException,
             NoSuchAlgorithmException, InvalidParameterSpecException, IOException, MessagingException {
 
@@ -61,7 +69,7 @@ public class EmailEncryptionSender {
 
         // Sender encodes encryption state and his public key in order to send it to recipient
         formattedMessage.addHeader(STATE, SENDER_FIRST_TIME);
-        formattedMessage.addHeader(PUBLIC_KEY_SENDER, DHHelper.publicKeyToString(mKeyPair.getPublic()));
+        formattedMessage.addHeader(PUBLIC_KEY_SENDER, DHHelper.publicKeyToString(keyPairSender.getPublic()));
 
         return formattedMessage;
     }
@@ -71,7 +79,7 @@ public class EmailEncryptionSender {
 //            formattedMessage.setText(FIRST_TIME_MESSAGE + "\n\n" + message.getContent().toString()); //TODO pictures etc?
 
 
-    public KeyPair getKeyPair() {
-        return mKeyPair;
-    }
+//    public KeyPair getKeyPair() {
+//        return mKeyPair;
+//    }
 }

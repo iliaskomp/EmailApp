@@ -42,9 +42,9 @@ class SendMailUtils {
         }
         return props;
     }
-
+    // e.g. return example.com from test@example.com
     static String getService(String emailName) {
-        return  emailName.substring(emailName.indexOf("@") + 1);
+        return emailName.substring(emailName.indexOf("@") + 1);
     }
 
     static MimeMessage createMimeMessage(Session session, String emailName, String recipient,

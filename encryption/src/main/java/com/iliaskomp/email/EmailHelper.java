@@ -18,4 +18,9 @@ public class EmailHelper {
         }
         return headersMap;
     }
+
+//    public static MimeMessage createMimeMessage(String from, String to, String date,
+//                                                String subject, String text) {
+//
+//    }
 }

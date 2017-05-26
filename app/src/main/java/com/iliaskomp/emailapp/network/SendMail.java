@@ -10,6 +10,7 @@ import com.iliaskomp.emailapp.models.EmailToSend;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
@@ -29,7 +30,6 @@ import javax.mail.internet.MimeMessage;
 public class SendMail extends AsyncTask<String, Void, Void>{
 
     private Context mContext;
-    private Session mSession;
 
     private String mRecipient;
     private String mSubject;
@@ -69,7 +69,7 @@ public class SendMail extends AsyncTask<String, Void, Void>{
         Properties props = SendMailUtils.getProperties(emailName);
 
         //Creating a new session
-        mSession = Session.getDefaultInstance(props, new javax.mail.Authenticator(){
+        Session session = Session.getDefaultInstance(props, new javax.mail.Authenticator(){
             //Authenticating the password
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(emailName, password);
@@ -77,16 +77,23 @@ public class SendMail extends AsyncTask<String, Void, Void>{
         });
 
         try {
-            MimeMessage mm = SendMailUtils.createMimeMessage(mSession, emailName,
+            MimeMessage mm = SendMailUtils.createMimeMessage(session, emailName,
                     mRecipient, mSubject, mMessage);
 
 
             //============================================================//
             EmailEncryptionSender ees = new EmailEncryptionSender();
+
+            // if recipient exists in database
+            // TODO get public key, encrypt message with it and send it
+
+            // if recipient doesn't exist, create key pair and send first message with public key
+            KeyPair keyPairSender = ees.createKeyPair();
             Message mm2 = null;
 
             try {
-                mm2 = ees.getEmailFirstTimeSending(mm, mSession);
+                mm2 = ees.getEmailFirstTimeSending(mm, session, keyPairSender);
+
             } catch (InvalidKeySpecException | InvalidAlgorithmParameterException
                     | InvalidParameterSpecException | NoSuchAlgorithmException | IOException e) {
                 e.printStackTrace();

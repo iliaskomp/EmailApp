@@ -19,9 +19,9 @@ public class HeaderFields {
     // Header fields
     // SCENARIO 1: FIRST INTERACTION
     public static final class FirstInteractionState {
-        public static final String SENDER_FIRST_TIME = "first_interaction_sender_first_time"; // sender sends his public key
+        public static final String SENDER_FIRST_TIME = "first_interaction_sender_first_time"; // recipient receives sender's public key
         public static final String RECIPIENT_FIRST_TIME = "first_interaction_recipient_first_time"; // sender receives recipient's key
-        public static final String SENDER_SECOND_TIME = "first_interaction_sender_second_time"; // sender sends encrypted email
+        public static final String SENDER_SECOND_TIME = "first_interaction_sender_second_time"; // recipient receives encrypted email
     }
 
     // SCENARIO 2: SECOND+ INTERACTION
