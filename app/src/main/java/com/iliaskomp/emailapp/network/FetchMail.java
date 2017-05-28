@@ -9,7 +9,7 @@ import android.widget.Toast;
 
 import com.iliaskomp.email.EmailEncryptionRecipient;
 import com.iliaskomp.email.HeaderFields;
-import com.iliaskomp.emailapp.database.EmailDbSchema;
+import com.iliaskomp.emailapp.database.email.EmailDbSchema;
 import com.iliaskomp.emailapp.models.EmailDB;
 import com.iliaskomp.emailapp.models.InboxDB;
 import com.iliaskomp.emailapp.models.SentDB;

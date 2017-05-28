@@ -16,7 +16,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.iliaskomp.emailapp.R;
-import com.iliaskomp.emailapp.database.EmailDbSchema;
+import com.iliaskomp.emailapp.database.email.EmailDbSchema;
 import com.iliaskomp.emailapp.models.EmailDB;
 import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.models.InboxDB;

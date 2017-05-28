@@ -1,10 +1,8 @@
-package com.iliaskomp.emailapp.database;
+package com.iliaskomp.emailapp.database.email;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
-import com.iliaskomp.emailapp.database.EmailDbSchema.SentTable;
 
 /**
  * Created by IliasKomp on 15/02/17.
@@ -20,15 +18,15 @@ public class SentBaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table " + SentTable.NAME + "(" +
+        db.execSQL("create table " + EmailDbSchema.SentTable.NAME + "(" +
                 " _id integer primary key autoincrement, " +
-                SentTable.Cols.UUID + ", " +
-                SentTable.Cols.SENDER + ", " +
-                SentTable.Cols.RECIPIENT + ", " +
-                SentTable.Cols.SUBJECT + ", " +
-                SentTable.Cols.MESSAGE + ", " +
-                SentTable.Cols.DATE + ", " +
-                SentTable.Cols.HEADERS +
+                EmailDbSchema.SentTable.Cols.UUID + ", " +
+                EmailDbSchema.SentTable.Cols.SENDER + ", " +
+                EmailDbSchema.SentTable.Cols.RECIPIENT + ", " +
+                EmailDbSchema.SentTable.Cols.SUBJECT + ", " +
+                EmailDbSchema.SentTable.Cols.MESSAGE + ", " +
+                EmailDbSchema.SentTable.Cols.DATE + ", " +
+                EmailDbSchema.SentTable.Cols.HEADERS +
                 ")"
         );
     }

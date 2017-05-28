@@ -1,4 +1,4 @@
-package com.iliaskomp.emailapp.database;
+package com.iliaskomp.emailapp.database.email;
 
 import android.database.Cursor;
 import android.database.CursorWrapper;

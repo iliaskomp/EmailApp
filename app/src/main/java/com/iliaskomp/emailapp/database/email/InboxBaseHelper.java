@@ -1,10 +1,8 @@
-package com.iliaskomp.emailapp.database;
+package com.iliaskomp.emailapp.database.email;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
-import com.iliaskomp.emailapp.database.EmailDbSchema.InboxTable;
 
 /**
  * Created by IliasKomp on 15/02/17.
@@ -20,15 +18,15 @@ public class InboxBaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table " + InboxTable.NAME + "(" +
+        db.execSQL("create table " + EmailDbSchema.InboxTable.NAME + "(" +
                 " _id integer primary key autoincrement, " +
-                InboxTable.Cols.UUID + ", " +
-                InboxTable.Cols.SENDER + ", " +
-                InboxTable.Cols.RECIPIENT + ", " +
-                InboxTable.Cols.SUBJECT + ", " +
-                InboxTable.Cols.MESSAGE + ", " +
-                InboxTable.Cols.DATE + ", " +
-                InboxTable.Cols.HEADERS +
+                EmailDbSchema.InboxTable.Cols.UUID + ", " +
+                EmailDbSchema.InboxTable.Cols.SENDER + ", " +
+                EmailDbSchema.InboxTable.Cols.RECIPIENT + ", " +
+                EmailDbSchema.InboxTable.Cols.SUBJECT + ", " +
+                EmailDbSchema.InboxTable.Cols.MESSAGE + ", " +
+                EmailDbSchema.InboxTable.Cols.DATE + ", " +
+                EmailDbSchema.InboxTable.Cols.HEADERS +
                 ")"
         );
     }

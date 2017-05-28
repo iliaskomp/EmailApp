@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.iliaskomp.emailapp.R;
-import com.iliaskomp.emailapp.database.EmailDbSchema;
+import com.iliaskomp.emailapp.database.email.EmailDbSchema;
 import com.iliaskomp.emailapp.inboxscreen.EmailListActivity;
 import com.iliaskomp.emailapp.newmailscreen.NewMailActivity;
 import com.iliaskomp.emailapp.utils.EmailCredentials;

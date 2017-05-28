@@ -5,9 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.iliaskomp.emailapp.database.InboxBaseHelper;
-import com.iliaskomp.emailapp.database.EmailCursorWrapper;
-import com.iliaskomp.emailapp.database.EmailDbSchema.InboxTable;
+import com.iliaskomp.emailapp.database.email.InboxBaseHelper;
+import com.iliaskomp.emailapp.database.email.EmailCursorWrapper;
+import com.iliaskomp.emailapp.database.email.EmailDbSchema.InboxTable;
 
 import java.util.ArrayList;
 import java.util.List;

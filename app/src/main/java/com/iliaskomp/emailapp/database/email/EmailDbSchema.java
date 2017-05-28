@@ -1,4 +1,4 @@
-package com.iliaskomp.emailapp.database;
+package com.iliaskomp.emailapp.database.email;
 
 /**
  * Created by IliasKomp on 15/02/17.
