@@ -24,11 +24,13 @@ import static com.iliaskomp.email.HeaderFields.HeaderX.STATE;
  */
 
 public class EmailEncryptionSender {
-
     // String messages
-    private static final String FIRST_TIME_MESSAGE = "This message is part of the encryption " +
-            "library. If you have it installed, then an automatic message will be sent to " +
-            "establish encrypted communication. Otherwise, either install the library or contact" +
+    private static final String FIRST_TIME_MESSAGE = "Step 1: This is an automated message to establish" +
+            " secret communication with ";
+
+    private static final String FIRST_TIME_MESSAGE_2 = "\n\nThis message is part of the encryption " +
+            "library. \n\nIf you have it installed, then an automatic message will be sent to " +
+            "establish encrypted communication. Otherwise, either install the library or contact " +
             "the sender for an unencrypted email";
 
 //    private KeyPair mKeyPair;
@@ -50,7 +52,7 @@ public class EmailEncryptionSender {
         return keyPair;
     }
 
-    // TODO First need to check db for email. No need for message here.
+    // TODO First need to check db for email. //No need for message here.
     // TODO multipart messages??
     // TODO IMPORTANT remove session as parameter?
     // Generate message for the first communication between sender/recipient
@@ -64,14 +66,22 @@ public class EmailEncryptionSender {
         formattedMessage.setFrom(message.getFrom()[0]);
         formattedMessage.setRecipient(Message.RecipientType.TO, message.getAllRecipients()[0]);
         formattedMessage.setSentDate(message.getSentDate());
-        formattedMessage.setSubject(message.getSubject());
-        formattedMessage.setText(FIRST_TIME_MESSAGE);
+        formattedMessage.setSubject(createSubjectFirstTime(message.getFrom()[0].toString()));
+        formattedMessage.setText(createFirstTimeMessage(message.getFrom()[0].toString()));
 
         // Sender encodes encryption state and his public key in order to send it to recipient
         formattedMessage.addHeader(STATE, SENDER_FIRST_TIME);
         formattedMessage.addHeader(PUBLIC_KEY_SENDER, DHHelper.publicKeyToString(keyPairSender.getPublic()));
 
         return formattedMessage;
+    }
+
+    private String createSubjectFirstTime(String emailAddress) {
+        return "Establishing secret key with " + emailAddress;
+    }
+
+    private String createFirstTimeMessage(String recipientEmail) {
+        return FIRST_TIME_MESSAGE + recipientEmail + "\n" + FIRST_TIME_MESSAGE_2;
     }
 
 

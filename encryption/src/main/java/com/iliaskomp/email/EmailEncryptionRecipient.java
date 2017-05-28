@@ -27,8 +27,8 @@ import static com.iliaskomp.email.HeaderFields.HeaderX.PUBLIC_KEY_SENDER;
 public class EmailEncryptionRecipient {
 
     // String messages
-    private static final String FIRST_TIME_MESSAGE = "This is an automated message to establish" +
-            "secret communication with other user by obtaining his/her public key.";
+    private static final String FIRST_TIME_MESSAGE = "Step 2: This is an automated message to establish" +
+            "secret communication with other";
 
     // if encryption state is not found, it returns null
     public String getHeaderState(Message message) throws MessagingException {
@@ -45,11 +45,11 @@ public class EmailEncryptionRecipient {
     public MimeMessage createMessageWithPublicKey(Message message, KeyPair keyPairRecipient) throws MessagingException {
         MimeMessage messageBack = new MimeMessage((MimeMessage) message);
 
-        messageBack.setFrom(message.getFrom()[0]);
-        messageBack.setRecipient(Message.RecipientType.TO, message.getAllRecipients()[0]);
+        messageBack.setFrom(message.getAllRecipients()[0]);
+        messageBack.setRecipient(Message.RecipientType.TO, message.getFrom()[0]);
         messageBack.setSentDate(message.getSentDate());
-        messageBack.setSubject(message.getSubject());
-        messageBack.setText(FIRST_TIME_MESSAGE);
+        messageBack.setSubject(createFirstTimeSubject(message.getAllRecipients()[0].toString())); //TODO check if it works
+        messageBack.setText(createFirstTimeMessage(message.getAllRecipients()[0].toString()));
 
         // Sender encodes encryption state and his public key in order to send it to recipient
         messageBack.addHeader(HeaderX.STATE, FirstInteractionState.RECIPIENT_FIRST_TIME);
@@ -78,5 +78,25 @@ public class EmailEncryptionRecipient {
             }
         }
         return null;
+    }
+
+
+
+    private String createFirstTimeSubject(String email) {
+
+        return "Establishing secret key with " + email;
+    }
+
+    private String createFirstTimeMessage(String email) {
+        StringBuilder messageSb = new StringBuilder();
+
+        messageSb.append(FIRST_TIME_MESSAGE)
+                .append(email)
+                .append("by obtaining his/her public key.")
+                .append("\nThis is the first step towards establishing a secret shared key.")
+                .append("\nAn automated message with your public key will be send automatically")
+                .append("\nYou do not have to do anything with this email.");
+
+        return messageSb.toString();
     }
 }
