@@ -1,5 +1,6 @@
 package com.iliaskomp.emailapp.network;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -59,6 +60,7 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
         Toast.makeText(mContext, "Messages Fetched", Toast.LENGTH_LONG).show();
     }
 
+    @SuppressLint("Assert")
     @Override
     protected EmailDB doInBackground(String... parameters) throws NullPointerException {
         Log.d(LOG_TAG, "doInBackground starts");
@@ -126,41 +128,47 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
 //================================================================================================
             // if db has no emails get all message emails
             // else get only unseen messages
+            assert db != null;
             if (db.getEmailCount() == 0) {
+                assert emailFolder != null;
                 Message[] messages = emailFolder.getMessages();
                 for (Message message : messages) {
                     //TODO IMPORTANT check for encryption library headers here
                     db.addEmail(FetchMailUtils.buildEmailFromMessage(message));
                     Log.d(LOG_TAG, "DB email count: " + db.getEmailCount());
                 }
-            } else if (db.getEmailCount() < emailFolder.getMessageCount()) {
-                // TODO What happens if I add delete functionality
-                for (int i = db.getEmailCount(); i < emailFolder.getMessageCount(); i++) {
-                    Message message = emailFolder.getMessage(i+1);
+            } else {
+                assert emailFolder != null;
+                if (db.getEmailCount() < emailFolder.getMessageCount()) {
+                    // TODO What happens if I add delete functionality
+                    for (int i = db.getEmailCount(); i < emailFolder.getMessageCount(); i++) {
+                        Message message = emailFolder.getMessage(i+1); // emailFolder counting starts at 1 instead of 0!
 
+                        // ENCRYPTION LIBRARY CODE HERE===============================================
+                        // TODO IMPORTANT here check if recipient has library
+                        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
+                        String headerState = eer.getHeaderState(message);
 
+                        switch (headerState) {
+                            case HeaderFields.FirstInteractionState.SENDER_FIRST_TIME:
+                                // recipient gets public key and sends his own public key to sender, save to db also
+                                KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
+                                assert keyPairRecipient != null;
 
+                                MimeMessage messageBack = eer.createMessageWithPublicKey(message, keyPairRecipient);
+                                //TODO to send email back
+                               // SendMail sm = new SendMail(mContext);
+                               // sm.execute(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, messageBack.getRecipients()[0].toString(), messageBack.getSubject(), messageBack.getContent().toString());
+                                break;
+                            case HeaderFields.FirstInteractionState.SENDER_SECOND_TIME:
+                                // decrypt email
+                                break;
+                            default:
+                                assert headerState.equals(HeaderFields.HeaderX.NO_HEADER_STRING);
+                                break;
+                        }
+                        db.addEmail(FetchMailUtils.buildEmailFromMessage(message));
 
-                    // ENCRYPTION LIBRARY CODE NOW===============================================
-                    // TODO IMPORTANT here check if recipient has library
-                    EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
-                    String headerState = eer.getHeaderState(message);
-
-                    switch (headerState) {
-                        case HeaderFields.FirstInteractionState.SENDER_FIRST_TIME:
-                            // recipient gets public key and sends his own public key to sender, save to db also
-                            KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
-                            assert keyPairRecipient != null;
-
-                            MimeMessage messageBack = eer.createMessageWithPublicKey(message, keyPairRecipient);
-//                            SendMail  sendMail = new SendMail(mContext, messageBack);
-                            break;
-                        case HeaderFields.FirstInteractionState.SENDER_SECOND_TIME:
-                            // decrypt email
-                            break;
-                        default:
-                            db.addEmail(FetchMailUtils.buildEmailFromMessage(message));
-                            break;
                     }
                 }
             }
@@ -180,6 +188,10 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
 
         } catch (MessagingException | IOException e) {
             e.printStackTrace();
+        }
+
+        if (db != null) {
+            Log.d(LOG_TAG, "db.getEmailCount() end: " + db.getEmailCount());
         }
         return db;
     }

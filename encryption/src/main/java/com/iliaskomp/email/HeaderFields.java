@@ -13,6 +13,8 @@ public class HeaderFields {
         public static final String STATE = "X-komp-state";
         public static final String PUBLIC_KEY_SENDER = "X-komp-sender-public-key";
         public static final String PUBLIC_KEY_RECIPIENT = "X-komp-recipient-public-key";
+        //returns NO_HEADER_STRING when encryption headers are not found
+        public static final String NO_HEADER_STRING = "no_header_string";
     }
 
 

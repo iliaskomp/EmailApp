@@ -39,7 +39,7 @@ public class EmailEncryptionRecipient {
                 return header.getValue();
             }
         }
-        return null;
+        return HeaderX.NO_HEADER_STRING;
     }
 
     public MimeMessage createMessageWithPublicKey(Message message, KeyPair keyPairRecipient) throws MessagingException {

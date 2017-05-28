@@ -83,13 +83,4 @@ public class EmailEncryptionSender {
     private String createFirstTimeMessage(String recipientEmail) {
         return FIRST_TIME_MESSAGE + recipientEmail + "\n" + FIRST_TIME_MESSAGE_2;
     }
-
-
-
-//            formattedMessage.setText(FIRST_TIME_MESSAGE + "\n\n" + message.getContent().toString()); //TODO pictures etc?
-
-
-//    public KeyPair getKeyPair() {
-//        return mKeyPair;
-//    }
 }
