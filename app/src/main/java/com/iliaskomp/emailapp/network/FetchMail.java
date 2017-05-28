@@ -142,33 +142,40 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
                 if (db.getEmailCount() < emailFolder.getMessageCount()) {
                     // TODO What happens if I add delete functionality
                     for (int i = db.getEmailCount(); i < emailFolder.getMessageCount(); i++) {
-                        Message message = emailFolder.getMessage(i+1); // emailFolder counting starts at 1 instead of 0!
+                        Message message = emailFolder.getMessage(i + 1); // emailFolder counting starts at 1 instead of 0!
 
                         // ENCRYPTION LIBRARY CODE HERE===============================================
-                        // TODO IMPORTANT here check if recipient has library
-                        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
-                        String headerState = eer.getHeaderState(message);
+                        if (FetchMailUtils.encryptionLibraryExists()) {
+                            Log.d(LOG_TAG, "Encryption library exists");
 
-                        switch (headerState) {
-                            case HeaderFields.FirstInteractionState.SENDER_FIRST_TIME:
-                                // recipient gets public key and sends his own public key to sender, save to db also
-                                KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
-                                assert keyPairRecipient != null;
+                            EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
+                            String headerState = eer.getHeaderState(message);
 
-                                MimeMessage messageBack = eer.createMessageWithPublicKey(message, keyPairRecipient);
-                                //TODO to send email back
-                               // SendMail sm = new SendMail(mContext);
-                               // sm.execute(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, messageBack.getRecipients()[0].toString(), messageBack.getSubject(), messageBack.getContent().toString());
-                                break;
-                            case HeaderFields.FirstInteractionState.SENDER_SECOND_TIME:
-                                // decrypt email
-                                break;
-                            default:
-                                assert headerState.equals(HeaderFields.HeaderX.NO_HEADER_STRING);
-                                break;
+                            switch (headerState) {
+                                case HeaderFields.FirstInteractionState.SENDER_FIRST_TIME:
+                                    // recipient gets public key and sends his own public key to sender, save to db also
+                                    KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
+                                    assert keyPairRecipient != null;
+
+                                    MimeMessage messageBack = eer.createMessageWithPublicKey(message, keyPairRecipient);
+                                    //TODO to send email back
+                                    // SendMail sm = new SendMail(mContext);
+                                    // sm.execute(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, messageBack.getRecipients()[0].toString(), messageBack.getSubject(), messageBack.getContent().toString());
+                                    break;
+                                case HeaderFields.FirstInteractionState.SENDER_SECOND_TIME:
+                                    // decrypt email
+                                    break;
+                                case HeaderFields.SecondPlusInteractionState.SENDER_SENDS:
+                                    break;
+                                default:
+                                    assert headerState.equals(HeaderFields.HeaderX.NO_HEADER_STRING);
+                                    break;
+                            }
+                            db.addEmail(FetchMailUtils.buildEmailFromMessage(message));
+
+                        } else {
+                            Log.d(LOG_TAG, "Encryption library does not exist");
                         }
-                        db.addEmail(FetchMailUtils.buildEmailFromMessage(message));
-
                     }
                 }
             }
@@ -195,11 +202,5 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
         }
         return db;
     }
-
-
-
-
-
-
 }
 

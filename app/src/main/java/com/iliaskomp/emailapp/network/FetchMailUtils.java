@@ -122,4 +122,13 @@ public class FetchMailUtils {
                 return null;
         }
     }
+
+    public static boolean encryptionLibraryExists() {
+        try {
+            Class cls = Class.forName("com.iliaskomp.email.EmailEncryptionRecipient");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
 }
