@@ -11,18 +11,31 @@
         android:paddingTop="@dimen/activity_vertical_margin"
         android:paddingBottom="@dimen/activity_vertical_margin"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/email_text_view_subject"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:text="Subject Title"
-            android:textColor="#000"
-            android:textSize="18sp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            />
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/email_text_view_subject"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Subject Title"
+                android:textColor="#000"
+                android:textSize="18sp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"/>
+
+            <ImageView
+                android:id="@+id/email_image_view_encryption_circle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:src="@drawable/circle_shape_green"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="@string/content_description_encryption_status"
+                android:layout_alignParentRight="true"/>
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/email_text_view_sender"

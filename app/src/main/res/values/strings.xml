@@ -7,4 +7,5 @@
     <string name="button_main_new_email">New email</string>
     <string name="button_main_inbox">Inbox</string>
     <string name="button_main_sent">Sent</string>
+    <string name="content_description_encryption_status">encryptionStatus</string>
 </resources>
