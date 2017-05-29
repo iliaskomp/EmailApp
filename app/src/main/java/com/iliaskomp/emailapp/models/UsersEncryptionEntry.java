@@ -23,11 +23,19 @@ public class UsersEncryptionEntry {
     private String mMyPrivateKey;
     private String mTheirPublicKey;
 
+    private String mSharedSecretKey;
+
     private String mState;
 
     // TODO state of entry?
 
     public UsersEncryptionEntry(UUID uuid, String myEmail, String theirEmail) {
+        mId = uuid;
+        mMyEmail = myEmail;
+        mTheirEmail = theirEmail;
+    }
+
+    public UsersEncryptionEntry(String myEmail, String theirEmail) {
         mId = UUID.randomUUID();
         mMyEmail = myEmail;
         mTheirEmail = theirEmail;
@@ -86,6 +94,13 @@ public class UsersEncryptionEntry {
         mTheirPublicKey = theirPublicKey;
     }
 
+    public String getSharedSecretKey() {
+        return mSharedSecretKey;
+    }
+
+    public void setSharedSecretKey(String sharedSecretKey) {
+        mSharedSecretKey = sharedSecretKey;
+    }
     public String getState() {
         return mState;
     }

@@ -24,12 +24,14 @@ public class UsersEncryptionCursorWrapper extends CursorWrapper {
         String myPublicKeyString = getString(getColumnIndex(UsersEncryptionSchema.UsersTable.Cols.MY_PUBLIC_KEY));
         String myPrivateKeyString = getString(getColumnIndex(UsersEncryptionSchema.UsersTable.Cols.MY_PRIVATE_KEY));
         String theirPublicKeyString = getString(getColumnIndex(UsersEncryptionSchema.UsersTable.Cols.THEIR_PUBLIC_KEY));
+        String sharedSecretKeyString = getString(getColumnIndex(UsersEncryptionSchema.UsersTable.Cols.SHARED_SECRET_KEY));
         String stateString = getString(getColumnIndex(UsersEncryptionSchema.UsersTable.Cols.STATE));
 
         UsersEncryptionEntry entry = new UsersEncryptionEntry(UUID.fromString(uuidString), myEmailString, theirEmailString);
         entry.setMyPublicKey(myPublicKeyString);
         entry.setMyPrivateKey(myPrivateKeyString);
         entry.setTheirPublicKey(theirPublicKeyString);
+        entry.setSharedSecretKey(sharedSecretKeyString);
         entry.setState(stateString);
 
         return entry;

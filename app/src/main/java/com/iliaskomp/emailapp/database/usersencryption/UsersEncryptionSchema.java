@@ -15,6 +15,7 @@ public class UsersEncryptionSchema {
             public static final String MY_PUBLIC_KEY = "my_public_key";
             public static final String MY_PRIVATE_KEY = "my_private_key";
             public static final String THEIR_PUBLIC_KEY = "their_public_key";
+            public static final String SHARED_SECRET_KEY = "shared_secret_key";
             public static final String STATE = "state";
         }
     }

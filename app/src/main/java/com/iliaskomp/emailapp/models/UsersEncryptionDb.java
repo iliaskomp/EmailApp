@@ -29,22 +29,14 @@ public class UsersEncryptionDb {
         return sUsersEncryptionDb;
     }
 
-    public UsersEncryptionEntry getEntryFromEmails (String myEmail, String theirEmail) {
-
-        UsersEncryptionCursorWrapper cursor = queryUsersEncryptionEntries(
-                UsersTable.Cols.MY_EMAIL + "= ? AND " + UsersTable.Cols.THEIR_EMAIL + "= ?",
-                new String[] {myEmail, theirEmail});
 
 
-        try {
-            if (cursor.getCount() == 0) {
-                return null;
-            }
-            cursor.moveToFirst();
-            return cursor.getUsersEncryptionEntry();
-        } finally {
-            cursor.close();
-        }
+    public String getEncryptionStateFromEmails (String myEmail, String theirEmail) {
+        return getEntryFromEmails(myEmail, theirEmail).getState();
+    }
+
+    public String getSharedSeretFromEmails (String myEmail, String theirEmail) {
+        return getEntryFromEmails(myEmail, theirEmail).getSharedSecretKey();
     }
 
     private UsersEncryptionDb(Context context) {
@@ -78,6 +70,23 @@ public class UsersEncryptionDb {
         return getUsersEncryptionEntries().size();
     }
 
+    private UsersEncryptionEntry getEntryFromEmails (String myEmail, String theirEmail) {
+        UsersEncryptionCursorWrapper cursor = queryUsersEncryptionEntries(
+                UsersTable.Cols.MY_EMAIL + "= ? AND " + UsersTable.Cols.THEIR_EMAIL + "= ?",
+                new String[] {myEmail, theirEmail});
+
+
+        try {
+            if (cursor.getCount() == 0) {
+                return null;
+            }
+            cursor.moveToFirst();
+            return cursor.getUsersEncryptionEntry();
+        } finally {
+            cursor.close();
+        }
+    }
+
     private UsersEncryptionCursorWrapper queryUsersEncryptionEntries(String whereClause, String[] whereArgs) {
         Cursor cursor = sDatabase.query(
                 UsersTable.NAME,
@@ -101,6 +110,7 @@ public class UsersEncryptionDb {
         values.put(UsersTable.Cols.MY_PUBLIC_KEY, entry.getMyPublicKey());
         values.put(UsersTable.Cols.MY_PRIVATE_KEY, entry.getMyPrivateKey());
         values.put(UsersTable.Cols.THEIR_PUBLIC_KEY, entry.getTheirPublicKey());
+        values.put(UsersTable.Cols.SHARED_SECRET_KEY, entry.getSharedSecretKey());
         values.put(UsersTable.Cols.STATE, entry.getState());
 
         return values;

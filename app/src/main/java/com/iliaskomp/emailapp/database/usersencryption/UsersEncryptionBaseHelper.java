@@ -27,6 +27,7 @@ public class UsersEncryptionBaseHelper extends SQLiteOpenHelper {
                 UsersEncryptionSchema.UsersTable.Cols.MY_PUBLIC_KEY + ", " +
                 UsersEncryptionSchema.UsersTable.Cols.MY_PRIVATE_KEY + ", " +
                 UsersEncryptionSchema.UsersTable.Cols.THEIR_PUBLIC_KEY + ", " +
+                UsersEncryptionSchema.UsersTable.Cols.SHARED_SECRET_KEY + ", " +
                 UsersEncryptionSchema.UsersTable.Cols.STATE +
                 ")"
         );
