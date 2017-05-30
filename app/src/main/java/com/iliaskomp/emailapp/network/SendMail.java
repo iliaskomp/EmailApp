@@ -5,16 +5,25 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
+import com.iliaskomp.dhalgorithm.DHHelper;
 import com.iliaskomp.email.EmailEncryptionSender;
+import com.iliaskomp.emailapp.models.UsersEncryptionDb;
+import com.iliaskomp.emailapp.models.UsersEncryptionEntry;
+import com.iliaskomp.encryption.EncryptionHelper;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.util.Properties;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
@@ -59,7 +68,7 @@ public class SendMail extends AsyncTask<String, Void, Void>{
         final String password = parameters[1];
         final String recipient = parameters[2];
         final String subject = parameters[3];
-        final String message = parameters[4];
+        final String content = parameters[4];
 
         Properties props = SendMailUtils.getProperties(emailName);
 
@@ -72,35 +81,55 @@ public class SendMail extends AsyncTask<String, Void, Void>{
         });
 
         try {
-            MimeMessage mm = SendMailUtils.createMimeMessage(session, emailName,
-                    recipient, subject, message);
+            MimeMessage originalMm = SendMailUtils.createMimeMessage(session, emailName,
+                    recipient, subject, content);
 
 
             //============================================================//
             EmailEncryptionSender ees = new EmailEncryptionSender();
 
-            // if recipient exists in database
-            // TODO get public key, encrypt message with it and send it
-
             // if recipient doesn't exist, create key pair and send first message with public key
+            // TODO save originalMm for further steps if 1st interaction for the next encrypted sending
             KeyPair keyPairSender = ees.createKeyPair();
-            Message mm2 = null;
+            Message encryptionMm = null;
 
-            try {
-                mm2 = ees.getEmailFirstTimeSending(mm, session, keyPairSender);
+            UsersEncryptionDb db = UsersEncryptionDb.get(mContext);
+            //1st interaction
+            if (FetchMailUtils.encryptionLibraryExists()) {
+                UsersEncryptionEntry entry = SendMailUtils.getUsersEncryptionEntryIfExists(mContext, originalMm);
+                // if email of sender/recipient are not on encryption database add it (first state with only sender's keys)
+                if (entry == null) {
+                    encryptionMm = ees.getEmailFirstTimeSending(originalMm, session, keyPairSender);
 
-            } catch (InvalidKeySpecException | InvalidAlgorithmParameterException
-                    | InvalidParameterSpecException | NoSuchAlgorithmException | IOException e) {
-                e.printStackTrace();
+                    UsersEncryptionEntry newEntry = SendMailUtils.createUsersEncryptionEntry(originalMm, keyPairSender);
+                    db.addEntry(newEntry);
+                    // else if entry exists, get public key of the other user and encrypt message with it
+                } else {
+                    // if recipient exists in database get secret key, encrypt message with it and send it
+                    SecretKey secretKey = DHHelper.SecretKeyClass.stringToSecretKey(entry.getSharedSecretKey());
+                    try {
+                        String[] encryptResult = EncryptionHelper.encrypt(originalMm.getContent().toString(), secretKey);
+                        encryptionMm = SendMailUtils.createEncryptedMessage(originalMm, encryptResult, session);
+
+                    } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException | IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
             }
 
             //Sending email
-            if (mm2 != null) {
-                Transport.send(mm2);
+            if (encryptionMm != null) {
+                Transport.send(encryptionMm);
             } else {
                 throw new NullPointerException("Message to sent is null");
             }
-        } catch (MessagingException e) {
+        } catch (MessagingException |
+                IOException |
+                InvalidAlgorithmParameterException |
+                NoSuchAlgorithmException |
+                InvalidKeySpecException |
+                InvalidParameterSpecException e) {
             e.printStackTrace();
         }
         return null;

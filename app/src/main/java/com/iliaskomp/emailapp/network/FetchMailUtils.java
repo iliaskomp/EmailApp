@@ -23,12 +23,11 @@ import javax.mail.internet.MimeMultipart;
 
 public class FetchMailUtils {
 
+    //TODO image support etc
     private static String getEmailContentFromMessageObjects(Part messageObject) throws MessagingException, IOException {
-
         Message message = (Message) messageObject;
         // String type = message.getContentType();
         String result = "";
-
 
         if (message.isMimeType("text/plain")) {
             result = message.getContent().toString();
@@ -55,6 +54,36 @@ public class FetchMailUtils {
         return result;
     }
 
+    static EmailModel buildEmailFromMessage(Message message) throws MessagingException, IOException {
+        EmailModel email = new EmailModel();
+
+        email.setSender(message.getFrom()[0].toString());
+        email.setSubject(message.getSubject());
+        email.setRecipient(message.getAllRecipients()[0].toString()); // TODO assuming one recipient
+        email.setFullDate(message.getSentDate());
+        email.setMessage(getEmailContentFromMessageObjects(message));
+        email.setHeaders(HeadersFormatHelper.getHeadersStringFromEnumeration(message.getAllHeaders()));
+
+        Log.d("FetchMailUtils", email.toString());
+
+        return email;
+    }
+
+//    static UsersEncryptionEntry createEncryptionEntry(Context context, Message message) {
+//        UsersEncryptionDb db = UsersEncryptionDb.get(context);
+//        for (UsersEncryptionEntry entry : db.getUsersEncryptionEntries()) {
+////            if (entry.getTheirEmail().equals(message.get))
+//        }
+//
+////        UsersEncryptionEntry entry = new UsersEncryptionEntry();
+//
+//        // if email is in db, get and return that entry
+//        // else create new entry and insert elements
+//
+//        return entry;
+//
+//    }
+
     static Properties getProperties(String server, String protocol) {
         Properties properties = new Properties();
         properties.put("mail.imap.host", server);
@@ -76,29 +105,7 @@ public class FetchMailUtils {
         return properties;
     }
 
-    //returns null if no known service/service found
-    static String getServiceFromEmail (String email) {
-        return  email.substring(email.indexOf("@") + 1);
-    }
-
-
-    static EmailModel buildEmailFromMessage(Message message) throws MessagingException, IOException {
-        EmailModel email = new EmailModel();
-
-        email.setSender(message.getFrom()[0].toString());
-        email.setSubject(message.getSubject());
-        email.setRecipient(message.getAllRecipients()[0].toString()); // TODO assuming one recipient
-        email.setFullDate(message.getSentDate());
-        email.setMessage(getEmailContentFromMessageObjects(message));
-        email.setHeaders(HeadersFormatHelper.getHeadersStringFromEnumeration(message.getAllHeaders()));
-
-        Log.d("FetchMailUtils", email.toString());
-
-        return email;
-    }
-
     static String getServerDomain(String domain, String protocol) {
-
         switch (domain) {
             case Config.Gmail.DOMAIN_NAME:
                 return  protocol.equals(Config.Name.IMAP) ?
@@ -121,6 +128,11 @@ public class FetchMailUtils {
             default:
                 return null;
         }
+    }
+
+    //returns null if no known service/service found
+    static String getServiceFromEmail (String email) {
+        return  email.substring(email.indexOf("@") + 1);
     }
 
     public static boolean encryptionLibraryExists() {

@@ -28,7 +28,12 @@ public class UsersEncryptionEntry {
     private String mState;
 
     // TODO state of entry?
+    public class State {
+        // 1st interaction sender sends mail with his public key.
+        public final static String STATE_SENDER_1 = "state_sender_1";
+    }
 
+    // Only for wrapper class when getting uuid from db and reconstructing this object
     public UsersEncryptionEntry(UUID uuid, String myEmail, String theirEmail) {
         mId = uuid;
         mMyEmail = myEmail;

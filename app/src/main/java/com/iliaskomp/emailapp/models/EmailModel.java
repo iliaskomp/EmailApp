@@ -17,6 +17,8 @@ public class EmailModel {
     private String mMessage;
     private Date mFullDate;
     private String mHeaders;
+
+    private UsersEncryptionEntry mEncryptionEntry = null;
 //    private HashMap<String, String> mHeadersMap;
 
 //    public EmailModel(String mSender, String mRecipient, String mSubject, String mMessage, String mHeadersMap) {
@@ -36,9 +38,9 @@ public class EmailModel {
     public EmailModel(UUID id) {
         mId = id;
     }
+
     @Override
     public String toString() {
-
         return "EMAIL INFO" +
                 "\nSender: " + mSender +
                 "\nRecipient: " + mRecipient +
@@ -108,4 +110,12 @@ public class EmailModel {
         return mId;
     }
 
+    // returns null if email model doesn't have an encryption entry set
+    public UsersEncryptionEntry getEncryptionEntry() {
+        return mEncryptionEntry;
+    }
+
+    public void setEncryptionEntry(UsersEncryptionEntry encryptionEntry) {
+        mEncryptionEntry = encryptionEntry;
+    }
 }

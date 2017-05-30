@@ -11,11 +11,13 @@ import com.iliaskomp.email.EmailEncryptionRecipient;
 import com.iliaskomp.email.HeaderFields;
 import com.iliaskomp.emailapp.database.email.EmailDbSchema;
 import com.iliaskomp.emailapp.models.EmailDB;
+import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.models.InboxDB;
 import com.iliaskomp.emailapp.models.SentDB;
 
 import java.io.IOException;
 import java.security.KeyPair;
+import java.util.List;
 import java.util.Properties;
 
 import javax.mail.Folder;
@@ -38,6 +40,11 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
     private String mProtocol;
 
     private ProgressDialog progressDialog;
+
+    private class fetchMailTaskReturnValue {
+        private EmailDB mEmailDb;
+        private List<EmailModel> test;
+    }
 
     public FetchMail(Context context, String protocol) {
         mContext = context;
@@ -87,23 +94,14 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
         try {
             //create the IMAP/POP3 store object and connect with the pop server
             Store store = emailSession.getStore(mProtocol + "s");
-//
-//            String host;
-//            if (mProtocol.equals(Config.Name.IMAP)) {
-//                host = Config.Yahoo.IMAP_SERVER;
-//            }
-//            else {
-//                host = Config.Yahoo.POP_SERVER
-//            };
-
             store.connect(server, email, password);
 
-            Folder[] folders = store.getDefaultFolder().list("*");
-            for (Folder folder1 : folders) {
-                if ((folder1.getType() & Folder.HOLDS_MESSAGES) != 0) {
-                    Log.d(LOG_TAG, folder1.getFullName() + ": " + folder1.getMessageCount());
-                }
-            }
+//            Folder[] folders = store.getDefaultFolder().list("*");
+//            for (Folder folder1 : folders) {
+//                if ((folder1.getType() & Folder.HOLDS_MESSAGES) != 0) {
+//                    Log.d(LOG_TAG, folder1.getFullName() + ": " + folder1.getMessageCount());
+//                }
+//            }
 
             //create the folder object and open it
             Folder emailFolder = null;
@@ -122,9 +120,6 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
                 Log.d(LOG_TAG, "emailFolder.getMessageCount(): " + emailFolder.getMessageCount());
             }
 
-//            Log.d(LOG_TAG, "first email from emaildb: " + db.getEmails().get(0).toString());
-//            Log.d(LOG_TAG, "first javamail message subject: " + emailFolder.getMessage(0).getSubject());
-
 //================================================================================================
             // if db has no emails get all message emails
             // else get only unseen messages
@@ -134,7 +129,14 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
                 Message[] messages = emailFolder.getMessages();
                 for (Message message : messages) {
                     //TODO IMPORTANT check for encryption library headers here
-                    db.addEmail(FetchMailUtils.buildEmailFromMessage(message));
+                    if (!FetchMailUtils.encryptionLibraryExists()) {
+                        EmailModel emailModel = FetchMailUtils.buildEmailFromMessage(message);
+//TODO                        UsersEncryptionEntry entry = FetchMailUtils.createEncryptionEntry(mContext, message);
+//                        db.addEmail();
+                    } else {
+                        db.addEmail(FetchMailUtils.buildEmailFromMessage(message));
+                    }
+
                     Log.d(LOG_TAG, "DB email count: " + db.getEmailCount());
                 }
             } else {
@@ -165,7 +167,7 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
                                 case HeaderFields.FirstInteractionState.SENDER_SECOND_TIME:
                                     // decrypt email
                                     break;
-                                case HeaderFields.SecondPlusInteractionState.SENDER_SENDS:
+                                case HeaderFields.SecondPlusInteractionState.SENDS_ENCRYPTED_MSG:
                                     break;
                                 default:
                                     assert headerState.equals(HeaderFields.HeaderX.NO_HEADER_STRING);
@@ -179,15 +181,6 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
                     }
                 }
             }
-//================================================================================================
-            // Redownload all messages every time
-//            Message[] messages = emailFolder.getMessages();
-//            for (Message message : messages) {
-//                db.addEmail(buildEmailFromMessage(message));
-//            }
-//            Log.d(LOG_TAG, "DB email count: " + db.getEmailCount());
-//================================================================================================
-//            Message[] unreadMessages = emailFolder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
 
             //close the store and folder objects
             emailFolder.close(false);
