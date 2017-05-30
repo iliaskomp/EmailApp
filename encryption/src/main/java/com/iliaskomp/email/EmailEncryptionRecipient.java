@@ -53,7 +53,7 @@ public class EmailEncryptionRecipient {
 
         // Sender encodes encryption state and his public key in order to send it to recipient
         messageBack.addHeader(HeaderX.STATE, FirstInteractionState.RECIPIENT_FIRST_TIME);
-        messageBack.addHeader(HeaderX.PUBLIC_KEY_RECIPIENT, DHHelper.publicKeyToString(keyPairRecipient.getPublic()));
+        messageBack.addHeader(HeaderX.PUBLIC_KEY_RECIPIENT, DHHelper.PublicKeyClass.publicKeyToString(keyPairRecipient.getPublic()));
 
         return messageBack;
     }
@@ -64,10 +64,10 @@ public class EmailEncryptionRecipient {
         for (Map.Entry<String, String> header : headers.entrySet()) {
             if (header.getKey().equals(PUBLIC_KEY_SENDER)) {
                 String publicKeyString = header.getValue();
-                PublicKey publicKeySender = DHHelper.stringToPublicKey(publicKeyString);
+                PublicKey publicKeySender = DHHelper.PublicKeyClass.stringToPublicKey(publicKeyString);
 
                 try {
-                    DHParameterSpec paramsFromSender = DHHelper.publicKeyToParams(publicKeySender);
+                    DHParameterSpec paramsFromSender = DHHelper.PublicKeyClass.publicKeyToParams(publicKeySender);
                     DHAlgorithm dh = new DHAlgorithm();
                     return dh.generateKeyPairFromParameters(paramsFromSender.getP(), paramsFromSender.getG());
                 } catch (InvalidKeySpecException | InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {

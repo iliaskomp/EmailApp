@@ -28,7 +28,7 @@ public class EmailEncryptionSender {
     private static final String FIRST_TIME_MESSAGE = "Step 1: This is an automated message to establish" +
             " secret communication with ";
 
-    private static final String FIRST_TIME_MESSAGE_2 = "\n\nThis message is part of the encryption " +
+    private static final String FIRST_TIME_MESSAGE_2 = "\nThis message is part of the encryption " +
             "library. \n\nIf you have it installed, then an automatic message will be sent to " +
             "establish encrypted communication. Otherwise, either install the library or contact " +
             "the sender for an unencrypted email";
@@ -71,7 +71,7 @@ public class EmailEncryptionSender {
 
         // Sender encodes encryption state and his public key in order to send it to recipient
         formattedMessage.addHeader(STATE, SENDER_FIRST_TIME);
-        formattedMessage.addHeader(PUBLIC_KEY_SENDER, DHHelper.publicKeyToString(keyPairSender.getPublic()));
+        formattedMessage.addHeader(PUBLIC_KEY_SENDER, DHHelper.PublicKeyClass.publicKeyToString(keyPairSender.getPublic()));
 
         return formattedMessage;
     }
