@@ -14,6 +14,7 @@ import com.iliaskomp.emailapp.models.EmailDB;
 import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.models.InboxDB;
 import com.iliaskomp.emailapp.models.SentDB;
+import com.iliaskomp.emailapp.utils.EmailCredentials;
 import com.iliaskomp.encryption.EncryptionHelper;
 
 import java.io.IOException;
@@ -89,6 +90,19 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
 
         progressDialog.dismiss();
         Toast.makeText(mContext, "Messages Fetched", Toast.LENGTH_LONG).show();
+
+        List<MimeMessage> messagesToSend = returnValue.getEmailsToAutoReply();
+        for (MimeMessage message : messagesToSend) {
+             SendMail sm = new SendMail(mContext);
+
+
+            try {
+                sm.execute(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, message.getAllRecipients()[0].toString(), message.getSubject(), message.getContent().toString());
+            } catch (MessagingException | IOException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 
     @SuppressLint("Assert")
@@ -104,7 +118,6 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
 
         EmailDB db = null;
         List<MimeMessage> emailsToAutoReply = new ArrayList<>(); //TODO
-        FetchMailTaskReturnValue fetchMailReturn = new FetchMailTaskReturnValue(db, emailsToAutoReply);
 
 
         // check if needing to fetch inbox or sent folder for email db
@@ -155,6 +168,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                 Message[] messages = emailFolder.getMessages();
                 for (Message message : messages) {
                     //TODO IMPORTANT check for encryption library headers here
+                    EmailModel emailToAddToDb = null;
 
                     if (FetchMailUtils.encryptionLibraryExists()) {
                         EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
@@ -165,7 +179,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                                 // recipient gets public key and sends his own public key to sender, save to db also
                                 KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
                                 assert keyPairRecipient != null;
-                                db.addEmail(FetchMailUtils.buildEmailFromMessage(mContext, message));
+                                emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
 
                                 MimeMessage messageBack = eer.createMessageWithPublicKey(message, keyPairRecipient);
                                 emailsToAutoReply.add(messageBack);
@@ -174,6 +188,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                                 // sm.execute(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, messageBack.getRecipients()[0].toString(), messageBack.getSubject(), messageBack.getContent().toString());
                                 break;
                             case HeaderFields.FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY:
+                                emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
 
                             case HeaderFields.SecondPlusInteractionState.SENDS_ENCRYPTED_MSG:
                                 SecretKey secretKey = FetchMailUtils.getSecretSharedKey(mContext, message);
@@ -185,8 +200,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                                     e.printStackTrace();
                                 }
 
-                                EmailModel emailModel = FetchMailUtils.buildDecryptedEmail(message, decryptedText);
-                                db.addEmail(emailModel); // add unencrypted email to db
+                                emailToAddToDb = FetchMailUtils.buildDecryptedEmail(message, decryptedText);
                                 break;
                             default:
                                 assert headerState.equals(HeaderFields.HeaderX.NO_HEADER_STRING);
@@ -198,9 +212,9 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
 //                        emailModel.setEntry(entry);
 //                        db.addEmail();
                         //TODO check for headers after adding emailModel to db and do appropriate action > check to unencrypt first before that
-                    } else {
-                        db.addEmail(FetchMailUtils.buildEmailFromMessage(mContext, message));
                     }
+                    if (emailToAddToDb != null) {db.addEmail(emailToAddToDb);}
+
 
                     Log.d(LOG_TAG, "DB email count: " + db.getEmailCount());
                 }
@@ -253,7 +267,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
             e.printStackTrace();
         }
 
-        return fetchMailReturn;
+        return new FetchMailTaskReturnValue(db, emailsToAutoReply);
     }
 }
 
