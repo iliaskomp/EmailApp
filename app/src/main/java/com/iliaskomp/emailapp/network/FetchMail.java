@@ -21,6 +21,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -39,7 +40,7 @@ import javax.mail.internet.MimeMessage;
  * Created by iliaskomp on 11/02/17.
  */
 
-public class FetchMail extends AsyncTask<String, Void, EmailDB> {
+public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskReturnValue> {
     private static final String LOG_TAG = "FetchMail";
 
     public AsyncResponseForFetchEmail delegate = null;
@@ -49,9 +50,22 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
 
     private ProgressDialog progressDialog;
 
-    private class fetchMailTaskReturnValue {
+    class FetchMailTaskReturnValue {
         private EmailDB mEmailDb;
-        private List<EmailModel> test;
+        private List<MimeMessage> mEmailsToAutoReply;
+
+        public FetchMailTaskReturnValue(EmailDB db, List<MimeMessage> emailsToAutoReply) {
+            mEmailDb = db;
+            mEmailsToAutoReply = emailsToAutoReply;
+        }
+
+        public EmailDB getEmailDb() {
+            return mEmailDb;
+        }
+
+        public List<MimeMessage> getEmailsToAutoReply() {
+            return mEmailsToAutoReply;
+        }
     }
 
     public FetchMail(Context context, String protocol) {
@@ -67,8 +81,10 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
     }
 
     @Override
-    protected void onPostExecute(EmailDB db) {
-        super.onPostExecute(db);
+    protected void onPostExecute(FetchMailTaskReturnValue returnValue) {
+        super.onPostExecute(returnValue);
+        EmailDB db = returnValue.getEmailDb();
+
         delegate.processFinish(db);
 
         progressDialog.dismiss();
@@ -77,16 +93,19 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
 
     @SuppressLint("Assert")
     @Override
-    protected EmailDB doInBackground(String... parameters) throws NullPointerException {
+    protected FetchMailTaskReturnValue doInBackground(String... parameters) throws NullPointerException {
         Log.d(LOG_TAG, "doInBackground starts");
-        EmailDB db = null;
 
         String folderName = parameters[0];
         String email = parameters[1];
         String password = parameters[2];
-
         String domain = FetchMailUtils.getServiceFromEmail(email); // e.g. gmail.com
         String server = FetchMailUtils.getServerDomain(domain, mProtocol); //e.g. imap.gmail.com
+
+        EmailDB db = null;
+        List<MimeMessage> emailsToAutoReply = new ArrayList<>(); //TODO
+        FetchMailTaskReturnValue fetchMailReturn = new FetchMailTaskReturnValue(db, emailsToAutoReply);
+
 
         // check if needing to fetch inbox or sent folder for email db
         if (folderName.equals(EmailDbSchema.InboxTable.NAME)) {
@@ -146,8 +165,10 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
                                 // recipient gets public key and sends his own public key to sender, save to db also
                                 KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
                                 assert keyPairRecipient != null;
+                                db.addEmail(FetchMailUtils.buildEmailFromMessage(mContext, message));
 
-                                //MimeMessage messageBack = eer.createMessageWithPublicKey(message, keyPairRecipient);
+                                MimeMessage messageBack = eer.createMessageWithPublicKey(message, keyPairRecipient);
+                                emailsToAutoReply.add(messageBack);
                                 //TODO to send email back
                                 // SendMail sm = new SendMail(mContext);
                                 // sm.execute(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, messageBack.getRecipients()[0].toString(), messageBack.getSubject(), messageBack.getContent().toString());
@@ -232,7 +253,7 @@ public class FetchMail extends AsyncTask<String, Void, EmailDB> {
             e.printStackTrace();
         }
 
-        return db;
+        return fetchMailReturn;
     }
 }
 
