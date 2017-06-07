@@ -84,7 +84,7 @@ class SendMailUtils {
     static UsersEncryptionEntry createUsersEncryptionEntry(
             MimeMessage message, KeyPair keyPair) throws MessagingException {
 
-        UsersEncryptionEntry entry = new UsersEncryptionEntry(message.getFrom()[0].toString(), //TODO null object reference?
+        UsersEncryptionEntry entry = new UsersEncryptionEntry(message.getFrom()[0].toString(),
                 message.getAllRecipients()[0].toString());
 
         entry.setMyPublicKey(DHHelper.PublicKeyClass.publicKeyToString(keyPair.getPublic()));

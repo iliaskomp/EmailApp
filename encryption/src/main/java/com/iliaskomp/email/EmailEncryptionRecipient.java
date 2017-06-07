@@ -42,6 +42,17 @@ public class EmailEncryptionRecipient {
         return HeaderX.NO_HEADER_STRING;
     }
 
+    public String getHeaderIv(Message message) throws MessagingException {
+        HashMap<String, String> headers = EmailHelper.getHeadersMapFromEnumeration(message.getAllHeaders());
+
+        for (Map.Entry<String, String> header : headers.entrySet()) {
+            if (header.getKey().equals(HeaderX.IV)) {
+                return header.getValue();
+            }
+        }
+        return HeaderX.NO_HEADER_STRING;
+    }
+
     public MimeMessage createMessageWithPublicKey(Message message, KeyPair keyPairRecipient) throws MessagingException {
         MimeMessage messageBack = new MimeMessage((MimeMessage) message);
 
@@ -52,7 +63,7 @@ public class EmailEncryptionRecipient {
         messageBack.setText(createFirstTimeMessage(message.getAllRecipients()[0].toString()));
 
         // Sender encodes encryption state and his public key in order to send it to recipient
-        messageBack.addHeader(HeaderX.STATE, FirstInteractionState.RECIPIENT_FIRST_TIME);
+        messageBack.addHeader(HeaderX.STATE, FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY);
         messageBack.addHeader(HeaderX.PUBLIC_KEY_RECIPIENT, DHHelper.PublicKeyClass.publicKeyToString(keyPairRecipient.getPublic()));
 
         return messageBack;

@@ -1,8 +1,12 @@
 package com.iliaskomp.emailapp.network;
 
+import android.content.Context;
 import android.util.Log;
 
+import com.iliaskomp.dhalgorithm.DHHelper;
+import com.iliaskomp.email.EmailEncryptionRecipient;
 import com.iliaskomp.emailapp.models.EmailModel;
+import com.iliaskomp.emailapp.models.UsersEncryptionDb;
 import com.iliaskomp.emailapp.utils.Config;
 import com.iliaskomp.emailapp.utils.HeadersFormatHelper;
 
@@ -11,6 +15,7 @@ import org.jsoup.Jsoup;
 import java.io.IOException;
 import java.util.Properties;
 
+import javax.crypto.SecretKey;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -54,7 +59,7 @@ public class FetchMailUtils {
         return result;
     }
 
-    static EmailModel buildEmailFromMessage(Message message) throws MessagingException, IOException {
+    static EmailModel buildEmailFromMessage(Context context, Message message) throws MessagingException, IOException {
         EmailModel email = new EmailModel();
 
         email.setSender(message.getFrom()[0].toString());
@@ -64,23 +69,50 @@ public class FetchMailUtils {
         email.setMessage(getEmailContentFromMessageObjects(message));
         email.setHeaders(HeadersFormatHelper.getHeadersStringFromEnumeration(message.getAllHeaders()));
 
+//        email.setEncryptionEntry(getEncryptionEntry(context, message));
         Log.d("FetchMailUtils", email.toString());
 
         return email;
     }
 
-//    static UsersEncryptionEntry createEncryptionEntry(Context context, Message message) {
+//    private static UsersEncryptionEntry getEncryptionEntry(Context context, Message message) throws MessagingException {
 //        UsersEncryptionDb db = UsersEncryptionDb.get(context);
+//
+//        EmailEncryptionRecipient ees = new EmailEncryptionRecipient();
+//        ees.getHeaderState(message);
+//
 //        for (UsersEncryptionEntry entry : db.getUsersEncryptionEntries()) {
+//            if (db.getEntryFromEmails(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString()) == null) {
+//
+//                // entry doesn't exist so create new entry
+//            } else {
+//                return entry;
+//            }
+//
 ////            if (entry.getTheirEmail().equals(message.get))
 //        }
 //
-////        UsersEncryptionEntry entry = new UsersEncryptionEntry();
 //
-//        // if email is in db, get and return that entry
-//        // else create new entry and insert elements
+//    }
+
+//    static UsersEncryptionEntry createEncryptionEntry(Context context, Message message) throws MessagingException {
+//        UsersEncryptionDb db = UsersEncryptionDb.get(context);
 //
-//        return entry;
+////        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
+////        eer.getHeaderState(message);
+//
+//        for (UsersEncryptionEntry entry : db.getUsersEncryptionEntries()) {
+//            if (db.getEntryFromEmails(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString()) == null) {
+//                UsersEncryptionEntry entryNew = new UsersEncryptionEntry(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
+//                return entryNew;
+//                // entry doesn't exist so create new entry
+//            } else {
+//                return entry;
+//            }
+//
+////            if (entry.getTheirEmail().equals(message.get))
+//        }
+//
 //
 //    }
 
@@ -142,5 +174,31 @@ public class FetchMailUtils {
         } catch (ClassNotFoundException e) {
             return false;
         }
+    }
+
+    public static SecretKey getSecretSharedKey(Context context, Message message) throws MessagingException {
+        UsersEncryptionDb db = UsersEncryptionDb.get(context);
+        String keyString = db.getSharedSeretFromEmails(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
+
+        return DHHelper.SecretKeyClass.stringToSecretKey(keyString);
+    }
+
+    public static String getIv(Message message) throws MessagingException {
+        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
+        String iv = eer.getHeaderIv(message);
+        return iv;
+    }
+
+    public static EmailModel buildDecryptedEmail(Message message, String decryptedText) throws MessagingException, IOException {
+        EmailModel email = new EmailModel();
+
+        email.setSender(message.getFrom()[0].toString());
+        email.setSubject(message.getSubject());
+        email.setRecipient(message.getAllRecipients()[0].toString());
+        email.setFullDate(message.getSentDate());
+        email.setMessage(decryptedText);
+        email.setHeaders(HeadersFormatHelper.getHeadersStringFromEnumeration(message.getAllHeaders()));
+
+        return email;
     }
 }

@@ -100,7 +100,7 @@ public class SendMail extends AsyncTask<String, Void, Void>{
                 // if email of sender/recipient are not on encryption database add it (first state with only sender's keys)
                 if (entry == null) {
                     encryptionMm = ees.getEmailFirstTimeSending(originalMm, session, keyPairSender);
-
+                    //TODO save original message in db, wait for recipient public key, then encrypt and send
                     UsersEncryptionEntry newEntry = SendMailUtils.createUsersEncryptionEntry(originalMm, keyPairSender);
                     db.addEntry(newEntry);
                     // else if entry exists, get public key of the other user and encrypt message with it

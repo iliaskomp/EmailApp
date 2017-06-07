@@ -10,6 +10,14 @@ import java.util.UUID;
  */
 
 public class EmailModel {
+    private static final int STATE_NO_KOMP = 0;
+    private static final int STATE_RECIPIENT_TO_SEND_BACK = 1;
+//    private static final int STATE_RECIPIENT_HAS_SEND_BACK = 2;
+    private static final int STATE_SENDER_TO_SEND_BACK = 3;
+//    private static final int STATE_SENDER_HAS_SEND_BACK = 4;
+    private static final int STATE_KOMP_COMPLETE = 5;
+
+
     private UUID mId;
     private String mSender;
     private String mRecipient;
@@ -18,7 +26,9 @@ public class EmailModel {
     private Date mFullDate;
     private String mHeaders;
 
-    private UsersEncryptionEntry mEncryptionEntry = null;
+//    private UsersEncryptionEntry mEncryptionEntry = null;
+    private int stateOfEncryption = STATE_NO_KOMP;
+
 //    private HashMap<String, String> mHeadersMap;
 
 //    public EmailModel(String mSender, String mRecipient, String mSubject, String mMessage, String mHeadersMap) {
@@ -111,11 +121,19 @@ public class EmailModel {
     }
 
     // returns null if email model doesn't have an encryption entry set
-    public UsersEncryptionEntry getEncryptionEntry() {
-        return mEncryptionEntry;
+//    public UsersEncryptionEntry getEncryptionEntry() {
+//        return mEncryptionEntry;
+//    }
+
+//    public void setEncryptionEntry(UsersEncryptionEntry encryptionEntry) {
+//        mEncryptionEntry = encryptionEntry;
+//    }
+
+    public int getStateOfEncryption() {
+        return stateOfEncryption;
     }
 
-    public void setEncryptionEntry(UsersEncryptionEntry encryptionEntry) {
-        mEncryptionEntry = encryptionEntry;
+    public void setStateOfEncryption(int stateOfEncryption) {
+        this.stateOfEncryption = stateOfEncryption;
     }
 }

@@ -23,7 +23,7 @@ public class UsersEncryptionEntry {
     private String mMyPrivateKey;
     private String mTheirPublicKey;
 
-    private String mSharedSecretKey;
+    private String mSharedSecretKey = "";
 
     private String mState;
 

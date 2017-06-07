@@ -15,7 +15,7 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
-import static com.iliaskomp.email.HeaderFields.FirstInteractionState.SENDER_FIRST_TIME;
+import static com.iliaskomp.email.HeaderFields.FirstInteractionState.RECIPIENT_GETS_SENDER_PUBLIC_KEY;
 import static com.iliaskomp.email.HeaderFields.HeaderX.PUBLIC_KEY_SENDER;
 import static com.iliaskomp.email.HeaderFields.HeaderX.STATE;
 
@@ -28,12 +28,10 @@ public class EmailEncryptionSender {
     private static final String FIRST_TIME_MESSAGE = "Step 1: This is an automated message to establish" +
             " secret communication with ";
 
-    private static final String FIRST_TIME_MESSAGE_2 = "\nThis message is part of the encryption " +
-            "library. \n\nIf you have it installed, then an automatic message will be sent to " +
-            "establish encrypted communication. Otherwise, either install the library or contact " +
-            "the sender for an unencrypted email";
-
-//    private KeyPair mKeyPair;
+    private static final String FIRST_TIME_MESSAGE_2 = "\nThis message is part of the komp " +
+            "encryption library. \n\nIf you have the library installed, an automatic message will " +
+            "be sent to establish encrypted communication. Otherwise, you could either install the " +
+            "library or contact the sender for an unencrypted email";
 
     public EmailEncryptionSender() {
 
@@ -70,7 +68,7 @@ public class EmailEncryptionSender {
         formattedMessage.setText(createFirstTimeMessage(message.getFrom()[0].toString()));
 
         // Sender encodes encryption state and his public key in order to send it to recipient
-        formattedMessage.addHeader(STATE, SENDER_FIRST_TIME);
+        formattedMessage.addHeader(STATE, RECIPIENT_GETS_SENDER_PUBLIC_KEY);
         formattedMessage.addHeader(PUBLIC_KEY_SENDER, DHHelper.PublicKeyClass.publicKeyToString(keyPairSender.getPublic()));
 
         return formattedMessage;

@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //TODO save email/password in internal storage and get them from there?
         // retrieve user email/password (static dummy currently)
         final String email = EmailCredentials.EMAIL_SEND;
         final String password = EmailCredentials.PASSWORD_SEND;

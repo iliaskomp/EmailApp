@@ -70,7 +70,7 @@ public class UsersEncryptionDb {
         return getUsersEncryptionEntries().size();
     }
 
-    private UsersEncryptionEntry getEntryFromEmails (String myEmail, String theirEmail) {
+    public UsersEncryptionEntry getEntryFromEmails (String myEmail, String theirEmail) {
         UsersEncryptionCursorWrapper cursor = queryUsersEncryptionEntries(
                 UsersTable.Cols.MY_EMAIL + "= ? AND " + UsersTable.Cols.THEIR_EMAIL + "= ?",
                 new String[] {myEmail, theirEmail});
