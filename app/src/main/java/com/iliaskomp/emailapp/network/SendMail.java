@@ -2,9 +2,12 @@ package com.iliaskomp.emailapp.network;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.iliaskomp.email.EmailEncryptionRecipient;
 import com.iliaskomp.email.EmailEncryptionSender;
 import com.iliaskomp.email.HeaderFields;
@@ -89,9 +92,10 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void>{
             if (FetchMailUtils.encryptionLibraryExists()) {
                 String headerState = eer.getHeaderState(message);
 
-                if (headerState.equals(HeaderFields.FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY)) {
+                if (headerState.equals(HeaderFields.FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY)) { // recipient sends his public key
                     encryptionMm = message; // then message is sent from FetchMail correctly with komp headers
                 } else {
+                    saveOriginalMessage(message);
                     UsersEncryptionEntry entry = SendMailUtils.getUsersEncryptionEntryIfExists(mContext, message);
                     // if email of sender/recipient are not on encryption database add it (first state with only sender's keys)
                     if (entry == null) {
@@ -137,6 +141,7 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void>{
 
 
             } else {
+                // no library, just send the normal message
                 encryptionMm = message;
             }
             //TODO create emailModel and add to sentDB?
@@ -155,5 +160,29 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void>{
             e.printStackTrace();
         }
         return null;
+    }
+
+    private void saveOriginalMessage(MimeMessage message) {
+        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor prefsEditor = mPrefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(message);
+        prefsEditor.putString("MyObject", json);
+        prefsEditor.commit();
+    }
+
+    private MimeMessage getOriginalMessage() {
+        Gson gson = new Gson();
+        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        String json = mPrefs.getString("MyObject", "");
+        MimeMessage mm = gson.fromJson(json, MimeMessage.class);
+        return mm;
+    }
+
+    private void removeMessage() {
+        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor editor = mPrefs.edit();
+        editor.remove("MyObject");
+        editor.commit();
     }
 }

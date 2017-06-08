@@ -28,7 +28,7 @@ import static com.iliaskomp.email.HeaderFields.HeaderX.PUBLIC_KEY_SENDER;
 public class EmailEncryptionRecipient {
 
     // String messages
-    private static final String FIRST_TIME_MESSAGE = "Step 2: This is an automated message to establish" +
+    private static final String FIRST_TIME_MESSAGE = "Step 2: This is an automated message to establish " +
             "secret communication with ";
 
     // if encryption state is not found, it returns null
@@ -68,7 +68,7 @@ public class EmailEncryptionRecipient {
         messageBack.removeHeader(HeaderX.STATE);
         messageBack.removeHeader(HeaderX.PUBLIC_KEY_SENDER);
 
-        //TODO fold public key
+        //TODO fold public key?
         messageBack.addHeader(HeaderX.STATE, FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY);
         messageBack.addHeader(HeaderX.PUBLIC_KEY_RECIPIENT, DHHelper.PublicKeyClass.publicKeyToString(keyPairRecipient.getPublic()));
 
@@ -76,22 +76,27 @@ public class EmailEncryptionRecipient {
     }
 
     public KeyPair createKeyPairFromSender(Message message) throws MessagingException {
+
+        PublicKey publicKeySender = getSenderPublicKeyFromHeader(message);
+
+        try {
+            DHParameterSpec paramsFromSender = DHHelper.PublicKeyClass.publicKeyToParams(publicKeySender);
+            DHAlgorithm dh = new DHAlgorithm();
+            return dh.generateKeyPairFromParameters(paramsFromSender.getP(), paramsFromSender.getG());
+        } catch (InvalidKeySpecException | InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public PublicKey getSenderPublicKeyFromHeader(Message message) throws MessagingException {
         HashMap<String, String> headers = EmailHelper.getHeadersMapFromEnumeration(message.getAllHeaders());
 
         for (Map.Entry<String, String> header : headers.entrySet()) {
             if (header.getKey().equals(PUBLIC_KEY_SENDER)) {
                 String publicKeyString = header.getValue();
-                PublicKey publicKeySender = DHHelper.PublicKeyClass.stringToPublicKey(publicKeyString);
-
-                try {
-                    DHParameterSpec paramsFromSender = DHHelper.PublicKeyClass.publicKeyToParams(publicKeySender);
-                    DHAlgorithm dh = new DHAlgorithm();
-                    return dh.generateKeyPairFromParameters(paramsFromSender.getP(), paramsFromSender.getG());
-                } catch (InvalidKeySpecException | InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
-                    e.printStackTrace();
-                }
-
-
+                return DHHelper.PublicKeyClass.stringToPublicKey(publicKeyString);
             }
         }
         return null;
@@ -107,13 +112,14 @@ public class EmailEncryptionRecipient {
         StringBuilder messageSb = new StringBuilder();
         messageSb.append(FIRST_TIME_MESSAGE)
                 .append(email)
-                .append("by obtaining their public key.")
+                .append(" by obtaining their public key.")
                 .append("\nThis is the first step towards establishing a secret shared key.")
                 .append("\nAn automated message with your public key will be send automatically")
-                .append("\nYou do not have to do anything with this email.");
+                .append("\nYou do not have to do any action with this email.");
 
         return messageSb.toString();
     }
+
 
 
 }

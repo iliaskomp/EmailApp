@@ -10,12 +10,14 @@ import java.util.UUID;
  */
 
 public class EmailModel {
-    private static final int STATE_NO_KOMP = 0;
-    private static final int STATE_RECIPIENT_TO_SEND_BACK = 1;
+//    private static final int STATE_RECIPIENT_TO_SEND_BACK = 1;
 //    private static final int STATE_RECIPIENT_HAS_SEND_BACK = 2;
-    private static final int STATE_SENDER_TO_SEND_BACK = 3;
+//    private static final int STATE_SENDER_TO_SEND_BACK = 3;
 //    private static final int STATE_SENDER_HAS_SEND_BACK = 4;
-    private static final int STATE_KOMP_COMPLETE = 5;
+
+    private static final int STATE_NO_KOMP = 1;
+    private static final int STATE_KOMP_TO_SEND_BACK = 2;
+    private static final int STATE_KOMP_COMPLETE = 3;
 
 
     private UUID mId;

@@ -25,12 +25,13 @@ public class UsersEncryptionEntry {
 
     private String mSharedSecretKey = "";
 
-    private String mState;
+    private int mState;
 
     // TODO state of entry?
     public class State {
         // 1st interaction sender sends mail with his public key.
-        public final static String STATE_SENDER_1 = "state_sender_1";
+        public final static int ENTRY_COMPLETE = 0;
+        public final static int SENDER_1 = 1;
     }
 
     // Only for wrapper class when getting uuid from db and reconstructing this object
@@ -106,11 +107,11 @@ public class UsersEncryptionEntry {
     public void setSharedSecretKey(String sharedSecretKey) {
         mSharedSecretKey = sharedSecretKey;
     }
-    public String getState() {
+    public int getState() {
         return mState;
     }
 
-    public void setState(String state) {
+    public void setState(int state) {
         mState = state;
     }
 }

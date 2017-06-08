@@ -3,16 +3,22 @@ package com.iliaskomp.emailapp.network;
 import android.content.Context;
 import android.util.Log;
 
+import com.iliaskomp.dhalgorithm.DHAlgorithm;
 import com.iliaskomp.dhalgorithm.DHHelper;
 import com.iliaskomp.email.EmailEncryptionRecipient;
 import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.models.UsersEncryptionDb;
+import com.iliaskomp.emailapp.models.UsersEncryptionEntry;
 import com.iliaskomp.emailapp.utils.Config;
 import com.iliaskomp.emailapp.utils.HeadersFormatHelper;
 
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.util.Properties;
 
 import javax.crypto.SecretKey;
@@ -97,26 +103,22 @@ public class FetchMailUtils {
 //
 //    }
 
-//    static UsersEncryptionEntry createEncryptionEntry(Context context, Message message) throws MessagingException {
-//        UsersEncryptionDb db = UsersEncryptionDb.get(context);
-//
-////        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
-////        eer.getHeaderState(message);
-//
-//        for (UsersEncryptionEntry entry : db.getUsersEncryptionEntries()) {
-//            if (db.getEntryFromEmails(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString()) == null) {
-//                UsersEncryptionEntry entryNew = new UsersEncryptionEntry(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
-//                return entryNew;
-//                // entry doesn't exist so create new entry
-//            } else {
-//                return entry;
-//            }
-//
-////            if (entry.getTheirEmail().equals(message.get))
-//        }
-//
-//
-//    }
+    static UsersEncryptionEntry createRecipientEntry(Context context, Message message, KeyPair keyPair) throws MessagingException, InvalidKeyException, NoSuchAlgorithmException {
+        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
+        DHAlgorithm dhAlgorithm = new DHAlgorithm();
+
+        PublicKey theirPublicKey = eer.getSenderPublicKeyFromHeader(message);
+        SecretKey secretKey = dhAlgorithm.agreeSecretKey(keyPair.getPrivate(), theirPublicKey);
+
+        UsersEncryptionEntry entry = new UsersEncryptionEntry(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
+        entry.setMyPrivateKey(DHHelper.PrivateKeyClass.privateKeyToString(keyPair.getPrivate()));
+        entry.setMyPublicKey(DHHelper.PublicKeyClass.publicKeyToString(keyPair.getPublic()));
+        entry.setTheirPublicKey(DHHelper.PublicKeyClass.publicKeyToString(theirPublicKey));
+        entry.setSharedSecretKey(DHHelper.SecretKeyClass.secretKeyToString(secretKey));
+        entry.setState(UsersEncryptionEntry.State.ENTRY_COMPLETE);
+
+        return entry;
+    }
 
     static Properties getProperties(String server, String protocol) {
         Properties properties = new Properties();
