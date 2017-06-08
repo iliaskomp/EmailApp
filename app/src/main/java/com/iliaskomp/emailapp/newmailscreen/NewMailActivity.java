@@ -11,9 +11,18 @@ import android.widget.EditText;
 import com.iliaskomp.emailapp.R;
 import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.models.InboxDB;
+import com.iliaskomp.emailapp.network.FetchMailUtils;
 import com.iliaskomp.emailapp.network.SendMail;
+import com.iliaskomp.emailapp.network.SendMailUtils;
+import com.iliaskomp.emailapp.utils.EmailCredentials;
 
+import java.util.Properties;
 import java.util.UUID;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 /**
  * Created by elias on 11/02/17.
@@ -48,7 +57,7 @@ public class NewMailActivity extends AppCompatActivity{
         mButtonSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendEmail(emailName, password);
+                sendEmail();
             }
         });
 
@@ -65,7 +74,7 @@ public class NewMailActivity extends AppCompatActivity{
 
     }
 
-    private void sendEmail(String emailName, String password) {
+    private void sendEmail() {
         //Getting content for emailToSend
         String recipient = mEditTextRecipient.getText().toString().trim();
         String subject = mEditTextSubject.getText().toString().trim();
@@ -73,7 +82,14 @@ public class NewMailActivity extends AppCompatActivity{
 
         //Create SendMail object
         SendMail sm = new SendMail(NewMailActivity.this);
-        sm.execute(emailName, password, recipient, subject, message);
+        MimeMessage mm = null;
+        try {
+            mm = createMessage(recipient, subject, message);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+        sm.execute(mm);
+//        sm.execute(emailName, password, );
     }
 
     public static Intent newIntent(Context contextPackage, UUID emailId,  String email, String password) {
@@ -90,10 +106,22 @@ public class NewMailActivity extends AppCompatActivity{
 //        return intent;
 //    }
 
+    private MimeMessage createMessage(String recipient, String subject, String message) throws MessagingException {
+        Properties props = SendMailUtils.getProperties(EmailCredentials.EMAIL_SEND);
+        MimeMessage mm = new MimeMessage(FetchMailUtils.getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, props));
+
+        mm.setFrom(new InternetAddress(EmailCredentials.EMAIL_SEND));
+        mm.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
+        mm.setSubject(subject);
+        mm.setText(message);
+
+        return mm;
+    }
+
     private void populateDataForTestPurposes(String emailName) {
         mEditTextSender.setText(emailName);
 //        mEditTextRecipient.setText("fhcrypto@gmail.com");
-        mEditTextSubject.setText("email test subject");
-        mEditTextMessage.setText("email test message");
+        mEditTextSubject.setText("email test reply");
+        mEditTextMessage.setText("This email is testing the reply of the recipient to sender's first message.");
     }
 }

@@ -5,25 +5,21 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
-import com.iliaskomp.dhalgorithm.DHHelper;
+import com.iliaskomp.email.EmailEncryptionRecipient;
 import com.iliaskomp.email.EmailEncryptionSender;
+import com.iliaskomp.email.HeaderFields;
 import com.iliaskomp.emailapp.models.UsersEncryptionDb;
 import com.iliaskomp.emailapp.models.UsersEncryptionEntry;
-import com.iliaskomp.encryption.EncryptionHelper;
+import com.iliaskomp.emailapp.utils.EmailCredentials;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.util.Properties;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
@@ -35,7 +31,7 @@ import javax.mail.internet.MimeMessage;
  * Created by iliaskomp on 11/02/17.
  */
 
-public class SendMail extends AsyncTask<String, Void, Void>{
+public class SendMail extends AsyncTask<MimeMessage, Void, Void>{
 
     private Context mContext;
     private ProgressDialog mProgressDialog;
@@ -62,62 +58,88 @@ public class SendMail extends AsyncTask<String, Void, Void>{
     }
 
     @Override
-    protected Void doInBackground(String... parameters) {
+    protected Void doInBackground(MimeMessage... messageArray) {
+        MimeMessage message = messageArray[0];
+        if (message == null) {return null;}
 
-        final String emailName = parameters[0];
-        final String password = parameters[1];
-        final String recipient = parameters[2];
-        final String subject = parameters[3];
-        final String content = parameters[4];
-
-        Properties props = SendMailUtils.getProperties(emailName);
+        Properties props = SendMailUtils.getProperties(EmailCredentials.EMAIL_SEND);
 
         //Creating a new session
         Session session = Session.getDefaultInstance(props, new javax.mail.Authenticator(){
             //Authenticating the password
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(emailName, password);
+                return new PasswordAuthentication(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND);
             }
         });
 
         try {
-            MimeMessage originalMm = SendMailUtils.createMimeMessage(session, emailName,
-                    recipient, subject, content);
-
-
+//            MimeMessage originalMm = SendMailUtils.createMimeMessage(session, EmailCredentials.EMAIL_SEND,
+//                    recipient, subject, content);
             //============================================================//
             EmailEncryptionSender ees = new EmailEncryptionSender();
+            EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
+
 
             // if recipient doesn't exist, create key pair and send first message with public key
-            // TODO save originalMm for further steps if 1st interaction for the next encrypted sending
             KeyPair keyPairSender = ees.createKeyPair();
             Message encryptionMm = null;
+            UsersEncryptionDb entriesDb = UsersEncryptionDb.get(mContext);
 
-            UsersEncryptionDb db = UsersEncryptionDb.get(mContext);
             //1st interaction
             if (FetchMailUtils.encryptionLibraryExists()) {
-                UsersEncryptionEntry entry = SendMailUtils.getUsersEncryptionEntryIfExists(mContext, originalMm);
-                // if email of sender/recipient are not on encryption database add it (first state with only sender's keys)
-                if (entry == null) {
-                    encryptionMm = ees.getEmailFirstTimeSending(originalMm, session, keyPairSender);
-                    //TODO save original message in db, wait for recipient public key, then encrypt and send
-                    UsersEncryptionEntry newEntry = SendMailUtils.createUsersEncryptionEntry(originalMm, keyPairSender);
-                    db.addEntry(newEntry);
-                    // else if entry exists, get public key of the other user and encrypt message with it
-                } else {
-                    // if recipient exists in database get secret key, encrypt message with it and send it
-                    SecretKey secretKey = DHHelper.SecretKeyClass.stringToSecretKey(entry.getSharedSecretKey());
-                    try {
-                        String[] encryptResult = EncryptionHelper.encrypt(originalMm.getContent().toString(), secretKey);
-                        encryptionMm = SendMailUtils.createEncryptedMessage(originalMm, encryptResult, session);
+                String headerState = eer.getHeaderState(message);
 
-                    } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException | IOException e) {
-                        e.printStackTrace();
+                if (headerState.equals(HeaderFields.FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY)) {
+                    encryptionMm = message; // then message is sent from FetchMail correctly with komp headers
+                } else {
+                    UsersEncryptionEntry entry = SendMailUtils.getUsersEncryptionEntryIfExists(mContext, message);
+                    // if email of sender/recipient are not on encryption database add it (first state with only sender's keys)
+                    if (entry == null) {
+//                        encryptionMm = eer.createMessageWithPublicKey(originalMm, keyPairSender);
+                        encryptionMm = ees.getEmailFirstTimeSending(message, session, keyPairSender);
+                        //TODO save original message in db, wait for recipient public key, then encrypt and send
+                        UsersEncryptionEntry newEntry = SendMailUtils.createUsersEncryptionEntry(message, keyPairSender);
+                        entriesDb.addEntry(newEntry);
+//                }
+                        // else if entry exists, get public key of the other user and encrypt message with it
+
                     }
+//                    else {
+//                        // if recipient exists in database get secret key, encrypt message with it and send it
+//                        SecretKey secretKey = DHHelper.SecretKeyClass.stringToSecretKey(entry.getSharedSecretKey());
+//                        try {
+//                            String[] encryptResult = EncryptionHelper.encrypt(originalMm.getContent().toString(), secretKey);
+//                            encryptionMm = SendMailUtils.createEncryptedMessage(originalMm, encryptResult, session);
+//
+//                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException | IOException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
                 }
 
-            }
 
+
+//                switch (headerState) {
+//                    case HeaderFields.FirstInteractionState.RECIPIENT_GETS_SENDER_PUBLIC_KEY:
+//                        break;
+//                    case HeaderFields.FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY:
+//                        break;
+//                    case HeaderFields.SecondPlusInteractionState.SENDS_ENCRYPTED_MSG:
+//                        break;
+//                    default:
+//                        assert headerState.equals(HeaderFields.HeaderX.NO_HEADER_STRING);
+//                        break;
+//                }
+
+
+
+
+
+
+            } else {
+                encryptionMm = message;
+            }
+            //TODO create emailModel and add to sentDB?
             //Sending email
             if (encryptionMm != null) {
                 Transport.send(encryptionMm);

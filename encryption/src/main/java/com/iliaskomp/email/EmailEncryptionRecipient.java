@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.crypto.spec.DHParameterSpec;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
 import static com.iliaskomp.email.HeaderFields.FirstInteractionState;
@@ -28,7 +29,7 @@ public class EmailEncryptionRecipient {
 
     // String messages
     private static final String FIRST_TIME_MESSAGE = "Step 2: This is an automated message to establish" +
-            "secret communication with other";
+            "secret communication with ";
 
     // if encryption state is not found, it returns null
     public String getHeaderState(Message message) throws MessagingException {
@@ -53,8 +54,8 @@ public class EmailEncryptionRecipient {
         return HeaderX.NO_HEADER_STRING;
     }
 
-    public MimeMessage createMessageWithPublicKey(Message message, KeyPair keyPairRecipient) throws MessagingException {
-        MimeMessage messageBack = new MimeMessage((MimeMessage) message);
+    public MimeMessage createMessageWithPublicKey(Session emailSession, Message message, KeyPair keyPairRecipient) throws MessagingException {
+        MimeMessage messageBack = new MimeMessage(emailSession);
 
         messageBack.setFrom(message.getAllRecipients()[0]);
         messageBack.setRecipient(Message.RecipientType.TO, message.getFrom()[0]);
@@ -63,6 +64,11 @@ public class EmailEncryptionRecipient {
         messageBack.setText(createFirstTimeMessage(message.getAllRecipients()[0].toString()));
 
         // Sender encodes encryption state and his public key in order to send it to recipient
+        //TODO remove headers
+        messageBack.removeHeader(HeaderX.STATE);
+        messageBack.removeHeader(HeaderX.PUBLIC_KEY_SENDER);
+
+        //TODO fold public key
         messageBack.addHeader(HeaderX.STATE, FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY);
         messageBack.addHeader(HeaderX.PUBLIC_KEY_RECIPIENT, DHHelper.PublicKeyClass.publicKeyToString(keyPairRecipient.getPublic()));
 
@@ -94,20 +100,20 @@ public class EmailEncryptionRecipient {
 
 
     private String createFirstTimeSubject(String email) {
-
-        return "Establishing secret key with " + email;
+        return "Komp Encryption: Step 2";
     }
 
     private String createFirstTimeMessage(String email) {
         StringBuilder messageSb = new StringBuilder();
-
         messageSb.append(FIRST_TIME_MESSAGE)
                 .append(email)
-                .append("by obtaining his/her public key.")
+                .append("by obtaining their public key.")
                 .append("\nThis is the first step towards establishing a secret shared key.")
                 .append("\nAn automated message with your public key will be send automatically")
                 .append("\nYou do not have to do anything with this email.");
 
         return messageSb.toString();
     }
+
+
 }

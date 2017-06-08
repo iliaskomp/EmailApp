@@ -20,6 +20,8 @@ import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Part;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
 import javax.mail.internet.MimeMultipart;
 
 /**
@@ -200,5 +202,14 @@ public class FetchMailUtils {
         email.setHeaders(HeadersFormatHelper.getHeadersStringFromEnumeration(message.getAllHeaders()));
 
         return email;
+    }
+
+    public static Session getSentSession(final String senderEmail, final String password, Properties props) {
+        return Session.getDefaultInstance(props, new javax.mail.Authenticator(){
+            //Authenticating the password
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(senderEmail, password);
+            }
+        });
     }
 }

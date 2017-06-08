@@ -21,9 +21,9 @@ import javax.mail.internet.MimeMessage;
  * Created by IliasKomp on 22/05/17.
  */
 
-class SendMailUtils {
+public class SendMailUtils {
 
-    static Properties getProperties(String email) {
+    public static Properties getProperties(String email) {
         String service = getService(email);
         // Creating properties
         Properties props = new Properties();
@@ -72,7 +72,7 @@ class SendMailUtils {
     static UsersEncryptionEntry getUsersEncryptionEntryIfExists(Context context, MimeMessage message) throws MessagingException {
         UsersEncryptionDb db = UsersEncryptionDb.get(context);
         for (UsersEncryptionEntry entry : db.getUsersEncryptionEntries()) {
-            if (entry.getMyEmail().equals(message.getSender().toString()) &&
+            if (entry.getMyEmail().equals(message.getFrom()[0].toString()) &&
                     entry.getTheirEmail().equals(message.getAllRecipients()[0].toString()))
                 return entry;
         }

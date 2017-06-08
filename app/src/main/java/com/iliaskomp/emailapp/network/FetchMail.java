@@ -85,24 +85,20 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
     protected void onPostExecute(FetchMailTaskReturnValue returnValue) {
         super.onPostExecute(returnValue);
         EmailDB db = returnValue.getEmailDb();
+        List<MimeMessage> messagesToSend = returnValue.getEmailsToAutoReply();
 
         delegate.processFinish(db);
-
         progressDialog.dismiss();
         Toast.makeText(mContext, "Messages Fetched", Toast.LENGTH_LONG).show();
 
-        List<MimeMessage> messagesToSend = returnValue.getEmailsToAutoReply();
-        for (MimeMessage message : messagesToSend) {
-             SendMail sm = new SendMail(mContext);
+        if (messagesToSend.size() != 0) {
+            for (MimeMessage message : messagesToSend) {
+                SendMail sm = new SendMail(mContext);
+                sm.execute(message);
 
-
-            try {
-                sm.execute(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, message.getAllRecipients()[0].toString(), message.getSubject(), message.getContent().toString());
-            } catch (MessagingException | IOException e) {
-                e.printStackTrace();
             }
-
         }
+
     }
 
     @SuppressLint("Assert")
@@ -160,14 +156,14 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                 Log.d(LOG_TAG, "emailFolder.getMessageCount(): " + emailFolder.getMessageCount());
             }
 
-//================================================================================================
+//========================================================================================================================================
+
             // if db has no emails get all message emails else get only unfetched messages
             assert db != null;
             if (db.getEmailCount() == 0) {
                 assert emailFolder != null;
                 Message[] messages = emailFolder.getMessages();
                 for (Message message : messages) {
-                    //TODO IMPORTANT check for encryption library headers here
                     EmailModel emailToAddToDb = null;
 
                     if (FetchMailUtils.encryptionLibraryExists()) {
@@ -177,19 +173,18 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                         switch (headerState) {
                             case HeaderFields.FirstInteractionState.RECIPIENT_GETS_SENDER_PUBLIC_KEY:
                                 // recipient gets public key and sends his own public key to sender, save to db also
-                                KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
-                                assert keyPairRecipient != null;
                                 emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
 
-                                MimeMessage messageBack = eer.createMessageWithPublicKey(message, keyPairRecipient);
+                                KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
+                                assert keyPairRecipient != null;
+                                //TODO entryDB, calculate secret key and add encryption entry
+                                Session session = FetchMailUtils.getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, SendMailUtils.getProperties(EmailCredentials.EMAIL_SEND));
+                                MimeMessage messageBack = eer.createMessageWithPublicKey(session, message, keyPairRecipient);
                                 emailsToAutoReply.add(messageBack);
-                                //TODO to send email back
-                                // SendMail sm = new SendMail(mContext);
-                                // sm.execute(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, messageBack.getRecipients()[0].toString(), messageBack.getSubject(), messageBack.getContent().toString());
                                 break;
                             case HeaderFields.FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY:
                                 emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
-
+                                break;
                             case HeaderFields.SecondPlusInteractionState.SENDS_ENCRYPTED_MSG:
                                 SecretKey secretKey = FetchMailUtils.getSecretSharedKey(mContext, message);
                                 String iv = FetchMailUtils.getIv(message);
@@ -204,6 +199,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                                 break;
                             default:
                                 assert headerState.equals(HeaderFields.HeaderX.NO_HEADER_STRING);
+                                emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
                                 break;
                         }
                           //TODO save email in db
@@ -218,6 +214,13 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
 
                     Log.d(LOG_TAG, "DB email count: " + db.getEmailCount());
                 }
+
+//========================================================================================================================================
+
+
+
+
+
             } else {
                 assert emailFolder != null;
                 if (db.getEmailCount() < emailFolder.getMessageCount()) {
@@ -237,7 +240,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                                     KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
                                     assert keyPairRecipient != null;
 
-                                    MimeMessage messageBack = eer.createMessageWithPublicKey(message, keyPairRecipient);
+                                    MimeMessage messageBack = eer.createMessageWithPublicKey(emailSession, message, keyPairRecipient);
                                     //TODO to send email back
                                     // SendMail sm = new SendMail(mContext);
                                     // sm.execute(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, messageBack.getRecipients()[0].toString(), messageBack.getSubject(), messageBack.getContent().toString());

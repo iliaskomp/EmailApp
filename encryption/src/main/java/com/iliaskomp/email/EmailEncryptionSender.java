@@ -68,6 +68,7 @@ public class EmailEncryptionSender {
         formattedMessage.setText(createFirstTimeMessage(message.getFrom()[0].toString()));
 
         // Sender encodes encryption state and his public key in order to send it to recipient
+        //TODO fold public key
         formattedMessage.addHeader(STATE, RECIPIENT_GETS_SENDER_PUBLIC_KEY);
         formattedMessage.addHeader(PUBLIC_KEY_SENDER, DHHelper.PublicKeyClass.publicKeyToString(keyPairSender.getPublic()));
 
@@ -75,7 +76,7 @@ public class EmailEncryptionSender {
     }
 
     private String createSubjectFirstTime(String emailAddress) {
-        return "Establishing secret key with " + emailAddress;
+        return "Komp Encryption: Step 1";
     }
 
     private String createFirstTimeMessage(String recipientEmail) {
