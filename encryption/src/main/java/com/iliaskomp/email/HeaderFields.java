@@ -29,7 +29,7 @@ public class HeaderFields {
 
     // SCENARIO 2: SECOND+ INTERACTION
     public static final class SecondPlusInteractionState {
-        public static final String SENDS_ENCRYPTED_MSG = "sender_sends_encrypted_to_known_recipient";
+        public static final String ENCRYPTED_EMAIL = "sender_sends_encrypted_to_known_recipient";
     }
 
     // SCENARIO 3: RECIPIENT NO LIBRARY

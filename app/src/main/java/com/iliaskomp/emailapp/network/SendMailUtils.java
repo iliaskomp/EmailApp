@@ -89,7 +89,7 @@ public class SendMailUtils {
 
         entry.setMyPublicKey(DHHelper.PublicKeyClass.publicKeyToString(keyPair.getPublic()));
         entry.setMyPrivateKey(DHHelper.PrivateKeyClass.privateKeyToString(keyPair.getPrivate()));
-        entry.setState(UsersEncryptionEntry.State.STATE_SENDER_1);
+        entry.setState(UsersEncryptionEntry.State.SENDER_1);
 
         return entry;
     }
@@ -105,7 +105,7 @@ public class SendMailUtils {
         mm.addRecipient(Message.RecipientType.TO, originalMm.getAllRecipients()[0]);
         mm.setSubject(originalMm.getSubject());
         mm.setText(encryptedText);
-        mm.setHeader(HeaderFields.HeaderX.STATE, HeaderFields.SecondPlusInteractionState.SENDS_ENCRYPTED_MSG);
+        mm.setHeader(HeaderFields.HeaderX.STATE, HeaderFields.SecondPlusInteractionState.ENCRYPTED_EMAIL);
         mm.setHeader(HeaderFields.HeaderX.IV, iv);
 
         return mm;

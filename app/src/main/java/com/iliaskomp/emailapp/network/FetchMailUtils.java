@@ -103,7 +103,30 @@ public class FetchMailUtils {
 //
 //    }
 
-    static UsersEncryptionEntry createRecipientEntry(Context context, Message message, KeyPair keyPair) throws MessagingException, InvalidKeyException, NoSuchAlgorithmException {
+    public static void updateAndCompleteEntry(Context context, Message message) throws MessagingException, InvalidKeyException, NoSuchAlgorithmException {
+        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
+        PublicKey theirPublicKey = eer.getRecipientPublicKeyFromHeader(message);
+
+        UsersEncryptionDb db = UsersEncryptionDb.get(context);
+        UsersEncryptionEntry oldEntry = db.getEntryFromEmails(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
+        UsersEncryptionEntry newEntry = new UsersEncryptionEntry(oldEntry.getMyEmail(), oldEntry.getTheirEmail());
+
+        newEntry.setId(oldEntry.getId());
+        newEntry.setMyPublicKey(oldEntry.getMyPublicKey());
+        newEntry.setMyPrivateKey(oldEntry.getMyPrivateKey());
+        newEntry.setState(UsersEncryptionEntry.State.ENTRY_COMPLETE);
+
+        newEntry.setTheirPublicKey(DHHelper.PublicKeyClass.publicKeyToString(theirPublicKey));
+
+
+        DHAlgorithm dhAlgorithm = new DHAlgorithm();
+        SecretKey secretKey = dhAlgorithm.agreeSecretKey(DHHelper.PrivateKeyClass.stringToPrivateKey(oldEntry.getMyPrivateKey()), theirPublicKey);
+        newEntry.setSharedSecretKey(DHHelper.SecretKeyClass.secretKeyToString(secretKey));
+
+        db.updateEntry(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString(), newEntry);
+    }
+
+    static UsersEncryptionEntry createRecipientEntry(Message message, KeyPair keyPair) throws MessagingException, InvalidKeyException, NoSuchAlgorithmException {
         EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
         DHAlgorithm dhAlgorithm = new DHAlgorithm();
 
@@ -144,10 +167,10 @@ public class FetchMailUtils {
     static String getServerDomain(String domain, String protocol) {
         switch (domain) {
             case Config.Gmail.DOMAIN_NAME:
-                return  protocol.equals(Config.Name.IMAP) ?
+                return protocol.equals(Config.Name.IMAP) ?
                         Config.Gmail.IMAP_SERVER : Config.Gmail.POP_SERVER;
             case Config.Yahoo.DOMAIN_NAME:
-                return  protocol.equals(Config.Name.IMAP) ?
+                return protocol.equals(Config.Name.IMAP) ?
                         Config.Yahoo.IMAP_SERVER : Config.Yahoo.POP_SERVER;
             default:
                 return null;
@@ -167,8 +190,8 @@ public class FetchMailUtils {
     }
 
     //returns null if no known service/service found
-    static String getServiceFromEmail (String email) {
-        return  email.substring(email.indexOf("@") + 1);
+    static String getServiceFromEmail(String email) {
+        return email.substring(email.indexOf("@") + 1);
     }
 
     public static boolean encryptionLibraryExists() {
@@ -180,7 +203,7 @@ public class FetchMailUtils {
         }
     }
 
-    public static SecretKey getSecretSharedKey(Context context, Message message) throws MessagingException {
+    public static SecretKey getSecretSharedKeyFromDb(Context context, Message message) throws MessagingException {
         UsersEncryptionDb db = UsersEncryptionDb.get(context);
         String keyString = db.getSharedSeretFromEmails(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
 
@@ -207,11 +230,13 @@ public class FetchMailUtils {
     }
 
     public static Session getSentSession(final String senderEmail, final String password, Properties props) {
-        return Session.getDefaultInstance(props, new javax.mail.Authenticator(){
+        return Session.getDefaultInstance(props, new javax.mail.Authenticator() {
             //Authenticating the password
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(senderEmail, password);
             }
         });
     }
+
+
 }

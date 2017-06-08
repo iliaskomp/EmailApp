@@ -128,7 +128,7 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void>{
 //                        break;
 //                    case HeaderFields.FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY:
 //                        break;
-//                    case HeaderFields.SecondPlusInteractionState.SENDS_ENCRYPTED_MSG:
+//                    case HeaderFields.SecondPlusInteractionState.ENCRYPTED_EMAIL:
 //                        break;
 //                    default:
 //                        assert headerState.equals(HeaderFields.HeaderX.NO_HEADER_STRING);

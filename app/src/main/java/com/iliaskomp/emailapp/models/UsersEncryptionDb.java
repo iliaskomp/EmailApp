@@ -31,7 +31,7 @@ public class UsersEncryptionDb {
 
 
 
-    public String getEncryptionStateFromEmails (String myEmail, String theirEmail) {
+    public int getEncryptionStateFromEmails (String myEmail, String theirEmail) {
         return getEntryFromEmails(myEmail, theirEmail).getState();
     }
 
@@ -64,6 +64,15 @@ public class UsersEncryptionDb {
     public void addEntry(UsersEncryptionEntry entry) {
         ContentValues values = getContentValues(entry);
         sDatabase.insert(UsersTable.NAME, null, values);
+    }
+
+    public void updateEntry(String myEmail, String theirEmail, UsersEncryptionEntry newEntry) {
+        ContentValues newValues = getContentValues(newEntry);
+
+        sDatabase.update(UsersTable.NAME, newValues,
+                UsersTable.Cols.MY_EMAIL + "= ? AND " + UsersTable.Cols.THEIR_EMAIL + "= ?",
+                new String[] {myEmail, theirEmail});
+
     }
 
     public int getUsersEncryptionEntriesCount() {

@@ -182,7 +182,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                                 assert keyPairRecipient != null;
 
                                 //TODO entryDB, calculate secret key and add encryption entry
-                                UsersEncryptionEntry entry = FetchMailUtils.createRecipientEntry(mContext, message, keyPairRecipient);
+                                UsersEncryptionEntry entry = FetchMailUtils.createRecipientEntry(message, keyPairRecipient);
                                 entriesDb.addEntry(entry);
 
                                 Session session = FetchMailUtils.getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, SendMailUtils.getProperties(EmailCredentials.EMAIL_SEND));
@@ -191,10 +191,11 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                                 break;
                             case HeaderFields.FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY:
                                 emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
+                                FetchMailUtils.updateAndCompleteEntry(mContext, message);
 
                                 break;
-                            case HeaderFields.SecondPlusInteractionState.SENDS_ENCRYPTED_MSG:
-                                SecretKey secretKey = FetchMailUtils.getSecretSharedKey(mContext, message);
+                            case HeaderFields.SecondPlusInteractionState.ENCRYPTED_EMAIL:
+                                SecretKey secretKey = FetchMailUtils.getSecretSharedKeyFromDb(mContext, message);
                                 String iv = FetchMailUtils.getIv(message);
                                 String decryptedText = null;
                                 try {
@@ -253,7 +254,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                                     // SendMail sm = new SendMail(mContext);
                                     // sm.execute(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, messageBack.getRecipients()[0].toString(), messageBack.getSubject(), messageBack.getContent().toString());
                                     break;
-                                case HeaderFields.SecondPlusInteractionState.SENDS_ENCRYPTED_MSG:
+                                case HeaderFields.SecondPlusInteractionState.ENCRYPTED_EMAIL:
                                     break;
                                 default:
                                     assert headerState.equals(HeaderFields.HeaderX.NO_HEADER_STRING);

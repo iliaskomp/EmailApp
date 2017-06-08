@@ -60,6 +60,10 @@ public class UsersEncryptionEntry {
         return mId;
     }
 
+    public void setId(UUID id) {
+        mId = id;
+    }
+
     public String getMyEmail() {
         return mMyEmail;
     }

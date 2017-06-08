@@ -19,6 +19,7 @@ import javax.mail.internet.MimeMessage;
 
 import static com.iliaskomp.email.HeaderFields.FirstInteractionState;
 import static com.iliaskomp.email.HeaderFields.HeaderX;
+import static com.iliaskomp.email.HeaderFields.HeaderX.PUBLIC_KEY_RECIPIENT;
 import static com.iliaskomp.email.HeaderFields.HeaderX.PUBLIC_KEY_SENDER;
 
 /**
@@ -102,7 +103,17 @@ public class EmailEncryptionRecipient {
         return null;
     }
 
+    public PublicKey getRecipientPublicKeyFromHeader(Message message) throws MessagingException {
+        HashMap<String, String> headers = EmailHelper.getHeadersMapFromEnumeration(message.getAllHeaders());
 
+        for (Map.Entry<String, String> header : headers.entrySet()) {
+            if (header.getKey().equals(PUBLIC_KEY_RECIPIENT)) {
+                String publicKeyString = header.getValue();
+                return DHHelper.PublicKeyClass.stringToPublicKey(publicKeyString);
+            }
+        }
+        return null;
+    }
 
     private String createFirstTimeSubject(String email) {
         return "Komp Encryption: Step 2";
