@@ -141,7 +141,7 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
     private void fetchMail() {
         FetchMail fetchMail = new FetchMail(getActivity(), Config.Name.IMAP);
         fetchMail.delegate = this;
-        fetchMail.execute(mFolderName, mEmail, mPassword);
+        fetchMail.execute(mFolderName);
     }
 
     public static EmailListFragment newInstance(String folder, String email, String password) {

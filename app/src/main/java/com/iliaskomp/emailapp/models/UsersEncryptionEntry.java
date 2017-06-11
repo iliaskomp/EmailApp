@@ -30,8 +30,8 @@ public class UsersEncryptionEntry {
     // TODO state of entry?
     public class State {
         // 1st interaction sender sends mail with his public key.
-        public final static int ENTRY_COMPLETE = 0;
-        public final static int SENDER_1 = 1;
+        public final static int SENDER_ENTRY_NON_COMPLETE = 0;
+        public final static int ENTRY_COMPLETE = 1;
     }
 
     // Only for wrapper class when getting uuid from db and reconstructing this object

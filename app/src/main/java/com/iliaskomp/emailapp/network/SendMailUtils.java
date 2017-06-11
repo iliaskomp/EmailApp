@@ -89,7 +89,7 @@ public class SendMailUtils {
 
         entry.setMyPublicKey(DHHelper.PublicKeyClass.publicKeyToString(keyPair.getPublic()));
         entry.setMyPrivateKey(DHHelper.PrivateKeyClass.privateKeyToString(keyPair.getPrivate()));
-        entry.setState(UsersEncryptionEntry.State.SENDER_1);
+        entry.setState(UsersEncryptionEntry.State.SENDER_ENTRY_NON_COMPLETE);
 
         return entry;
     }
