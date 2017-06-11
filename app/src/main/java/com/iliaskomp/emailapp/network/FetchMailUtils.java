@@ -109,21 +109,24 @@ public class FetchMailUtils {
 
         UsersEncryptionDb db = UsersEncryptionDb.get(context);
         UsersEncryptionEntry oldEntry = db.getEntryFromEmails(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
-        UsersEncryptionEntry newEntry = new UsersEncryptionEntry(oldEntry.getMyEmail(), oldEntry.getTheirEmail());
 
-        newEntry.setId(oldEntry.getId());
-        newEntry.setMyPublicKey(oldEntry.getMyPublicKey());
-        newEntry.setMyPrivateKey(oldEntry.getMyPrivateKey());
-        newEntry.setState(UsersEncryptionEntry.State.ENTRY_COMPLETE);
+        if (oldEntry != null) {
+            UsersEncryptionEntry newEntry = new UsersEncryptionEntry(oldEntry.getMyEmail(), oldEntry.getTheirEmail());
 
-        newEntry.setTheirPublicKey(DHHelper.PublicKeyClass.publicKeyToString(theirPublicKey));
+            newEntry.setId(oldEntry.getId());
+            newEntry.setMyPublicKey(oldEntry.getMyPublicKey());
+            newEntry.setMyPrivateKey(oldEntry.getMyPrivateKey());
+            newEntry.setState(UsersEncryptionEntry.State.ENTRY_COMPLETE);
+
+            newEntry.setTheirPublicKey(DHHelper.PublicKeyClass.publicKeyToString(theirPublicKey));
 
 
-        DHAlgorithm dhAlgorithm = new DHAlgorithm();
-        SecretKey secretKey = dhAlgorithm.agreeSecretKey(DHHelper.PrivateKeyClass.stringToPrivateKey(oldEntry.getMyPrivateKey()), theirPublicKey);
-        newEntry.setSharedSecretKey(DHHelper.SecretKeyClass.secretKeyToString(secretKey));
+            DHAlgorithm dhAlgorithm = new DHAlgorithm();
+            SecretKey secretKey = dhAlgorithm.agreeSecretKey(DHHelper.PrivateKeyClass.stringToPrivateKey(oldEntry.getMyPrivateKey()), theirPublicKey);
+            newEntry.setSharedSecretKey(DHHelper.SecretKeyClass.secretKeyToString(secretKey));
 
-        db.updateEntry(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString(), newEntry);
+            db.updateEntry(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString(), newEntry);
+        }
     }
 
     static UsersEncryptionEntry createRecipientEntry(Message message, KeyPair keyPair) throws MessagingException, InvalidKeyException, NoSuchAlgorithmException {

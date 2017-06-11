@@ -13,7 +13,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -107,15 +106,10 @@ public class DHHelper {
         }
 
         public static SecretKey stringToSecretKey(String string) {
-            try {
-                byte[] stringBytes = Base64.decode(string, Base64.NO_WRAP);
-                SecretKeyFactory kf = SecretKeyFactory.getInstance("PBEWithHmacSHA256AndAES_128");
-                SecretKeySpec spec = new SecretKeySpec(stringBytes, "AES");
-                return decodeSecretKey(spec.getEncoded());
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            }
-            return null;
+            byte[] stringBytes = Base64.decode(string, Base64.NO_WRAP);
+//          SecretKeyFactory kf = SecretKeyFactory.getInstance("PBEWithHmacSHA256AndAES_128");
+            SecretKeySpec spec = new SecretKeySpec(stringBytes, "AES");
+            return decodeSecretKey(spec.getEncoded());
         }
     }
 

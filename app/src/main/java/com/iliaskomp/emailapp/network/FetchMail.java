@@ -172,7 +172,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                         String headerState = eer.getHeaderState(message);
 
                         switch (headerState) {
-                            case HeaderFields.FirstInteractionState.RECIPIENT_GETS_SENDER_PUBLIC_KEY:
+                            case HeaderFields.FirstInteractionState.RECIPIENT_GETS_SENDER_PUBLIC_KEY: {
                                 // recipient gets public key and sends his own public key to sender, save to db also
                                 emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
 
@@ -187,13 +187,17 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                                 MimeMessage messageBack = eer.createMessageWithPublicKey(session, message, keyPairRecipient);
                                 emailsToAutoReply.add(messageBack);
                                 break;
-                            case HeaderFields.FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY:
+                            }
+                            case HeaderFields.FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY: {
                                 emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
                                 FetchMailUtils.updateAndCompleteEntry(mContext, message);
                                 //TODO get secret key, get original message(s) for recipient's email and send encrypted email
-
+                                SecretKey secretKey = FetchMailUtils.getSecretSharedKeyFromDb(mContext, message);
+                                List<MimeMessage> messagesForRecipient = EmailSharedPrefsUtils.getOriginalMessagesForEmail(mContext, message.getFrom()[0].toString());
+                                emailsToAutoReply.addAll(messagesForRecipient);
                                 break;
-                            case HeaderFields.SecondPlusInteractionState.ENCRYPTED_EMAIL:
+                            }
+                            case HeaderFields.SecondPlusInteractionState.ENCRYPTED_EMAIL: {
                                 SecretKey secretKey = FetchMailUtils.getSecretSharedKeyFromDb(mContext, message);
                                 String iv = FetchMailUtils.getIv(message);
                                 String decryptedText = null;
@@ -205,10 +209,12 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
 
                                 emailToAddToDb = FetchMailUtils.buildDecryptedEmail(message, decryptedText);
                                 break;
-                            default:
+                            }
+                            default: {
                                 assert headerState.equals(HeaderFields.HeaderX.NO_HEADER_STRING);
                                 emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
                                 break;
+                            }
                         }
                           //TODO save email in db
 //                        EmailModel emailModel = FetchMailUtils.buildEmailFromMessage(mContext, message);

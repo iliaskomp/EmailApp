@@ -60,7 +60,7 @@ public class EmailSharedPrefsUtils {
         return filename;
     }
 
-    private List<MimeMessage> getOriginalMessagesForEmail(Context context, String emailName) throws MessagingException {
+    public static List<MimeMessage> getOriginalMessagesForEmail(Context context, String emailName) throws MessagingException {
         List<String> encodedMessages = null;
         List<MimeMessage> messages = null;
 
@@ -74,16 +74,15 @@ public class EmailSharedPrefsUtils {
         for (Map.Entry<String,?> entry : keys.entrySet()){
             String entryEmail = entry.getKey().split("-")[1];
             if (entryEmail.equals(emailName)) {
-                byte[] emailByteArray = Base64.decode((String) entry.getValue(), Base64.NO_WRAP);
-                ByteArrayInputStream bais = new ByteArrayInputStream(emailByteArray);
-                messages.add(new MimeMessage(session,bais));
+                MimeMessage message = getOriginalMessage(context, entry.getKey());
+                if (message != null) {messages.add(message);}
             }
         }
 
         return messages;
     }
 
-    public void removeOriginalMessagesForEmail(Context context, String emailName) {
+    public static void removeOriginalMessagesForEmail(Context context, String emailName) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         Map<String,?> keys = prefs.getAll();
 
@@ -94,25 +93,25 @@ public class EmailSharedPrefsUtils {
         }
     }
 
-    private void removeOriginalMessage(Context context, String emailNameFile) {
+    private static void removeOriginalMessage(Context context, String emailNameFile) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = prefs.edit();
         editor.remove(emailNameFile);
         editor.commit();
     }
 
-    //    private MimeMessage getOriginalMessage(String prefsEmailName) throws MessagingException {
-//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-//        String emailEncoded = prefs.getString(prefsEmailName, "");
-//
-//        byte[] emailByteArray = Base64.decode(emailEncoded, Base64.NO_WRAP);
-//
-//        ByteArrayInputStream bais = new ByteArrayInputStream(emailByteArray);
-//
-//        Session session = FetchMailUtils.getSentSession(EmailCredentials.EMAIL_SEND,
-//                EmailCredentials.PASSWORD_SEND,
-//                SendMailUtils.getProperties(EmailCredentials.EMAIL_SEND));
-//
-//        return new MimeMessage(session,bais);
-//    }
+    private static MimeMessage getOriginalMessage(Context context, String prefsEmailName) throws MessagingException {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String emailEncoded = prefs.getString(prefsEmailName, "");
+
+        byte[] emailByteArray = Base64.decode(emailEncoded, Base64.NO_WRAP);
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(emailByteArray);
+
+        Session session = FetchMailUtils.getSentSession(EmailCredentials.EMAIL_SEND,
+                EmailCredentials.PASSWORD_SEND,
+                SendMailUtils.getProperties(EmailCredentials.EMAIL_SEND));
+
+        return new MimeMessage(session, bais);
+    }
 }
