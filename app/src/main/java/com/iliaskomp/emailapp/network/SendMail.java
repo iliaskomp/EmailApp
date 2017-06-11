@@ -7,14 +7,15 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.iliaskomp.email.EmailEncryptionRecipient;
 import com.iliaskomp.email.EmailEncryptionSender;
 import com.iliaskomp.email.HeaderFields;
 import com.iliaskomp.emailapp.models.UsersEncryptionDb;
 import com.iliaskomp.emailapp.models.UsersEncryptionEntry;
 import com.iliaskomp.emailapp.utils.EmailCredentials;
+import com.iliaskomp.libs.Base64;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
@@ -163,21 +164,47 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void>{
     }
 
     private void saveOriginalMessage(MimeMessage message) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            message.writeTo(baos);
+        } catch (IOException | MessagingException e) {
+            e.printStackTrace();
+        }
+        byte[] bytearray = baos.toByteArray();
+        String base64encodedmessage = Base64.encodeToString(bytearray, Base64.NO_WRAP);
+
+
         SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
         SharedPreferences.Editor prefsEditor = mPrefs.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(message);
-        prefsEditor.putString("MyObject", json);
+        prefsEditor.putString("EmailMessage ", base64encodedmessage);
         prefsEditor.commit();
+
+//        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+//        SharedPreferences.Editor prefsEditor = mPrefs.edit();
+//        Gson gson = new Gson();
+//        String json = gson.toJson(message);
+//        prefsEditor.putString("EmailMessage ", json);
+//        prefsEditor.commit();
     }
 
-    private MimeMessage getOriginalMessage() {
-        Gson gson = new Gson();
-        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-        String json = mPrefs.getString("MyObject", "");
-        MimeMessage mm = gson.fromJson(json, MimeMessage.class);
-        return mm;
-    }
+//    private MimeMessage getOriginalMessage() {
+//        Base64Decoder decoder = new Base64Decoder();
+//        byte[] bytearray = decoder.decodeBuffer(base64encodedmessage );
+//        ByteArrayInputStream bais = new ByteArrayInputStream(bytearray);
+//
+//        mailprops.setProperty('mail.from',sender);
+//        Session session = Session.getInstance(mailprops,null);
+//        session.setDebug(debug);
+//
+//        MimeMessage mimemessage = new MimeMessage(session,bais);
+//
+//        return mimemessage;
+////        Gson gson = new Gson();
+////        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+////        String json = mPrefs.getString("MyObject", "");
+////        MimeMessage mm = gson.fromJson(json, MimeMessage.class);
+////        return mm;
+//    }
 
     private void removeMessage() {
         SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
