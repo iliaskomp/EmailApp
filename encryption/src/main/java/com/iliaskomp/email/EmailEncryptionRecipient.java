@@ -2,8 +2,11 @@ package com.iliaskomp.email;
 
 import com.iliaskomp.dhalgorithm.DHAlgorithm;
 import com.iliaskomp.dhalgorithm.DHHelper;
+import com.iliaskomp.encryption.EncryptionHelper;
 
+import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -11,12 +14,17 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.DHParameterSpec;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
+import static com.iliaskomp.email.HeaderFields.*;
 import static com.iliaskomp.email.HeaderFields.FirstInteractionState;
 import static com.iliaskomp.email.HeaderFields.HeaderX;
 import static com.iliaskomp.email.HeaderFields.HeaderX.PUBLIC_KEY_RECIPIENT;
@@ -132,5 +140,24 @@ public class EmailEncryptionRecipient {
     }
 
 
+    public MimeMessage createEncryptedMessage(Session session, MimeMessage message, SecretKey secretKey) throws IOException, MessagingException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
+        MimeMessage encryptedMessage = new MimeMessage(session);
 
+        String content = (String) message.getContent();
+        String[] encryptionResult = EncryptionHelper.encrypt(content, secretKey);
+        String encryptedText = encryptionResult[0];
+        String ivString = encryptionResult[1];
+
+        encryptedMessage.setFrom(message.getFrom()[0]);
+        encryptedMessage.setRecipient(Message.RecipientType.TO, message.getAllRecipients()[0]);
+        encryptedMessage.setSentDate(message.getSentDate());
+        encryptedMessage.setSubject(message.getSubject());
+        encryptedMessage.setText(encryptedText);
+
+        encryptedMessage.addHeader(HeaderX.STATE, SecondPlusInteractionState.ENCRYPTED_EMAIL);
+        encryptedMessage.addHeader(HeaderX.IV, ivString);
+
+        return encryptedMessage;
+
+    }
 }

@@ -10,6 +10,7 @@ import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.models.UsersEncryptionDb;
 import com.iliaskomp.emailapp.models.UsersEncryptionEntry;
 import com.iliaskomp.emailapp.utils.Config;
+import com.iliaskomp.emailapp.utils.EmailCredentials;
 import com.iliaskomp.emailapp.utils.HeadersFormatHelper;
 
 import org.jsoup.Jsoup;
@@ -19,8 +20,13 @@ import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.mail.BodyPart;
 import javax.mail.Message;
@@ -28,6 +34,7 @@ import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
+import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 /**
@@ -82,26 +89,6 @@ public class FetchMailUtils {
 
         return email;
     }
-
-//    private static UsersEncryptionEntry getEncryptionEntry(Context context, Message message) throws MessagingException {
-//        UsersEncryptionDb db = UsersEncryptionDb.get(context);
-//
-//        EmailEncryptionRecipient ees = new EmailEncryptionRecipient();
-//        ees.getHeaderState(message);
-//
-//        for (UsersEncryptionEntry entry : db.getUsersEncryptionEntries()) {
-//            if (db.getEntryFromEmails(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString()) == null) {
-//
-//                // entry doesn't exist so create new entry
-//            } else {
-//                return entry;
-//            }
-//
-////            if (entry.getTheirEmail().equals(message.get))
-//        }
-//
-//
-//    }
 
     public static void updateAndCompleteEntry(Context context, Message message) throws MessagingException, InvalidKeyException, NoSuchAlgorithmException {
         EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
@@ -206,17 +193,11 @@ public class FetchMailUtils {
         }
     }
 
-    public static SecretKey getSecretSharedKeyFromDb(Context context, Message message) throws MessagingException {
+    public static SecretKey getSecretSharedKeyFromDb(Context context, String myEmail, String theirEmail) throws MessagingException {
         UsersEncryptionDb db = UsersEncryptionDb.get(context);
-        String keyString = db.getSharedSeretFromEmails(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
+        String keyString = db.getSharedSeretFromEmails(myEmail, theirEmail);
 
         return DHHelper.SecretKeyClass.stringToSecretKey(keyString);
-    }
-
-    public static String getIv(Message message) throws MessagingException {
-        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
-        String iv = eer.getHeaderIv(message);
-        return iv;
     }
 
     public static EmailModel buildDecryptedEmail(Message message, String decryptedText) throws MessagingException, IOException {
@@ -242,4 +223,20 @@ public class FetchMailUtils {
     }
 
 
+
+
+    public static List<MimeMessage> encryptMessagesForRecipient(Context context, List<MimeMessage> messagesForRecipient) throws IOException, MessagingException, InvalidKeyException, BadPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, NoSuchPaddingException {
+        List<MimeMessage> messages = new ArrayList<>();
+        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
+
+        for (MimeMessage message : messagesForRecipient) {
+            Session session = getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, SendMailUtils.getProperties(message.getAllRecipients()[0].toString()));
+            SecretKey secretKey = FetchMailUtils.getSecretSharedKeyFromDb(context, message.getFrom()[0].toString(), message.getAllRecipients()[0].toString());
+
+            MimeMessage encryptedMessage = eer.createEncryptedMessage(session, message, secretKey);
+            messages.add(encryptedMessage);
+            //messages.add(createEncryptedMessage(context, m));
+        }
+        return messages;
+    }
 }

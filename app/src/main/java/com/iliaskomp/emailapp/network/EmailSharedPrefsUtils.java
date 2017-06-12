@@ -10,6 +10,7 @@ import com.iliaskomp.libs.Base64;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -62,7 +63,7 @@ public class EmailSharedPrefsUtils {
 
     public static List<MimeMessage> getOriginalMessagesForEmail(Context context, String emailName) throws MessagingException {
         List<String> encodedMessages = null;
-        List<MimeMessage> messages = null;
+        List<MimeMessage> messages = new ArrayList<>();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         Map<String,?> keys = prefs.getAll();
@@ -75,7 +76,9 @@ public class EmailSharedPrefsUtils {
             String entryEmail = entry.getKey().split("-")[1];
             if (entryEmail.equals(emailName)) {
                 MimeMessage message = getOriginalMessage(context, entry.getKey());
-                if (message != null) {messages.add(message);}
+                if (message != null) {
+                    messages.add(message);
+                }
             }
         }
 

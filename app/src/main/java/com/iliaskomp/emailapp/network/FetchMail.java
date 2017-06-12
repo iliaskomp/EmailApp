@@ -179,7 +179,6 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                                 KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
                                 assert keyPairRecipient != null;
 
-                                //TODO entryDB, calculate secret key and add encryption entry
                                 UsersEncryptionEntry entry = FetchMailUtils.createRecipientEntry(message, keyPairRecipient);
                                 entriesDb.addEntry(entry);
 
@@ -191,15 +190,17 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                             case HeaderFields.FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY: {
                                 emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
                                 FetchMailUtils.updateAndCompleteEntry(mContext, message);
-                                //TODO get secret key, get original message(s) for recipient's email and send encrypted email
-                                SecretKey secretKey = FetchMailUtils.getSecretSharedKeyFromDb(mContext, message);
+                                //TODO get secret key, get original message(s) for recipient's email and send encrypted email (also remove messages for that email from sharedprefs)
+
+                                // get messages where sender was waiting to receive recipient's key from sharedprefs
                                 List<MimeMessage> messagesForRecipient = EmailSharedPrefsUtils.getOriginalMessagesForEmail(mContext, message.getFrom()[0].toString());
-                                emailsToAutoReply.addAll(messagesForRecipient);
+                                List<MimeMessage> messagesForRecipientEncrypted = FetchMailUtils.encryptMessagesForRecipient(mContext, messagesForRecipient);
+                                emailsToAutoReply.addAll(messagesForRecipientEncrypted);
                                 break;
                             }
                             case HeaderFields.SecondPlusInteractionState.ENCRYPTED_EMAIL: {
-                                SecretKey secretKey = FetchMailUtils.getSecretSharedKeyFromDb(mContext, message);
-                                String iv = FetchMailUtils.getIv(message);
+                                SecretKey secretKey = FetchMailUtils.getSecretSharedKeyFromDb(mContext, message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
+                                String iv = eer.getHeaderIv(message);
                                 String decryptedText = null;
                                 try {
                                     decryptedText = EncryptionHelper.decrypt(message.getContent().toString(), secretKey, iv);
@@ -278,9 +279,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
             emailFolder.close(false);
             store.close();
 
-        } catch (MessagingException | IOException | NoSuchAlgorithmException |
-                InvalidAlgorithmParameterException | NoSuchPaddingException |
-                IllegalBlockSizeException | InvalidKeyException e) {
+        } catch (MessagingException | IOException | NoSuchAlgorithmException | InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | InvalidKeyException | BadPaddingException e) {
             e.printStackTrace();
         }
 

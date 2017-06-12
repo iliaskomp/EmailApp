@@ -91,7 +91,9 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void>{
 
                 if (headerState.equals(HeaderFields.FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY)) { // recipient sends his public key
                     encryptionMm = message; // then message is sent from FetchMail correctly with komp headers
-                } else {
+                } else if (headerState.equals(HeaderFields.SecondPlusInteractionState.ENCRYPTED_EMAIL)) { // sender sends encrypted email
+                    encryptionMm = message; // then message is sent from FetchMail correctly with komp headers
+                } else { // first time sending message so need to save original message and send info email with sender's public key
                     EmailSharedPrefsUtils.saveOriginalMessage(mContext, message);
                     UsersEncryptionEntry entry = SendMailUtils.getUsersEncryptionEntryIfExists(mContext, message);
                     // if email of sender/recipient are not on encryption database add it (first state with only sender's keys)
