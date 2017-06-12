@@ -170,54 +170,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                     if (FetchMailUtils.encryptionLibraryExists()) {
                         EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
                         String headerState = eer.getHeaderState(message);
-
-                        switch (headerState) {
-                            case HeaderFields.KompState.RECIPIENT_GETS_SENDER_PUBLIC_KEY: {
-                                // recipient gets public key and sends his own public key to sender, save to db also
-                                emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
-
-                                KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
-                                assert keyPairRecipient != null;
-
-                                UsersEncryptionEntry entry = FetchMailUtils.createRecipientEntry(message, keyPairRecipient);
-                                entriesDb.addEntry(entry);
-
-                                Session session = FetchMailUtils.getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, SendMailUtils.getProperties(EmailCredentials.EMAIL_SEND));
-                                MimeMessage messageBack = eer.createMessageWithPublicKey(session, message, keyPairRecipient);
-                                emailsToAutoReply.add(messageBack);
-                                break;
-                            }
-                            case HeaderFields.KompState.SENDER_GETS_RECIPIENT_PUBLIC_KEY: {
-                                emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
-                                FetchMailUtils.updateAndCompleteEntry(mContext, message); // get recipient's key and complete encryption db for recipient
-
-                                // get messages where sender was waiting to receive recipient's key from sharedprefs
-                                List<MimeMessage> messagesForRecipient = EmailSharedPrefsUtils.getOriginalMessagesForEmail(mContext, message.getFrom()[0].toString());
-                                EmailSharedPrefsUtils.removeOriginalMessagesForEmail(mContext, message.getFrom()[0].toString());
-
-                                List<MimeMessage> messagesForRecipientEncrypted = FetchMailUtils.encryptMessagesForRecipient(mContext, messagesForRecipient);
-                                emailsToAutoReply.addAll(messagesForRecipientEncrypted);
-                                break;
-                            }
-                            case HeaderFields.KompState.ENCRYPTED_EMAIL: {
-                                SecretKey secretKey = FetchMailUtils.getSecretSharedKeyFromDb(mContext, message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
-                                String iv = eer.getHeaderIv(message);
-                                String decryptedText = null;
-                                try {
-                                    decryptedText = EncryptionHelper.decrypt(message.getContent().toString(), secretKey, iv);
-                                } catch (BadPaddingException e) {
-                                    e.printStackTrace();
-                                }
-
-                                emailToAddToDb = FetchMailUtils.buildDecryptedEmail(message, decryptedText);
-                                break;
-                            }
-                            default: {
-                                assert headerState.equals(HeaderFields.HeaderX.NO_HEADER_STRING);
-                                emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
-                                break;
-                            }
-                        }
+                        emailToAddToDb = checkHeaderState(emailsToAutoReply, message, headerState);
                     }
 
                     if (emailToAddToDb != null) {
@@ -235,6 +188,62 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
         }
 
         return new FetchMailTaskReturnValue(emailDb, emailsToAutoReply);
+    }
+
+
+    private EmailModel checkHeaderState(List<MimeMessage> emailsToAutoReply, Message message,
+                                        String headerState) throws MessagingException, IOException, InvalidKeyException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, NoSuchPaddingException, InvalidAlgorithmParameterException {
+        UsersEncryptionDb entriesDb = UsersEncryptionDb.get(mContext);
+        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
+        EmailModel emailToAddToDb;
+        switch (headerState) {
+            case HeaderFields.KompState.RECIPIENT_GETS_SENDER_PUBLIC_KEY: {
+                // recipient gets public key and sends his own public key to sender, save to db also
+                emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
+
+                KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
+                assert keyPairRecipient != null;
+
+                UsersEncryptionEntry entry = FetchMailUtils.createRecipientEntry(message, keyPairRecipient);
+                entriesDb.addEntry(entry);
+
+                Session session = FetchMailUtils.getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, SendMailUtils.getProperties(EmailCredentials.EMAIL_SEND));
+                MimeMessage messageBack = eer.createMessageWithPublicKey(session, message, keyPairRecipient);
+                emailsToAutoReply.add(messageBack);
+                break;
+            }
+            case HeaderFields.KompState.SENDER_GETS_RECIPIENT_PUBLIC_KEY: {
+                emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
+                FetchMailUtils.updateAndCompleteEntry(mContext, message); // get recipient's key and complete encryption db for recipient
+
+                // get messages where sender was waiting to receive recipient's key from sharedprefs
+                List<MimeMessage> messagesForRecipient = EmailSharedPrefsUtils.getOriginalMessagesForEmail(mContext, message.getFrom()[0].toString());
+                EmailSharedPrefsUtils.removeOriginalMessagesForEmail(mContext, message.getFrom()[0].toString());
+
+                List<MimeMessage> messagesForRecipientEncrypted = FetchMailUtils.encryptMessagesForRecipient(mContext, messagesForRecipient);
+                emailsToAutoReply.addAll(messagesForRecipientEncrypted);
+                break;
+            }
+            case HeaderFields.KompState.ENCRYPTED_EMAIL: {
+                SecretKey secretKey = FetchMailUtils.getSecretSharedKeyFromDb(mContext, message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
+                String iv = eer.getHeaderIv(message);
+                String decryptedText = null;
+                try {
+                    decryptedText = EncryptionHelper.decrypt(message.getContent().toString(), secretKey, iv);
+                } catch (BadPaddingException e) {
+                    e.printStackTrace();
+                }
+
+                emailToAddToDb = FetchMailUtils.buildDecryptedEmail(message, decryptedText);
+                break;
+            }
+            default: {
+                assert headerState.equals(HeaderFields.HeaderX.NO_HEADER_STRING);
+                emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
+                break;
+            }
+        }
+        return emailToAddToDb;
     }
 }
 
