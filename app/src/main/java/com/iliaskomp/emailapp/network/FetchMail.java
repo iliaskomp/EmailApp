@@ -161,10 +161,10 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
             //TODO if folder is inbox, search for parameters, komp etc NOT on sent
             // if db has no emails get all message emails else get only unfetched messages
             assert emailDb != null;
-            if (emailDb.getEmailCount() == 0) {
-                assert emailFolder != null;
-                Message[] messages = emailFolder.getMessages();
-                for (Message message : messages) {
+            assert emailFolder != null;
+            if (emailDb.getEmailCount() < emailFolder.getMessageCount()) {
+                for (int i = emailDb.getEmailCount(); i < emailFolder.getMessageCount(); i++) {
+                    Message message = emailFolder.getMessage(i + 1); // emailFolder counting starts at 1 instead of 0!
                     EmailModel emailToAddToDb = null;
 
                     if (FetchMailUtils.encryptionLibraryExists()) {
@@ -189,11 +189,12 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                             }
                             case HeaderFields.FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY: {
                                 emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
-                                FetchMailUtils.updateAndCompleteEntry(mContext, message);
-                                //TODO get secret key, get original message(s) for recipient's email and send encrypted email (also remove messages for that email from sharedprefs)
+                                FetchMailUtils.updateAndCompleteEntry(mContext, message); // get recipient's key and complete encryption db for recipient
 
                                 // get messages where sender was waiting to receive recipient's key from sharedprefs
                                 List<MimeMessage> messagesForRecipient = EmailSharedPrefsUtils.getOriginalMessagesForEmail(mContext, message.getFrom()[0].toString());
+                                EmailSharedPrefsUtils.removeOriginalMessagesForEmail(mContext, message.getFrom()[0].toString());
+
                                 List<MimeMessage> messagesForRecipientEncrypted = FetchMailUtils.encryptMessagesForRecipient(mContext, messagesForRecipient);
                                 emailsToAutoReply.addAll(messagesForRecipientEncrypted);
                                 break;
@@ -217,64 +218,13 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                                 break;
                             }
                         }
-                          //TODO save email in db
-//                        EmailModel emailModel = FetchMailUtils.buildEmailFromMessage(mContext, message);
-//                        UsersEncryptionEntry entry = FetchMailUtils.createEncryptionEntry(mContext, message);
-//                        emailModel.setEntry(entry);
-//                        db.addEmail();
-                        //TODO check for headers after adding emailModel to db and do appropriate action > check to unencrypt first before that
                     }
-                    if (emailToAddToDb != null) {emailDb.addEmail(emailToAddToDb);}
-
-
+                    if (emailToAddToDb != null) {
+                        emailDb.addEmail(emailToAddToDb);
+                    }
                     Log.d(LOG_TAG, "DB email count: " + emailDb.getEmailCount());
                 }
-
-//========================================================================================================================================
-
-
-
-
-
-            } else {
-                assert emailFolder != null;
-                if (emailDb.getEmailCount() < emailFolder.getMessageCount()) {
-                    for (int i = emailDb.getEmailCount(); i < emailFolder.getMessageCount(); i++) {
-                        Message message = emailFolder.getMessage(i + 1); // emailFolder counting starts at 1 instead of 0!
-
-                        // ENCRYPTION LIBRARY CODE HERE===============================================
-                        if (FetchMailUtils.encryptionLibraryExists()) {
-                            Log.d(LOG_TAG, "Encryption library exists");
-
-                            EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
-                            String headerState = eer.getHeaderState(message);
-
-                            switch (headerState) {
-                                case HeaderFields.FirstInteractionState.RECIPIENT_GETS_SENDER_PUBLIC_KEY:
-                                    // recipient gets public key and sends his own public key to sender, save to db also
-                                    KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
-                                    assert keyPairRecipient != null;
-
-                                    MimeMessage messageBack = eer.createMessageWithPublicKey(emailSession, message, keyPairRecipient);
-                                    //TODO to send email back
-                                    // SendMail sm = new SendMail(mContext);
-                                    // sm.execute(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, messageBack.getRecipients()[0].toString(), messageBack.getSubject(), messageBack.getContent().toString());
-                                    break;
-                                case HeaderFields.SecondPlusInteractionState.ENCRYPTED_EMAIL:
-                                    break;
-                                default:
-                                    assert headerState.equals(HeaderFields.HeaderX.NO_HEADER_STRING);
-                                    break;
-                            }
-                            emailDb.addEmail(FetchMailUtils.buildEmailFromMessage(mContext, message));
-
-                        } else {
-                            Log.d(LOG_TAG, "Encryption library does not exist");
-                        }
-                    }
-                }
             }
-
             //close the store and folder objects
             emailFolder.close(false);
             store.close();
