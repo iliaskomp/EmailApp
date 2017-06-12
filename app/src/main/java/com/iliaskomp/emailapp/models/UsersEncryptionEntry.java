@@ -27,7 +27,6 @@ public class UsersEncryptionEntry {
 
     private int mState;
 
-    // TODO state of entry?
     public class State {
         // 1st interaction sender sends mail with his public key.
         public final static int SENDER_ENTRY_NON_COMPLETE = 0;

@@ -158,7 +158,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
             }
 
 //========================================================================================================================================
-            //TODO if folder is inbox, search for parameters, komp etc NOT on sent
+            //TODO only if folder is inbox, search for parameters, komp etc. NOT with sent folder
             // if db has no emails get all message emails else get only unfetched messages
             assert emailDb != null;
             assert emailFolder != null;
@@ -172,7 +172,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                         String headerState = eer.getHeaderState(message);
 
                         switch (headerState) {
-                            case HeaderFields.FirstInteractionState.RECIPIENT_GETS_SENDER_PUBLIC_KEY: {
+                            case HeaderFields.KompState.RECIPIENT_GETS_SENDER_PUBLIC_KEY: {
                                 // recipient gets public key and sends his own public key to sender, save to db also
                                 emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
 
@@ -187,7 +187,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                                 emailsToAutoReply.add(messageBack);
                                 break;
                             }
-                            case HeaderFields.FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY: {
+                            case HeaderFields.KompState.SENDER_GETS_RECIPIENT_PUBLIC_KEY: {
                                 emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
                                 FetchMailUtils.updateAndCompleteEntry(mContext, message); // get recipient's key and complete encryption db for recipient
 
@@ -199,7 +199,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                                 emailsToAutoReply.addAll(messagesForRecipientEncrypted);
                                 break;
                             }
-                            case HeaderFields.SecondPlusInteractionState.ENCRYPTED_EMAIL: {
+                            case HeaderFields.KompState.ENCRYPTED_EMAIL: {
                                 SecretKey secretKey = FetchMailUtils.getSecretSharedKeyFromDb(mContext, message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
                                 String iv = eer.getHeaderIv(message);
                                 String decryptedText = null;
@@ -219,6 +219,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                             }
                         }
                     }
+
                     if (emailToAddToDb != null) {
                         emailDb.addEmail(emailToAddToDb);
                     }

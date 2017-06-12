@@ -105,7 +105,7 @@ public class SendMailUtils {
         mm.addRecipient(Message.RecipientType.TO, originalMm.getAllRecipients()[0]);
         mm.setSubject(originalMm.getSubject());
         mm.setText(encryptedText);
-        mm.setHeader(HeaderFields.HeaderX.STATE, HeaderFields.SecondPlusInteractionState.ENCRYPTED_EMAIL);
+        mm.setHeader(HeaderFields.HeaderX.STATE, HeaderFields.KompState.ENCRYPTED_EMAIL);
         mm.setHeader(HeaderFields.HeaderX.IV, iv);
 
         return mm;

@@ -37,7 +37,7 @@ import javax.mail.internet.MimeMessage;
  * Created by iliaskomp on 11/02/17.
  */
 
-public class SendMail extends AsyncTask<MimeMessage, Void, Void>{
+public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
 
     private Context mContext;
     private ProgressDialog mProgressDialog;
@@ -50,7 +50,7 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void>{
     protected void onPreExecute() {
         super.onPreExecute();
         //Showing progress dialog while sending email
-        mProgressDialog = ProgressDialog.show(mContext,"Sending message","Please wait...",false,false);
+        mProgressDialog = ProgressDialog.show(mContext, "Sending message", "Please wait...", false, false);
 
     }
 
@@ -60,18 +60,20 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void>{
         //Dismissing the progress dialog
         mProgressDialog.dismiss();
         //Showing a success message
-        Toast.makeText(mContext,"Message Sent",Toast.LENGTH_LONG).show();
+        Toast.makeText(mContext, "Message Sent", Toast.LENGTH_LONG).show();
     }
 
     @Override
     protected Void doInBackground(MimeMessage... messageArray) {
         MimeMessage message = messageArray[0];
-        if (message == null) {return null;}
+        if (message == null) {
+            return null;
+        }
 
         Properties props = SendMailUtils.getProperties(EmailCredentials.EMAIL_SEND);
 
         //Creating a new session
-        Session session = Session.getDefaultInstance(props, new javax.mail.Authenticator(){
+        Session session = Session.getDefaultInstance(props, new javax.mail.Authenticator() {
             //Authenticating the password
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND);
@@ -95,9 +97,9 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void>{
             if (FetchMailUtils.encryptionLibraryExists()) {
                 String headerState = eer.getHeaderState(message);
 
-                if (headerState.equals(HeaderFields.FirstInteractionState.SENDER_GETS_RECIPIENT_PUBLIC_KEY)) { // recipient sends his public key
+                if (headerState.equals(HeaderFields.KompState.SENDER_GETS_RECIPIENT_PUBLIC_KEY)) { // recipient sends his public key
                     encryptionMm = message; // then message is sent from FetchMail correctly with komp headers
-                } else if (headerState.equals(HeaderFields.SecondPlusInteractionState.ENCRYPTED_EMAIL)) { // sender sends encrypted email
+                } else if (headerState.equals(HeaderFields.KompState.ENCRYPTED_EMAIL)) { // sender sends encrypted email
                     encryptionMm = message; // then message is sent from FetchMail correctly with komp headers
                 } else { // first time sending message so need to save original message and send info email with sender's public key
                     EmailSharedPrefsUtils.saveOriginalMessage(mContext, message);
@@ -105,31 +107,14 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void>{
                     // if email of sender/recipient are not on encryption database add it (first state with only sender's keys)
                     if (entry == null) {
                         encryptionMm = ees.getEmailFirstTimeSending(message, session, keyPairSender);
-                        //TODO save original message in db, wait for recipient public key, then encrypt and send
                         UsersEncryptionEntry newEntry = SendMailUtils.createUsersEncryptionEntry(message, keyPairSender);
                         entriesDb.addEntry(newEntry);
-                        // else if entry exists, get public key of the other user and encrypt message with it
-
+                        // else if recipient exists in database get secret key, encrypt message with it and send it
                     } else {
-                        // if recipient exists in database get secret key, encrypt message with it and send it
                         SecretKey secretKey = DHHelper.SecretKeyClass.stringToSecretKey(entry.getSharedSecretKey());
                         encryptionMm = eer.createEncryptedMessage(session, message, secretKey);
-
-//                        try {
-//                            String[] encryptResult = EncryptionHelper.encrypt(message.getContent().toString(), secretKey);
-//                            encryptionMm = SendMailUtils.createEncryptedMessage(message, encryptResult, session);
-//
-//                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException | IOException e) {
-//                            e.printStackTrace();
-//                        }
                     }
                 }
-
-
-
-
-
-
             } else {
                 // no library, just send the normal message
                 encryptionMm = message;
@@ -146,14 +131,6 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void>{
         }
         return null;
     }
-
-
-
-
-
-
-
-
 
 
 }
