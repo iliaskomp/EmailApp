@@ -84,7 +84,6 @@ public class FetchMailUtils {
         email.setMessage(getEmailContentFromMessageObjects(message));
         email.setHeaders(HeadersFormatHelper.getHeadersStringFromEnumeration(message.getAllHeaders()));
 
-//        email.setEncryptionEntry(getEncryptionEntry(context, message));
         Log.d("FetchMailUtils", email.toString());
 
         return email;

@@ -15,8 +15,7 @@ import com.iliaskomp.emailapp.models.EmailModel;
  */
 
 public class EmailListActivity extends SingleFragmentActivity implements EmailListFragment.Callbacks {
-    private static final String LOG_TAG = "EmailListActivity";
-    public static final String EXTRA_FOLDER_NAME = "com.iliaskomp.emailapp.foldername";
+    private static final String EXTRA_FOLDER_NAME = "com.iliaskomp.emailapp.foldername";
 
     private static String mFolderName;
     private static String mEmail;

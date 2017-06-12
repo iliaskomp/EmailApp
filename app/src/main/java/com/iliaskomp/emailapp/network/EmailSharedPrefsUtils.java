@@ -42,7 +42,7 @@ public class EmailSharedPrefsUtils {
         prefsEditor.commit();
     }
 
-    public static String createFilenameForPrefs(Context context, MimeMessage message) throws MessagingException {
+    private static String createFilenameForPrefs(Context context, MimeMessage message) throws MessagingException {
         String filename = "mm-" + message.getAllRecipients()[0].toString();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -62,15 +62,10 @@ public class EmailSharedPrefsUtils {
     }
 
     public static List<MimeMessage> getOriginalMessagesForEmail(Context context, String emailName) throws MessagingException {
-        List<String> encodedMessages = null;
         List<MimeMessage> messages = new ArrayList<>();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         Map<String,?> keys = prefs.getAll();
-
-        Session session = FetchMailUtils.getSentSession(EmailCredentials.EMAIL_SEND,
-                EmailCredentials.PASSWORD_SEND,
-                SendMailUtils.getProperties(EmailCredentials.EMAIL_SEND));
 
         for (Map.Entry<String,?> entry : keys.entrySet()){
             String entryEmail = entry.getKey().split("-")[1];

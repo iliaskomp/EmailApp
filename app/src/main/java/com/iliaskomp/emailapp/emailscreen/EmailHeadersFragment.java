@@ -3,6 +3,7 @@ package com.iliaskomp.emailapp.emailscreen;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class EmailHeadersFragment extends DialogFragment {
     private static final String ARG_EMAIL_ID = "com.iliaskomp.email_id";
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View v = LayoutInflater.from(getActivity())

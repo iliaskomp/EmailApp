@@ -90,30 +90,46 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
 
             // if recipient doesn't exist, create key pair and send first message with public key
             KeyPair keyPairSender = ees.createKeyPair();
-            Message encryptionMm = null;
+            Message encryptionMm;
             UsersEncryptionDb entriesDb = UsersEncryptionDb.get(mContext);
 
             //1st interaction
             if (FetchMailUtils.encryptionLibraryExists()) {
                 String headerState = eer.getHeaderState(message);
 
-                if (headerState.equals(HeaderFields.KompState.SENDER_GETS_RECIPIENT_PUBLIC_KEY)) { // recipient sends his public key
-                    encryptionMm = message; // then message is sent from FetchMail correctly with komp headers
-                } else if (headerState.equals(HeaderFields.KompState.ENCRYPTED_EMAIL)) { // sender sends encrypted email
-                    encryptionMm = message; // then message is sent from FetchMail correctly with komp headers
-                } else { // first time sending message so need to save original message and send info email with sender's public key
-                    EmailSharedPrefsUtils.saveOriginalMessage(mContext, message);
-                    UsersEncryptionEntry entry = SendMailUtils.getUsersEncryptionEntryIfExists(mContext, message);
-                    // if email of sender/recipient are not on encryption database add it (first state with only sender's keys)
-                    if (entry == null) {
-                        encryptionMm = ees.getEmailFirstTimeSending(message, session, keyPairSender);
-                        UsersEncryptionEntry newEntry = SendMailUtils.createUsersEncryptionEntry(message, keyPairSender);
-                        entriesDb.addEntry(newEntry);
-                        // else if recipient exists in database get secret key, encrypt message with it and send it
-                    } else {
-                        SecretKey secretKey = DHHelper.SecretKeyClass.stringToSecretKey(entry.getSharedSecretKey());
-                        encryptionMm = eer.createEncryptedMessage(session, message, secretKey);
-                    }
+                switch (headerState) {
+                    case HeaderFields.KompState.SENDER_GETS_RECIPIENT_PUBLIC_KEY:  // recipient
+                        // sends his public key
+                        encryptionMm = message; // then message is sent from FetchMail correctly
+                        // with komp headers
+
+                        break;
+                    case HeaderFields.KompState.ENCRYPTED_EMAIL:  // sender sends encrypted email
+                        encryptionMm = message; // then message is sent from FetchMail correctly
+                        // with komp headers
+
+                        break;
+                    default:  // first time sending message so need to save original message and
+                        // send info email with sender's public key
+                        EmailSharedPrefsUtils.saveOriginalMessage(mContext, message);
+                        UsersEncryptionEntry entry = SendMailUtils
+                                .getUsersEncryptionEntryIfExists(mContext, message);
+                        // if email of sender/recipient are not on encryption database add it
+                        // (first state with only sender's keys)
+                        if (entry == null) {
+                            encryptionMm = ees.getEmailFirstTimeSending(message, session,
+                                    keyPairSender);
+                            UsersEncryptionEntry newEntry = SendMailUtils
+                                    .createUsersEncryptionEntry(message, keyPairSender);
+                            entriesDb.addEntry(newEntry);
+                            // else if recipient exists in database get secret key, encrypt
+                            // message with it and send it
+                        } else {
+                            SecretKey secretKey = DHHelper.SecretKeyClass.stringToSecretKey(entry
+                                    .getSharedSecretKey());
+                            encryptionMm = eer.createEncryptedMessage(session, message, secretKey);
+                        }
+                        break;
                 }
             } else {
                 // no library, just send the normal message

@@ -5,12 +5,12 @@
     <item
         android:id="@+id/menu_item_refresh"
         android:icon="@drawable/ic_menu_refresh"
-        android:title="Refresh"
+        android:title="@string/menu_refresh"
         app:showAsAction="ifRoom|withText"/>
 
     <item
         android:id="@+id/menu_item_new_email"
         android:icon="@drawable/ic_menu_new_mail"
-        android:title="New Email"
+        android:title="@string/menu_new_email"
         app:showAsAction="ifRoom|withText"/>
 </menu>

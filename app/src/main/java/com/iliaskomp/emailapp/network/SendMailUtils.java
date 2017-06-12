@@ -3,7 +3,6 @@ package com.iliaskomp.emailapp.network;
 import android.content.Context;
 
 import com.iliaskomp.dhalgorithm.DHHelper;
-import com.iliaskomp.email.HeaderFields;
 import com.iliaskomp.emailapp.models.UsersEncryptionDb;
 import com.iliaskomp.emailapp.models.UsersEncryptionEntry;
 import com.iliaskomp.emailapp.utils.Config;
@@ -11,10 +10,7 @@ import com.iliaskomp.emailapp.utils.Config;
 import java.security.KeyPair;
 import java.util.Properties;
 
-import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 /**
@@ -55,19 +51,6 @@ public class SendMailUtils {
         return emailName.substring(emailName.indexOf("@") + 1);
     }
 
-    static MimeMessage createMimeMessage(Session session, String emailName, String recipient,
-                                         String subject, String message) throws MessagingException {
-
-        MimeMessage mm = new MimeMessage(session);
-
-        mm.setFrom(new InternetAddress(emailName));
-        mm.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
-        mm.setSubject(subject);
-        mm.setText(message);
-
-        return mm;
-    }
-
     // returns null if no entry is found
     static UsersEncryptionEntry getUsersEncryptionEntryIfExists(Context context, MimeMessage message) throws MessagingException {
         UsersEncryptionDb db = UsersEncryptionDb.get(context);
@@ -92,22 +75,5 @@ public class SendMailUtils {
         entry.setState(UsersEncryptionEntry.State.SENDER_ENTRY_NON_COMPLETE);
 
         return entry;
-    }
-
-    public static Message createEncryptedMessage(MimeMessage originalMm, String[] encryptResult, Session session) throws MessagingException {
-        String encryptedText = encryptResult[0];
-        String iv = encryptResult[1];
-
-        //Creating MimeMessage object
-        MimeMessage mm = new MimeMessage(session);
-
-        mm.setFrom(originalMm.getSender());
-        mm.addRecipient(Message.RecipientType.TO, originalMm.getAllRecipients()[0]);
-        mm.setSubject(originalMm.getSubject());
-        mm.setText(encryptedText);
-        mm.setHeader(HeaderFields.HeaderX.STATE, HeaderFields.KompState.ENCRYPTED_EMAIL);
-        mm.setHeader(HeaderFields.HeaderX.IV, iv);
-
-        return mm;
     }
 }

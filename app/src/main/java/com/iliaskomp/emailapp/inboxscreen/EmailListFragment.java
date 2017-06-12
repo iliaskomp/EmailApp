@@ -34,8 +34,7 @@ import java.util.List;
  */
 
 public class EmailListFragment extends Fragment implements AsyncResponseForFetchEmail {
-    private static final String LOG_CAT = "EmailListFragment";
-    public static final String ARGS_FOLDER = "folderName";
+    private static final String ARGS_FOLDER = "folderName";
     private static final String ARGS_EMAIL = "email";
     private static final String ARGS_PASSWORD = "password";
 
@@ -79,9 +78,9 @@ public class EmailListFragment extends Fragment implements AsyncResponseForFetch
 
         TextView textViewTitle = (TextView) view.findViewById(R.id.text_view_email_list_title);
         if (mFolderName.equals(EmailDbSchema.InboxTable.NAME)) {
-            textViewTitle.setText("Inbox");
+            textViewTitle.setText(R.string.folder_name_inbox);
         } else if (mFolderName.equals(EmailDbSchema.SentTable.NAME)) {
-            textViewTitle.setText("Sent");
+            textViewTitle.setText(R.string.folder_name_sent);
         }
 
         fetchMail();

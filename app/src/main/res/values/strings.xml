@@ -8,4 +8,24 @@
     <string name="button_main_inbox">Inbox</string>
     <string name="button_main_sent">Sent</string>
     <string name="content_description_encryption_status">encryptionStatus</string>
+
+    <!--NEW MAIL ACTIVITY-->
+    <string name="new_mail_sender">Sender</string>
+    <string name="new_mail_recipient">Recipient</string>
+    <string name="new_mail_subject">Subject</string>
+    <string name="new_mail_message">Message</string>
+    <string name="new_mail_button_send">Send</string>
+
+    <!--MAIL ACTIVITY-->
+    <string name="email_text_message">Message</string>
+    <string name="email_text_click_for_headers">Click for headers</string>
+
+    <!--MENU-->
+    <string name="menu_refresh">Refresh</string>
+    <string name="menu_new_email">New Email</string>
+
+    <!--EMAIL FOLDER NAMES-->
+    <string name="folder_name_inbox">Inbox</string>
+    <string name="folder_name_sent">Sent</string>
+
 </resources>
