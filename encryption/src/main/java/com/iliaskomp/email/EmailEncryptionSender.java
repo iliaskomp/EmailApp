@@ -31,7 +31,7 @@ public class EmailEncryptionSender {
 
     private static final String FIRST_TIME_MESSAGE_2 = "\nThis message is part of the komp " +
             "encryption library.\n\nIf you have the library installed, an automatic message will " +
-            "be sent to establish encrypted communication. In any other case, you should either" +
+            "be sent to establish encrypted communication. In any other case, you should either " +
             "install the library or contact the sender for an unencrypted email";
 
     public EmailEncryptionSender() {
@@ -72,7 +72,7 @@ public class EmailEncryptionSender {
         // Sender encodes encryption state and his public key in order to send it to recipient
         //TODO fold public key?
         formattedMessage.addHeader(STATE, RECIPIENT_GETS_SENDER_PUBLIC_KEY);
-        formattedMessage.addHeader(PUBLIC_KEY_SENDER, DHHelper.PublicKeyClass.publicKeyToString
+        formattedMessage.addHeader(PUBLIC_KEY_SENDER, DHHelper.PublicKeyClass.keyToString
                 (keyPairSender.getPublic()));
 
         return formattedMessage;

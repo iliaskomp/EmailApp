@@ -1,14 +1,10 @@
-package com.iliaskomp.emailapp.network;
+package com.iliaskomp.emailapp.network.utils;
 
 import android.content.Context;
 import android.util.Log;
 
-import com.iliaskomp.dhalgorithm.DHAlgorithm;
-import com.iliaskomp.dhalgorithm.DHHelper;
 import com.iliaskomp.email.EmailEncryptionRecipient;
 import com.iliaskomp.emailapp.models.EmailModel;
-import com.iliaskomp.emailapp.models.UsersEncryptionDb;
-import com.iliaskomp.emailapp.models.UsersEncryptionEntry;
 import com.iliaskomp.emailapp.utils.Config;
 import com.iliaskomp.emailapp.utils.EmailCredentials;
 import com.iliaskomp.emailapp.utils.HeadersFormatHelper;
@@ -17,9 +13,7 @@ import org.jsoup.Jsoup;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
-import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -43,38 +37,8 @@ import javax.mail.internet.MimeMultipart;
 
 public class FetchMailUtils {
 
-    //TODO image support etc
-    private static String getEmailContentFromMessageObjects(Part messageObject) throws MessagingException, IOException {
-        Message message = (Message) messageObject;
-        // String type = message.getContentType();
-        String result = "";
 
-        if (message.isMimeType("text/plain")) {
-            result = message.getContent().toString();
-        } else if (message.isMimeType("text/plain")) {
-            String html = (String) messageObject.getContent();
-            result = result + "\n" + Jsoup.parse(html).text();
-        } else if (message.isMimeType("multipart/*")) {
-            MimeMultipart mimeMultipart = (MimeMultipart) message.getContent();
-            int count = mimeMultipart.getCount();
-            for (int i = 0; i < count; i++) {
-                BodyPart bodyPart = mimeMultipart.getBodyPart(i);
-                if (bodyPart.isMimeType("text/plain")) {
-                    result = result + "\n" + bodyPart.getContent();
-                    break;  //without break same text appears twice in my tests
-                } else if (bodyPart.isMimeType("text/html")) {
-                    String html = (String) bodyPart.getContent();
-                    result = result + "\n" + Jsoup.parse(html).text();
-                }
-            }
-        } else {
-            result = "invalid";
-        }
-
-        return result;
-    }
-
-    static EmailModel buildEmailFromMessage(Context context, Message message) throws MessagingException, IOException {
+    public static EmailModel buildEmailFromMessage(Context context, Message message) throws MessagingException, IOException {
         EmailModel email = new EmailModel();
 
         email.setSender(message.getFrom()[0].toString());
@@ -89,50 +53,7 @@ public class FetchMailUtils {
         return email;
     }
 
-    public static void updateAndCompleteEntry(Context context, Message message) throws MessagingException, InvalidKeyException, NoSuchAlgorithmException {
-        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
-        PublicKey theirPublicKey = eer.getRecipientPublicKeyFromHeader(message);
-
-        UsersEncryptionDb db = UsersEncryptionDb.get(context);
-        UsersEncryptionEntry oldEntry = db.getEntryFromEmails(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
-
-        if (oldEntry != null) {
-            UsersEncryptionEntry newEntry = new UsersEncryptionEntry(oldEntry.getMyEmail(), oldEntry.getTheirEmail());
-
-            newEntry.setId(oldEntry.getId());
-            newEntry.setMyPublicKey(oldEntry.getMyPublicKey());
-            newEntry.setMyPrivateKey(oldEntry.getMyPrivateKey());
-            newEntry.setState(UsersEncryptionEntry.State.ENTRY_COMPLETE);
-
-            newEntry.setTheirPublicKey(DHHelper.PublicKeyClass.publicKeyToString(theirPublicKey));
-
-
-            DHAlgorithm dhAlgorithm = new DHAlgorithm();
-            SecretKey secretKey = dhAlgorithm.agreeSecretKey(DHHelper.PrivateKeyClass.stringToPrivateKey(oldEntry.getMyPrivateKey()), theirPublicKey);
-            newEntry.setSharedSecretKey(DHHelper.SecretKeyClass.secretKeyToString(secretKey));
-
-            db.updateEntry(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString(), newEntry);
-        }
-    }
-
-    static UsersEncryptionEntry createRecipientEntry(Message message, KeyPair keyPair) throws MessagingException, InvalidKeyException, NoSuchAlgorithmException {
-        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
-        DHAlgorithm dhAlgorithm = new DHAlgorithm();
-
-        PublicKey theirPublicKey = eer.getSenderPublicKeyFromHeader(message);
-        SecretKey secretKey = dhAlgorithm.agreeSecretKey(keyPair.getPrivate(), theirPublicKey);
-
-        UsersEncryptionEntry entry = new UsersEncryptionEntry(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
-        entry.setMyPrivateKey(DHHelper.PrivateKeyClass.privateKeyToString(keyPair.getPrivate()));
-        entry.setMyPublicKey(DHHelper.PublicKeyClass.publicKeyToString(keyPair.getPublic()));
-        entry.setTheirPublicKey(DHHelper.PublicKeyClass.publicKeyToString(theirPublicKey));
-        entry.setSharedSecretKey(DHHelper.SecretKeyClass.secretKeyToString(secretKey));
-        entry.setState(UsersEncryptionEntry.State.ENTRY_COMPLETE);
-
-        return entry;
-    }
-
-    static Properties getProperties(String server, String protocol) {
+    public static Properties getProperties(String server, String protocol) {
         Properties properties = new Properties();
         properties.put("mail.imap.host", server);
 
@@ -153,7 +74,7 @@ public class FetchMailUtils {
         return properties;
     }
 
-    static String getServerDomain(String domain, String protocol) {
+    public static String getServerDomain(String domain, String protocol) {
         switch (domain) {
             case Config.Gmail.DOMAIN_NAME:
                 return protocol.equals(Config.Name.IMAP) ?
@@ -179,7 +100,7 @@ public class FetchMailUtils {
     }
 
     //returns null if no known service/service found
-    static String getServiceFromEmail(String email) {
+    public static String getServiceFromEmail(String email) {
         return email.substring(email.indexOf("@") + 1);
     }
 
@@ -190,13 +111,6 @@ public class FetchMailUtils {
         } catch (ClassNotFoundException e) {
             return false;
         }
-    }
-
-    public static SecretKey getSecretSharedKeyFromDb(Context context, String myEmail, String theirEmail) throws MessagingException {
-        UsersEncryptionDb db = UsersEncryptionDb.get(context);
-        String keyString = db.getSharedSeretFromEmails(myEmail, theirEmail);
-
-        return DHHelper.SecretKeyClass.stringToSecretKey(keyString);
     }
 
     public static EmailModel buildDecryptedEmail(Message message, String decryptedText) throws MessagingException, IOException {
@@ -230,7 +144,7 @@ public class FetchMailUtils {
 
         for (MimeMessage message : messagesForRecipient) {
             Session session = getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, SendMailUtils.getProperties(message.getAllRecipients()[0].toString()));
-            SecretKey secretKey = FetchMailUtils.getSecretSharedKeyFromDb(context, message.getFrom()[0].toString(), message.getAllRecipients()[0].toString());
+            SecretKey secretKey = UsersEncryptionEntryHelper.getSecretSharedKeyFromDb(context, message.getFrom()[0].toString(), message.getAllRecipients()[0].toString());
 
             MimeMessage encryptedMessage = eer.createEncryptedMessage(session, message, secretKey);
             messages.add(encryptedMessage);
@@ -238,4 +152,73 @@ public class FetchMailUtils {
         }
         return messages;
     }
+
+    //TODO image support etc
+    private static String getEmailContentFromMessageObjects(Part messageObject) throws
+            MessagingException, IOException {
+        Message message = (Message) messageObject;
+//         String type = message.getContentType();
+        String result = "";
+
+        if (message.isMimeType("text/plain")) {
+            result = message.getContent().toString();
+        } else if (message.isMimeType("text/html")) {
+            String html = (String) messageObject.getContent();
+            result = result + "\n" + Jsoup.parse(html).text();
+        } else if (message.isMimeType("multipart/*")) {
+            MimeMultipart mimeMultipart = (MimeMultipart) message.getContent();
+            int count = mimeMultipart.getCount();
+            for (int i = 0; i < count; i++) {
+                BodyPart bodyPart = mimeMultipart.getBodyPart(i);
+                if (bodyPart.isMimeType("text/plain")) {
+                    result = result + "\n" + bodyPart.getContent();
+                    break;  //without break same text appears twice in my tests
+                } else if (bodyPart.isMimeType("text/html")) {
+                    String html = (String) bodyPart.getContent();
+                    result = result + "\n" + Jsoup.parse(html).text();
+                }
+            }
+        } else {
+            result = "invalid";
+        }
+
+//        else if (message.isMimeType("image/jpeg")) {
+//            System.out.println("--------> image/jpeg");
+//            Object o = message.getContent();
+//
+//            InputStream x = (InputStream) o;
+//            // Construct the required byte array
+//            System.out.println("x.length = " + x.available());
+//            while ((i = (int) ((InputStream) x).available()) > 0) {
+//                int result = (int) (((InputStream) x).read(bArray));
+//                if (result == -1) {
+//                    int i = 0;
+//                }
+//                byte[] bArray = new byte[x.available()];
+//
+//                break;
+//            }
+//            FileOutputStream f2 = new FileOutputStream("/tmp/image.jpg");
+//            f2.write(bArray);
+//        }
+
+//        else if (message.getContentType().contains("image/")) {
+//                Log.d("content type", message.getContentType());
+//                File f = new File("image" + new Date().getTime() + ".jpg");
+//                DataOutputStream output = new DataOutputStream(
+//                        new BufferedOutputStream(new FileOutputStream(f)));
+//                com.sun.mail.util.BASE64DecoderStream test =
+//                        (com.sun.mail.util.BASE64DecoderStream) message
+//                                .getContent();
+//                byte[] buffer = new byte[1024];
+//                int bytesRead;
+//                while ((bytesRead = test.read(buffer)) != -1) {
+//                    output.write(buffer, 0, bytesRead);
+//                }
+//
+
+
+        return result;
+    }
+
 }

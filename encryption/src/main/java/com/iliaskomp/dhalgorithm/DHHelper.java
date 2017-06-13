@@ -21,7 +21,7 @@ public class DHHelper {
 
     public static class PublicKeyClass {
 
-        public static PublicKey decodePublicKey(byte[] key) throws NoSuchAlgorithmException,
+        public static PublicKey decode(byte[] key) throws NoSuchAlgorithmException,
                 InvalidKeySpecException {
 
             KeyFactory keyFactory = KeyFactory.getInstance("DH");
@@ -30,16 +30,16 @@ public class DHHelper {
             return keyFactory.generatePublic(x509KeySpec);
         }
 
-        public static byte[] encodePublicKey(PublicKey key) {
+        public static byte[] encode(PublicKey key) {
             return key.getEncoded();
         }
 
-        public static String publicKeyToString(PublicKey publicKey) {
-            byte[] publicKeyEncodedSender = encodePublicKey(publicKey);
+        public static String keyToString(PublicKey publicKey) {
+            byte[] publicKeyEncodedSender = encode(publicKey);
             return Base64.encodeToString(publicKeyEncodedSender, Base64.NO_WRAP);
         }
 
-        public static PublicKey stringToPublicKey(String string) {
+        public static PublicKey stringToKey(String string) {
             try {
                 byte[] stringBytes = Base64.decode(string, Base64.NO_WRAP);
                 X509EncodedKeySpec keySpec = new X509EncodedKeySpec(stringBytes);
@@ -53,7 +53,7 @@ public class DHHelper {
         }
 
         // Get params from public key
-        public static DHParameterSpec publicKeyToParams(PublicKey publicKey) throws
+        public static DHParameterSpec keyToParams(PublicKey publicKey) throws
                 NoSuchAlgorithmException, InvalidAlgorithmParameterException,
                 InvalidKeySpecException {
             return ((DHPublicKey) publicKey).getParams();
@@ -61,7 +61,7 @@ public class DHHelper {
     }
 
     public static class PrivateKeyClass {
-        private static byte[] encodePrivateKey(PrivateKey key) {
+        private static byte[] encode(PrivateKey key) {
             return key.getEncoded();
         }
 
@@ -74,12 +74,12 @@ public class DHHelper {
             return keyFactory.generatePrivate(x509KeySpec);
         }
 
-        public static String privateKeyToString(PrivateKey privateKey) {
-            byte[] privateKeyEncodedSender = encodePrivateKey(privateKey);
+        public static String keyToString(PrivateKey privateKey) {
+            byte[] privateKeyEncodedSender = encode(privateKey);
             return Base64.encodeToString(privateKeyEncodedSender, Base64.NO_WRAP);
         }
 
-        public static PrivateKey stringToPrivateKey(String string) {
+        public static PrivateKey stringToKey(String string) {
             try {
                 byte[] stringBytes = Base64.decode(string, Base64.NO_WRAP);
                 PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(stringBytes);
@@ -95,24 +95,24 @@ public class DHHelper {
 
     public static class SecretKeyClass {
 
-        public static byte[] encodeSecretKey(SecretKey key) {
+        public static byte[] encode(SecretKey key) {
             return key.getEncoded();
         }
 
-        public static SecretKey decodeSecretKey(byte[] encodedKey) {
+        public static SecretKey decode(byte[] encodedKey) {
             return new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES");
         }
 
-        public static String secretKeyToString(SecretKey secretKey) {
-            byte[] secretKeyEncodedSender = encodeSecretKey(secretKey);
+        public static String keyToString(SecretKey secretKey) {
+            byte[] secretKeyEncodedSender = encode(secretKey);
             return Base64.encodeToString(secretKeyEncodedSender, Base64.NO_WRAP);
         }
 
-        public static SecretKey stringToSecretKey(String string) {
+        public static SecretKey stringToKey(String string) {
             byte[] stringBytes = Base64.decode(string, Base64.NO_WRAP);
 //          SecretKeyFactory kf = SecretKeyFactory.getInstance("PBEWithHmacSHA256AndAES_128");
             SecretKeySpec spec = new SecretKeySpec(stringBytes, "AES");
-            return decodeSecretKey(spec.getEncoded());
+            return decode(spec.getEncoded());
         }
     }
 

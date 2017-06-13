@@ -82,7 +82,7 @@ public class EmailEncryptionRecipient {
         //TODO fold public key?
         messageBack.addHeader(HeaderX.STATE, KompState.SENDER_GETS_RECIPIENT_PUBLIC_KEY);
         messageBack.addHeader(HeaderX.PUBLIC_KEY_RECIPIENT, DHHelper.PublicKeyClass
-                .publicKeyToString(keyPairRecipient.getPublic()));
+                .keyToString(keyPairRecipient.getPublic()));
 
         return messageBack;
     }
@@ -93,7 +93,7 @@ public class EmailEncryptionRecipient {
 
         try {
             DHParameterSpec paramsFromSender =
-                    DHHelper.PublicKeyClass.publicKeyToParams(publicKeySender);
+                    DHHelper.PublicKeyClass.keyToParams(publicKeySender);
             DHAlgorithm dh = new DHAlgorithm();
             return dh.generateKeyPairFromParameters(
                     paramsFromSender.getP(), paramsFromSender.getG());
@@ -112,7 +112,7 @@ public class EmailEncryptionRecipient {
         for (Map.Entry<String, String> header : headers.entrySet()) {
             if (header.getKey().equals(PUBLIC_KEY_SENDER)) {
                 String publicKeyString = header.getValue();
-                return DHHelper.PublicKeyClass.stringToPublicKey(publicKeyString);
+                return DHHelper.PublicKeyClass.stringToKey(publicKeyString);
             }
         }
         return null;
@@ -125,7 +125,7 @@ public class EmailEncryptionRecipient {
         for (Map.Entry<String, String> header : headers.entrySet()) {
             if (header.getKey().equals(PUBLIC_KEY_RECIPIENT)) {
                 String publicKeyString = header.getValue();
-                return DHHelper.PublicKeyClass.stringToPublicKey(publicKeyString);
+                return DHHelper.PublicKeyClass.stringToKey(publicKeyString);
             }
         }
         return null;

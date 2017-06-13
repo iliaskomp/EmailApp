@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.iliaskomp.emailapp.network.utils.FetchMailUtils;
+import com.iliaskomp.emailapp.network.utils.SendMailUtils;
 import com.iliaskomp.emailapp.utils.EmailCredentials;
 import com.iliaskomp.libs.Base64;
 

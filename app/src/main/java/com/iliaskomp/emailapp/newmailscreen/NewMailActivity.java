@@ -11,9 +11,9 @@ import android.widget.EditText;
 import com.iliaskomp.emailapp.R;
 import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.models.InboxDB;
-import com.iliaskomp.emailapp.network.FetchMailUtils;
+import com.iliaskomp.emailapp.network.utils.FetchMailUtils;
 import com.iliaskomp.emailapp.network.SendMail;
-import com.iliaskomp.emailapp.network.SendMailUtils;
+import com.iliaskomp.emailapp.network.utils.SendMailUtils;
 import com.iliaskomp.emailapp.utils.EmailCredentials;
 
 import java.util.Properties;

@@ -4,7 +4,7 @@ package com.iliaskomp.emailapp.database.usersencryption;
  * Created by IliasKomp on 28/05/17.
  */
 
-public class UsersEncryptionSchema {
+public class KompSchema {
     public static final class UsersTable {
         public static final String NAME = "users";
 

@@ -9,8 +9,11 @@ import com.iliaskomp.dhalgorithm.DHHelper;
 import com.iliaskomp.email.EmailEncryptionRecipient;
 import com.iliaskomp.email.EmailEncryptionSender;
 import com.iliaskomp.email.HeaderFields;
-import com.iliaskomp.emailapp.models.UsersEncryptionDb;
-import com.iliaskomp.emailapp.models.UsersEncryptionEntry;
+import com.iliaskomp.emailapp.models.KompDb;
+import com.iliaskomp.emailapp.models.KompEntry;
+import com.iliaskomp.emailapp.network.utils.FetchMailUtils;
+import com.iliaskomp.emailapp.network.utils.SendMailUtils;
+import com.iliaskomp.emailapp.network.utils.UsersEncryptionEntryHelper;
 import com.iliaskomp.emailapp.utils.EmailCredentials;
 
 import java.io.IOException;
@@ -91,7 +94,7 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
             // if recipient doesn't exist, create key pair and send first message with public key
             KeyPair keyPairSender = ees.createKeyPair();
             Message encryptionMm;
-            UsersEncryptionDb entriesDb = UsersEncryptionDb.get(mContext);
+            KompDb entriesDb = KompDb.get(mContext);
 
             //1st interaction
             if (FetchMailUtils.encryptionLibraryExists()) {
@@ -112,20 +115,20 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
                     default:  // first time sending message so need to save original message and
                         // send info email with sender's public key
                         EmailSharedPrefsUtils.saveOriginalMessage(mContext, message);
-                        UsersEncryptionEntry entry = SendMailUtils
+                        KompEntry entry = UsersEncryptionEntryHelper
                                 .getUsersEncryptionEntryIfExists(mContext, message);
                         // if email of sender/recipient are not on encryption database add it
                         // (first state with only sender's keys)
                         if (entry == null) {
                             encryptionMm = ees.getEmailFirstTimeSending(message, session,
                                     keyPairSender);
-                            UsersEncryptionEntry newEntry = SendMailUtils
-                                    .createUsersEncryptionEntry(message, keyPairSender);
+                            KompEntry newEntry = UsersEncryptionEntryHelper
+                                    .createSenderEntryNonComplete(message, keyPairSender);
                             entriesDb.addEntry(newEntry);
                             // else if recipient exists in database get secret key, encrypt
                             // message with it and send it
                         } else {
-                            SecretKey secretKey = DHHelper.SecretKeyClass.stringToSecretKey(entry
+                            SecretKey secretKey = DHHelper.SecretKeyClass.stringToKey(entry
                                     .getSharedSecretKey());
                             encryptionMm = eer.createEncryptedMessage(session, message, secretKey);
                         }

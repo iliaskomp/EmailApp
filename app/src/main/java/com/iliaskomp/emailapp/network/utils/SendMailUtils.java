@@ -1,17 +1,8 @@
-package com.iliaskomp.emailapp.network;
+package com.iliaskomp.emailapp.network.utils;
 
-import android.content.Context;
-
-import com.iliaskomp.dhalgorithm.DHHelper;
-import com.iliaskomp.emailapp.models.UsersEncryptionDb;
-import com.iliaskomp.emailapp.models.UsersEncryptionEntry;
 import com.iliaskomp.emailapp.utils.Config;
 
-import java.security.KeyPair;
 import java.util.Properties;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 
 /**
  * Created by IliasKomp on 22/05/17.
@@ -51,29 +42,5 @@ public class SendMailUtils {
         return emailName.substring(emailName.indexOf("@") + 1);
     }
 
-    // returns null if no entry is found
-    static UsersEncryptionEntry getUsersEncryptionEntryIfExists(Context context, MimeMessage message) throws MessagingException {
-        UsersEncryptionDb db = UsersEncryptionDb.get(context);
-        for (UsersEncryptionEntry entry : db.getUsersEncryptionEntries()) {
-            if (entry.getMyEmail().equals(message.getFrom()[0].toString()) &&
-                    entry.getTheirEmail().equals(message.getAllRecipients()[0].toString()))
-                return entry;
-        }
-        return null;
-    }
 
-
-
-    static UsersEncryptionEntry createUsersEncryptionEntry(
-            MimeMessage message, KeyPair keyPair) throws MessagingException {
-
-        UsersEncryptionEntry entry = new UsersEncryptionEntry(message.getFrom()[0].toString(),
-                message.getAllRecipients()[0].toString());
-
-        entry.setMyPublicKey(DHHelper.PublicKeyClass.publicKeyToString(keyPair.getPublic()));
-        entry.setMyPrivateKey(DHHelper.PrivateKeyClass.privateKeyToString(keyPair.getPrivate()));
-        entry.setState(UsersEncryptionEntry.State.SENDER_ENTRY_NON_COMPLETE);
-
-        return entry;
-    }
 }

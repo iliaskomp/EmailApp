@@ -14,8 +14,11 @@ import com.iliaskomp.emailapp.models.EmailDB;
 import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.models.InboxDB;
 import com.iliaskomp.emailapp.models.SentDB;
-import com.iliaskomp.emailapp.models.UsersEncryptionDb;
-import com.iliaskomp.emailapp.models.UsersEncryptionEntry;
+import com.iliaskomp.emailapp.models.KompDb;
+import com.iliaskomp.emailapp.models.KompEntry;
+import com.iliaskomp.emailapp.network.utils.FetchMailUtils;
+import com.iliaskomp.emailapp.network.utils.SendMailUtils;
+import com.iliaskomp.emailapp.network.utils.UsersEncryptionEntryHelper;
 import com.iliaskomp.emailapp.utils.EmailCredentials;
 import com.iliaskomp.encryption.EncryptionHelper;
 
@@ -113,7 +116,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
         String server = FetchMailUtils.getServerDomain(domain, mProtocol); //e.g. imap.gmail.com
 
         EmailDB emailDb = null;
-        UsersEncryptionDb entriesDb = UsersEncryptionDb.get(mContext);
+        KompDb entriesDb = KompDb.get(mContext);
         List<MimeMessage> emailsToAutoReply = new ArrayList<>(); //TODO
 
 
@@ -193,7 +196,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
 
     private EmailModel checkHeaderState(List<MimeMessage> emailsToAutoReply, Message message,
                                         String headerState) throws MessagingException, IOException, InvalidKeyException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, NoSuchPaddingException, InvalidAlgorithmParameterException {
-        UsersEncryptionDb entriesDb = UsersEncryptionDb.get(mContext);
+        KompDb entriesDb = KompDb.get(mContext);
         EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
         EmailModel emailToAddToDb;
         switch (headerState) {
@@ -204,7 +207,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                 KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
                 assert keyPairRecipient != null;
 
-                UsersEncryptionEntry entry = FetchMailUtils.createRecipientEntry(message, keyPairRecipient);
+                KompEntry entry = UsersEncryptionEntryHelper.createRecipientEntry(message, keyPairRecipient);
                 entriesDb.addEntry(entry);
 
                 Session session = FetchMailUtils.getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, SendMailUtils.getProperties(EmailCredentials.EMAIL_SEND));
@@ -214,7 +217,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
             }
             case HeaderFields.KompState.SENDER_GETS_RECIPIENT_PUBLIC_KEY: {
                 emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
-                FetchMailUtils.updateAndCompleteEntry(mContext, message); // get recipient's key and complete encryption db for recipient
+                UsersEncryptionEntryHelper.updateAndCompleteSenderEntry(mContext, message); // get recipient's key and complete encryption db for recipient
 
                 // get messages where sender was waiting to receive recipient's key from sharedprefs
                 List<MimeMessage> messagesForRecipient = EmailSharedPrefsUtils.getOriginalMessagesForEmail(mContext, message.getFrom()[0].toString());
@@ -225,7 +228,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                 break;
             }
             case HeaderFields.KompState.ENCRYPTED_EMAIL: {
-                SecretKey secretKey = FetchMailUtils.getSecretSharedKeyFromDb(mContext, message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
+                SecretKey secretKey = UsersEncryptionEntryHelper.getSecretSharedKeyFromDb(mContext, message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
                 String iv = eer.getHeaderIv(message);
                 String decryptedText = null;
                 try {

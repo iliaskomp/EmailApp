@@ -6,7 +6,7 @@ import java.util.UUID;
  * Created by IliasKomp on 28/05/17.
  */
 
-public class UsersEncryptionEntry {
+public class KompEntry {
 
 //    public static final String UUID = "uuid";
 //    public static final String MY_EMAIL = "my_email";
@@ -34,13 +34,13 @@ public class UsersEncryptionEntry {
     }
 
     // Only for wrapper class when getting uuid from db and reconstructing this object
-    public UsersEncryptionEntry(UUID uuid, String myEmail, String theirEmail) {
+    public KompEntry(UUID uuid, String myEmail, String theirEmail) {
         mId = uuid;
         mMyEmail = myEmail;
         mTheirEmail = theirEmail;
     }
 
-    public UsersEncryptionEntry(String myEmail, String theirEmail) {
+    public KompEntry(String myEmail, String theirEmail) {
         mId = UUID.randomUUID();
         mMyEmail = myEmail;
         mTheirEmail = theirEmail;
@@ -110,6 +110,7 @@ public class UsersEncryptionEntry {
     public void setSharedSecretKey(String sharedSecretKey) {
         mSharedSecretKey = sharedSecretKey;
     }
+
     public int getState() {
         return mState;
     }

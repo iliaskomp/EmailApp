@@ -5,28 +5,28 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.iliaskomp.emailapp.database.usersencryption.UsersEncryptionBaseHelper;
-import com.iliaskomp.emailapp.database.usersencryption.UsersEncryptionCursorWrapper;
+import com.iliaskomp.emailapp.database.usersencryption.KompBaseHelper;
+import com.iliaskomp.emailapp.database.usersencryption.KompCursorWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.iliaskomp.emailapp.database.usersencryption.UsersEncryptionSchema.UsersTable;
+import static com.iliaskomp.emailapp.database.usersencryption.KompSchema.UsersTable;
 
 /**
  * Created by IliasKomp on 28/05/17.
  */
 
-public class UsersEncryptionDb {
-    private static UsersEncryptionDb sUsersEncryptionDb;
+public class KompDb {
+    private static KompDb sKompDb;
     private static SQLiteDatabase sDatabase;
 
-    public static UsersEncryptionDb get(Context context) {
-        if (sUsersEncryptionDb == null) {
-            sUsersEncryptionDb = new UsersEncryptionDb(context);
+    public static KompDb get(Context context) {
+        if (sKompDb == null) {
+            sKompDb = new KompDb(context);
         }
 
-        return sUsersEncryptionDb;
+        return sKompDb;
     }
 
 
@@ -35,23 +35,22 @@ public class UsersEncryptionDb {
         return getEntryFromEmails(myEmail, theirEmail).getState();
     }
 
-    public String getSharedSeretFromEmails (String myEmail, String theirEmail) {
+    public String getSecretKeyForEmails(String myEmail, String theirEmail) {
         return getEntryFromEmails(myEmail, theirEmail).getSharedSecretKey();
     }
 
-    private UsersEncryptionDb(Context context) {
-        sDatabase = new UsersEncryptionBaseHelper(context).getWritableDatabase();
+    private KompDb(Context context) {
+        sDatabase = new KompBaseHelper(context).getWritableDatabase();
     }
 
-    public List<UsersEncryptionEntry> getUsersEncryptionEntries() {
-        List<UsersEncryptionEntry> userEntries = new ArrayList<>();
-
-        UsersEncryptionCursorWrapper cursor = queryUsersEncryptionEntries(null, null);
+    public List<KompEntry> getAllKompEntries() {
+        List<KompEntry> userEntries = new ArrayList<>();
+        KompCursorWrapper cursor = queryKompEntries(null, null);
 
         try {
             cursor.moveToLast();
             while (!cursor.isBeforeFirst()) {
-                userEntries.add(cursor.getUsersEncryptionEntry());
+                userEntries.add(cursor.getKompEntry());
                 cursor.moveToPrevious();
             }
         } finally {
@@ -61,12 +60,12 @@ public class UsersEncryptionDb {
         return userEntries;
     }
 
-    public void addEntry(UsersEncryptionEntry entry) {
+    public void addEntry(KompEntry entry) {
         ContentValues values = getContentValues(entry);
         sDatabase.insert(UsersTable.NAME, null, values);
     }
 
-    public void updateEntry(String myEmail, String theirEmail, UsersEncryptionEntry newEntry) {
+    public void updateEntry(String myEmail, String theirEmail, KompEntry newEntry) {
         ContentValues newValues = getContentValues(newEntry);
 
         sDatabase.update(UsersTable.NAME, newValues,
@@ -75,12 +74,8 @@ public class UsersEncryptionDb {
 
     }
 
-    public int getUsersEncryptionEntriesCount() {
-        return getUsersEncryptionEntries().size();
-    }
-
-    public UsersEncryptionEntry getEntryFromEmails (String myEmail, String theirEmail) {
-        UsersEncryptionCursorWrapper cursor = queryUsersEncryptionEntries(
+    public KompEntry getEntryFromEmails (String myEmail, String theirEmail) {
+        KompCursorWrapper cursor = queryKompEntries(
                 UsersTable.Cols.MY_EMAIL + "= ? AND " + UsersTable.Cols.THEIR_EMAIL + "= ?",
                 new String[] {myEmail, theirEmail});
 
@@ -90,13 +85,13 @@ public class UsersEncryptionDb {
                 return null;
             }
             cursor.moveToFirst();
-            return cursor.getUsersEncryptionEntry();
+            return cursor.getKompEntry();
         } finally {
             cursor.close();
         }
     }
 
-    private UsersEncryptionCursorWrapper queryUsersEncryptionEntries(String whereClause, String[] whereArgs) {
+    private KompCursorWrapper queryKompEntries(String whereClause, String[] whereArgs) {
         Cursor cursor = sDatabase.query(
                 UsersTable.NAME,
                 null,
@@ -107,10 +102,10 @@ public class UsersEncryptionDb {
                 null
         );
 
-        return new UsersEncryptionCursorWrapper(cursor);
+        return new KompCursorWrapper(cursor);
     }
 
-    private ContentValues getContentValues(UsersEncryptionEntry entry) {
+    private ContentValues getContentValues(KompEntry entry) {
         ContentValues values = new ContentValues();
 
         values.put(UsersTable.Cols.UUID, entry.getId().toString());
