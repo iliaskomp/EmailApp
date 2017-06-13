@@ -11,8 +11,7 @@ import com.iliaskomp.email.EmailEncryptionSender;
 import com.iliaskomp.email.HeaderFields;
 import com.iliaskomp.emailapp.models.KompDb;
 import com.iliaskomp.emailapp.models.KompEntry;
-import com.iliaskomp.emailapp.network.utils.FetchMailUtils;
-import com.iliaskomp.emailapp.network.utils.SendMailUtils;
+import com.iliaskomp.emailapp.network.utils.EmailConfigUtils;
 import com.iliaskomp.emailapp.network.utils.KompEntriesHelper;
 import com.iliaskomp.emailapp.utils.EmailCredentials;
 
@@ -73,7 +72,7 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
             return null;
         }
 
-        Properties props = SendMailUtils.getProperties(EmailCredentials.EMAIL_SEND);
+        Properties props = EmailConfigUtils.getSmtpProps(EmailCredentials.EMAIL_SEND);
 
         //Creating a new session
         Session session = Session.getDefaultInstance(props, new javax.mail.Authenticator() {
@@ -97,7 +96,7 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
             KompDb entriesDb = KompDb.get(mContext);
 
             //1st interaction
-            if (FetchMailUtils.encryptionLibraryExists()) {
+            if (KompEntriesHelper.encryptionLibraryExists()) {
                 String headerState = eer.getHeaderState(message);
 
                 switch (headerState) {

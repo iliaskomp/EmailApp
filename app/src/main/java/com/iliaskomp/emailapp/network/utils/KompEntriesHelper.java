@@ -7,15 +7,24 @@ import com.iliaskomp.dhalgorithm.DHHelper;
 import com.iliaskomp.email.EmailEncryptionRecipient;
 import com.iliaskomp.emailapp.models.KompDb;
 import com.iliaskomp.emailapp.models.KompEntry;
+import com.iliaskomp.emailapp.utils.EmailCredentials;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
 /**
@@ -48,7 +57,8 @@ public class KompEntriesHelper {
         PublicKey theirPublicKey = eer.getSenderPublicKeyFromHeader(message);
         SecretKey secretKey = dhAlgorithm.agreeSecretKey(keyPair.getPrivate(), theirPublicKey);
 
-        KompEntry entry = new KompEntry(message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
+        KompEntry entry = new KompEntry(message.getAllRecipients()[0].toString(),
+                message.getFrom()[0].toString());
         entry.setMyPrivateKey(DHHelper.PrivateKeyClass.keyToString(keyPair.getPrivate()));
         entry.setMyPublicKey(DHHelper.PublicKeyClass.keyToString(keyPair.getPublic()));
         entry.setTheirPublicKey(DHHelper.PublicKeyClass.keyToString(theirPublicKey));
@@ -91,7 +101,9 @@ public class KompEntriesHelper {
     }
 
     // try to get entry for message's sender and recipient. returns null if no entry is found
-    public static KompEntry getUsersEncryptionEntryIfExists(Context context, MimeMessage message) throws MessagingException {
+    public static KompEntry getUsersEncryptionEntryIfExists(Context context, MimeMessage message)
+            throws MessagingException {
+
         KompDb db = KompDb.get(context);
         for (KompEntry entry : db.getAllKompEntries()) {
             if (entry.getMyEmail().equals(message.getFrom()[0].toString()) &&
@@ -102,12 +114,43 @@ public class KompEntriesHelper {
     }
 
     // get secret key from db for sender and recipient email
-    public static SecretKey getSecretSharedKeyFromDb(Context context, String myEmail, String theirEmail)
-            throws MessagingException {
+    public static SecretKey getSecretSharedKeyFromDb(Context context, String myEmail,
+                                                     String theirEmail) throws MessagingException {
 
         KompDb db = KompDb.get(context);
         String keyString = db.getSecretKeyForEmails(myEmail, theirEmail);
 
         return DHHelper.SecretKeyClass.stringToKey(keyString);
+    }
+
+    //messagesForRecipient: messages that were saved by sender while waiting for R's public key
+    public static List<MimeMessage> encryptMessagesForRecipient(Context context,
+                                                                List<MimeMessage> messagesForRecipient)
+            throws IOException, MessagingException, InvalidKeyException, BadPaddingException,
+            NoSuchAlgorithmException, IllegalBlockSizeException, NoSuchPaddingException {
+
+        List<MimeMessage> messages = new ArrayList<>();
+        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
+
+        for (MimeMessage message : messagesForRecipient) {
+            Properties props = EmailConfigUtils.getSmtpProps(message.getAllRecipients()[0].toString());
+            Session session = EmailConfigUtils.getSentSession(EmailCredentials.EMAIL_SEND,
+                    EmailCredentials.PASSWORD_SEND, props);
+            SecretKey secretKey = getSecretSharedKeyFromDb(context, message.getFrom()[0].toString(),
+                    message.getAllRecipients()[0].toString());
+
+            MimeMessage encryptedMessage = eer.createEncryptedMessage(session, message, secretKey);
+            messages.add(encryptedMessage);
+        }
+        return messages;
+    }
+
+    public static boolean encryptionLibraryExists() {
+        try {
+            Class cls = Class.forName("com.iliaskomp.email.EmailEncryptionRecipient");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 }

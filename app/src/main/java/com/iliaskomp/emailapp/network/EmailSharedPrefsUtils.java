@@ -4,8 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.iliaskomp.emailapp.network.utils.FetchMailUtils;
-import com.iliaskomp.emailapp.network.utils.SendMailUtils;
+import com.iliaskomp.emailapp.network.utils.EmailConfigUtils;
 import com.iliaskomp.emailapp.utils.EmailCredentials;
 import com.iliaskomp.libs.Base64;
 
@@ -108,9 +107,9 @@ public class EmailSharedPrefsUtils {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(emailByteArray);
 
-        Session session = FetchMailUtils.getSentSession(EmailCredentials.EMAIL_SEND,
+        Session session = EmailConfigUtils.getSentSession(EmailCredentials.EMAIL_SEND,
                 EmailCredentials.PASSWORD_SEND,
-                SendMailUtils.getProperties(EmailCredentials.EMAIL_SEND));
+                EmailConfigUtils.getSmtpProps(EmailCredentials.EMAIL_SEND));
 
         return new MimeMessage(session, bais);
     }

@@ -11,9 +11,8 @@ import android.widget.EditText;
 import com.iliaskomp.emailapp.R;
 import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.models.InboxDB;
-import com.iliaskomp.emailapp.network.utils.FetchMailUtils;
 import com.iliaskomp.emailapp.network.SendMail;
-import com.iliaskomp.emailapp.network.utils.SendMailUtils;
+import com.iliaskomp.emailapp.network.utils.EmailConfigUtils;
 import com.iliaskomp.emailapp.utils.EmailCredentials;
 
 import java.util.Properties;
@@ -107,8 +106,8 @@ public class NewMailActivity extends AppCompatActivity{
 //    }
 
     private MimeMessage createMessage(String recipient, String subject, String message) throws MessagingException {
-        Properties props = SendMailUtils.getProperties(EmailCredentials.EMAIL_SEND);
-        MimeMessage mm = new MimeMessage(FetchMailUtils.getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, props));
+        Properties props = EmailConfigUtils.getSmtpProps(EmailCredentials.EMAIL_SEND);
+        MimeMessage mm = new MimeMessage(EmailConfigUtils.getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, props));
 
         mm.setFrom(new InternetAddress(EmailCredentials.EMAIL_SEND));
         mm.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));

@@ -3,39 +3,24 @@ package com.iliaskomp.emailapp.network.utils;
 import android.content.Context;
 import android.util.Log;
 
-import com.iliaskomp.email.EmailEncryptionRecipient;
 import com.iliaskomp.emailapp.models.EmailModel;
-import com.iliaskomp.emailapp.utils.Config;
-import com.iliaskomp.emailapp.utils.EmailCredentials;
 import com.iliaskomp.emailapp.utils.HeadersFormatHelper;
 
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Part;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 /**
- * Created by IliasKomp on 22/05/17.
+ * Created by IliasKomp on 13/06/17.
  */
 
-public class FetchMailUtils {
+public class EmailModelHelper {
 
     public static EmailModel buildEmailFromMessage(Context context, Message message) throws MessagingException, IOException {
         EmailModel email = new EmailModel();
@@ -52,66 +37,6 @@ public class FetchMailUtils {
         return email;
     }
 
-    public static Properties getProperties(String server, String protocol) {
-        Properties properties = new Properties();
-        properties.put("mail.imap.host", server);
-
-        switch (server) {
-            case Config.Gmail.IMAP_SERVER:
-                properties.put("mail.imap.port", Config.Gmail.IMAP_PORT);
-                break;
-            case Config.Yahoo.IMAP_SERVER:
-                properties.put("mail.imap.port", Config.Yahoo.IMAP_PORT);
-                break;
-            default:
-                properties.put("mail.imap.port", null);
-                break;
-        }
-
-        properties.put(String.format("mail.%s.starttls.enable", protocol), "true");
-
-        return properties;
-    }
-
-    public static String getServerDomain(String domain, String protocol) {
-        switch (domain) {
-            case Config.Gmail.DOMAIN_NAME:
-                return protocol.equals(Config.Name.IMAP) ?
-                        Config.Gmail.IMAP_SERVER : Config.Gmail.POP_SERVER;
-            case Config.Yahoo.DOMAIN_NAME:
-                return protocol.equals(Config.Name.IMAP) ?
-                        Config.Yahoo.IMAP_SERVER : Config.Yahoo.POP_SERVER;
-            default:
-                return null;
-        }
-    }
-
-    public static String getSentFolderName(String domain) {
-
-        switch (domain) {
-            case Config.Gmail.DOMAIN_NAME:
-                return "[Gmail]/Sent Mail";
-            case Config.Yahoo.DOMAIN_NAME:
-                return "Sent";
-            default:
-                return null;
-        }
-    }
-
-    //returns null if no known service/service found
-    public static String getServiceFromEmail(String email) {
-        return email.substring(email.indexOf("@") + 1);
-    }
-
-    public static boolean encryptionLibraryExists() {
-        try {
-            Class cls = Class.forName("com.iliaskomp.email.EmailEncryptionRecipient");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
-
     public static EmailModel buildDecryptedEmail(Message message, String decryptedText) throws MessagingException, IOException {
         EmailModel email = new EmailModel();
 
@@ -123,33 +48,6 @@ public class FetchMailUtils {
         email.setHeaders(HeadersFormatHelper.getHeadersStringFromEnumeration(message.getAllHeaders()));
 
         return email;
-    }
-
-    public static Session getSentSession(final String senderEmail, final String password, Properties props) {
-        return Session.getDefaultInstance(props, new javax.mail.Authenticator() {
-            //Authenticating the password
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(senderEmail, password);
-            }
-        });
-    }
-
-
-
-
-    public static List<MimeMessage> encryptMessagesForRecipient(Context context, List<MimeMessage> messagesForRecipient) throws IOException, MessagingException, InvalidKeyException, BadPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, NoSuchPaddingException {
-        List<MimeMessage> messages = new ArrayList<>();
-        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
-
-        for (MimeMessage message : messagesForRecipient) {
-            Session session = getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, SendMailUtils.getProperties(message.getAllRecipients()[0].toString()));
-            SecretKey secretKey = KompEntriesHelper.getSecretSharedKeyFromDb(context, message.getFrom()[0].toString(), message.getAllRecipients()[0].toString());
-
-            MimeMessage encryptedMessage = eer.createEncryptedMessage(session, message, secretKey);
-            messages.add(encryptedMessage);
-            //messages.add(createEncryptedMessage(context, m));
-        }
-        return messages;
     }
 
     //TODO image support etc
@@ -215,9 +113,6 @@ public class FetchMailUtils {
 //                    output.write(buffer, 0, bytesRead);
 //                }
 //
-
-
         return result;
     }
-
 }

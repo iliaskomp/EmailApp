@@ -16,8 +16,8 @@ import com.iliaskomp.emailapp.models.InboxDB;
 import com.iliaskomp.emailapp.models.SentDB;
 import com.iliaskomp.emailapp.models.KompDb;
 import com.iliaskomp.emailapp.models.KompEntry;
-import com.iliaskomp.emailapp.network.utils.FetchMailUtils;
-import com.iliaskomp.emailapp.network.utils.SendMailUtils;
+import com.iliaskomp.emailapp.network.utils.EmailModelHelper;
+import com.iliaskomp.emailapp.network.utils.EmailConfigUtils;
 import com.iliaskomp.emailapp.network.utils.KompEntriesHelper;
 import com.iliaskomp.emailapp.utils.EmailCredentials;
 import com.iliaskomp.encryption.EncryptionHelper;
@@ -112,8 +112,8 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
         Log.d(LOG_TAG, "doInBackground starts");
 
         String folderName = parameters[0];
-        String domain = FetchMailUtils.getServiceFromEmail(EmailCredentials.EMAIL_SEND); // e.g. gmail.com
-        String server = FetchMailUtils.getServerDomain(domain, mProtocol); //e.g. imap.gmail.com
+        String domain = EmailConfigUtils.getServiceFromEmail(EmailCredentials.EMAIL_SEND); // e.g. gmail.com
+        String server = EmailConfigUtils.getServerDomain(domain, mProtocol); //e.g. imap.gmail.com
 
         EmailDB emailDb = null;
         KompDb entriesDb = KompDb.get(mContext);
@@ -128,7 +128,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
         }
 
         //create properties field
-        Properties properties = FetchMailUtils.getProperties(server, mProtocol);
+        Properties properties = EmailConfigUtils.getImapProps(server, mProtocol);
         Session emailSession = Session.getInstance(properties); //Session.getDefaultInstance(properties);
 
         try {
@@ -148,7 +148,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
             if (folderName.equals(EmailDbSchema.InboxTable.NAME)) {
                 emailFolder = store.getFolder("INBOX");
             } else if (folderName.equals(EmailDbSchema.SentTable.NAME)) {
-                emailFolder = store.getFolder(FetchMailUtils.getSentFolderName(domain));
+                emailFolder = store.getFolder(EmailConfigUtils.getSentFolderName(domain));
             }
 
             if (emailDb != null) {
@@ -170,7 +170,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                     Message message = emailFolder.getMessage(i + 1); // emailFolder counting starts at 1 instead of 0!
                     EmailModel emailToAddToDb = null;
 
-                    if (FetchMailUtils.encryptionLibraryExists()) {
+                    if (KompEntriesHelper.encryptionLibraryExists()) {
                         EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
                         String headerState = eer.getHeaderState(message);
                         emailToAddToDb = checkHeaderState(emailsToAutoReply, message, headerState);
@@ -202,7 +202,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
         switch (headerState) {
             case HeaderFields.KompState.RECIPIENT_GETS_SENDER_PUBLIC_KEY: {
                 // recipient gets public key and sends his own public key to sender, save to db also
-                emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
+                emailToAddToDb = EmailModelHelper.buildEmailFromMessage(mContext, message);
 
                 KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
                 assert keyPairRecipient != null;
@@ -210,20 +210,20 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                 KompEntry entry = KompEntriesHelper.createRecipientEntry(message, keyPairRecipient);
                 entriesDb.addEntry(entry);
 
-                Session session = FetchMailUtils.getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, SendMailUtils.getProperties(EmailCredentials.EMAIL_SEND));
+                Session session = EmailConfigUtils.getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, EmailConfigUtils.getSmtpProps(EmailCredentials.EMAIL_SEND));
                 MimeMessage messageBack = eer.createMessageWithPublicKey(session, message, keyPairRecipient);
                 emailsToAutoReply.add(messageBack);
                 break;
             }
             case HeaderFields.KompState.SENDER_GETS_RECIPIENT_PUBLIC_KEY: {
-                emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
+                emailToAddToDb = EmailModelHelper.buildEmailFromMessage(mContext, message);
                 KompEntriesHelper.updateAndCompleteSenderEntry(mContext, message); // get recipient's key and complete encryption db for recipient
 
                 // get messages where sender was waiting to receive recipient's key from sharedprefs
                 List<MimeMessage> messagesForRecipient = EmailSharedPrefsUtils.getOriginalMessagesForEmail(mContext, message.getFrom()[0].toString());
                 EmailSharedPrefsUtils.removeOriginalMessagesForEmail(mContext, message.getFrom()[0].toString());
 
-                List<MimeMessage> messagesForRecipientEncrypted = FetchMailUtils.encryptMessagesForRecipient(mContext, messagesForRecipient);
+                List<MimeMessage> messagesForRecipientEncrypted = KompEntriesHelper.encryptMessagesForRecipient(mContext, messagesForRecipient);
                 emailsToAutoReply.addAll(messagesForRecipientEncrypted);
                 break;
             }
@@ -237,12 +237,12 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                     e.printStackTrace();
                 }
 
-                emailToAddToDb = FetchMailUtils.buildDecryptedEmail(message, decryptedText);
+                emailToAddToDb = EmailModelHelper.buildDecryptedEmail(message, decryptedText);
                 break;
             }
             default: {
                 assert headerState.equals(HeaderFields.HeaderX.NO_HEADER_STRING);
-                emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
+                emailToAddToDb = EmailModelHelper.buildEmailFromMessage(mContext, message);
                 break;
             }
         }

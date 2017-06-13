@@ -79,7 +79,7 @@ public class EmailEncryptionSender {
     }
 
     private String createSubjectFirstTime(String emailAddress) {
-        return "Komp Encryption Step 1 with" + emailAddress;
+        return "Komp Encryption Step 1 with " + emailAddress;
     }
 
     private String createFirstTimeMessage(String recipientEmail) {
