@@ -13,7 +13,7 @@ import com.iliaskomp.emailapp.models.KompDb;
 import com.iliaskomp.emailapp.models.KompEntry;
 import com.iliaskomp.emailapp.network.utils.FetchMailUtils;
 import com.iliaskomp.emailapp.network.utils.SendMailUtils;
-import com.iliaskomp.emailapp.network.utils.UsersEncryptionEntryHelper;
+import com.iliaskomp.emailapp.network.utils.KompEntriesHelper;
 import com.iliaskomp.emailapp.utils.EmailCredentials;
 
 import java.io.IOException;
@@ -115,14 +115,14 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
                     default:  // first time sending message so need to save original message and
                         // send info email with sender's public key
                         EmailSharedPrefsUtils.saveOriginalMessage(mContext, message);
-                        KompEntry entry = UsersEncryptionEntryHelper
+                        KompEntry entry = KompEntriesHelper
                                 .getUsersEncryptionEntryIfExists(mContext, message);
                         // if email of sender/recipient are not on encryption database add it
                         // (first state with only sender's keys)
                         if (entry == null) {
                             encryptionMm = ees.getEmailFirstTimeSending(message, session,
                                     keyPairSender);
-                            KompEntry newEntry = UsersEncryptionEntryHelper
+                            KompEntry newEntry = KompEntriesHelper
                                     .createSenderEntryNonComplete(message, keyPairSender);
                             entriesDb.addEntry(newEntry);
                             // else if recipient exists in database get secret key, encrypt

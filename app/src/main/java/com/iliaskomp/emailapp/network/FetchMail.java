@@ -18,7 +18,7 @@ import com.iliaskomp.emailapp.models.KompDb;
 import com.iliaskomp.emailapp.models.KompEntry;
 import com.iliaskomp.emailapp.network.utils.FetchMailUtils;
 import com.iliaskomp.emailapp.network.utils.SendMailUtils;
-import com.iliaskomp.emailapp.network.utils.UsersEncryptionEntryHelper;
+import com.iliaskomp.emailapp.network.utils.KompEntriesHelper;
 import com.iliaskomp.emailapp.utils.EmailCredentials;
 import com.iliaskomp.encryption.EncryptionHelper;
 
@@ -207,7 +207,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                 KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
                 assert keyPairRecipient != null;
 
-                KompEntry entry = UsersEncryptionEntryHelper.createRecipientEntry(message, keyPairRecipient);
+                KompEntry entry = KompEntriesHelper.createRecipientEntry(message, keyPairRecipient);
                 entriesDb.addEntry(entry);
 
                 Session session = FetchMailUtils.getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, SendMailUtils.getProperties(EmailCredentials.EMAIL_SEND));
@@ -217,7 +217,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
             }
             case HeaderFields.KompState.SENDER_GETS_RECIPIENT_PUBLIC_KEY: {
                 emailToAddToDb = FetchMailUtils.buildEmailFromMessage(mContext, message);
-                UsersEncryptionEntryHelper.updateAndCompleteSenderEntry(mContext, message); // get recipient's key and complete encryption db for recipient
+                KompEntriesHelper.updateAndCompleteSenderEntry(mContext, message); // get recipient's key and complete encryption db for recipient
 
                 // get messages where sender was waiting to receive recipient's key from sharedprefs
                 List<MimeMessage> messagesForRecipient = EmailSharedPrefsUtils.getOriginalMessagesForEmail(mContext, message.getFrom()[0].toString());
@@ -228,7 +228,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                 break;
             }
             case HeaderFields.KompState.ENCRYPTED_EMAIL: {
-                SecretKey secretKey = UsersEncryptionEntryHelper.getSecretSharedKeyFromDb(mContext, message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
+                SecretKey secretKey = KompEntriesHelper.getSecretSharedKeyFromDb(mContext, message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
                 String iv = eer.getHeaderIv(message);
                 String decryptedText = null;
                 try {

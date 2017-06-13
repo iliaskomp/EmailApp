@@ -37,7 +37,6 @@ import javax.mail.internet.MimeMultipart;
 
 public class FetchMailUtils {
 
-
     public static EmailModel buildEmailFromMessage(Context context, Message message) throws MessagingException, IOException {
         EmailModel email = new EmailModel();
 
@@ -144,7 +143,7 @@ public class FetchMailUtils {
 
         for (MimeMessage message : messagesForRecipient) {
             Session session = getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, SendMailUtils.getProperties(message.getAllRecipients()[0].toString()));
-            SecretKey secretKey = UsersEncryptionEntryHelper.getSecretSharedKeyFromDb(context, message.getFrom()[0].toString(), message.getAllRecipients()[0].toString());
+            SecretKey secretKey = KompEntriesHelper.getSecretSharedKeyFromDb(context, message.getFrom()[0].toString(), message.getAllRecipients()[0].toString());
 
             MimeMessage encryptedMessage = eer.createEncryptedMessage(session, message, secretKey);
             messages.add(encryptedMessage);
