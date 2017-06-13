@@ -50,26 +50,30 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
     private static final String LOG_TAG = "FetchMail";
 
     public AsyncResponseForFetchEmail delegate = null;
-
     private Context mContext;
     private String mProtocol;
+    private ProgressDialog mProgressDialog;
 
-    private ProgressDialog progressDialog;
+
+
+    public interface AsyncResponseForFetchEmail {
+        void processFinish(EmailDB db);
+    }
 
     class FetchMailTaskReturnValue {
         private EmailDB mEmailDb;
         private List<MimeMessage> mEmailsToAutoReply;
 
-        public FetchMailTaskReturnValue(EmailDB db, List<MimeMessage> emailsToAutoReply) {
+        private FetchMailTaskReturnValue(EmailDB db, List<MimeMessage> emailsToAutoReply) {
             mEmailDb = db;
             mEmailsToAutoReply = emailsToAutoReply;
         }
 
-        public EmailDB getEmailDb() {
+        private EmailDB getEmailDb() {
             return mEmailDb;
         }
 
-        public List<MimeMessage> getEmailsToAutoReply() {
+        private List<MimeMessage> getEmailsToAutoReply() {
             return mEmailsToAutoReply;
         }
     }
@@ -83,7 +87,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
     protected void onPreExecute() {
         super.onPreExecute();
         //Showing progress dialog while sending email
-        progressDialog = ProgressDialog.show(mContext, "Fetching messages", "Please wait...", false, false);
+        mProgressDialog = ProgressDialog.show(mContext, "Fetching messages", "Please wait...", false, false);
     }
 
     @Override
@@ -93,7 +97,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
         List<MimeMessage> messagesToSend = returnValue.getEmailsToAutoReply();
 
         delegate.processFinish(db);
-        progressDialog.dismiss();
+        mProgressDialog.dismiss();
         Toast.makeText(mContext, "Messages Fetched", Toast.LENGTH_LONG).show();
 
         if (messagesToSend.size() != 0) {
@@ -168,12 +172,14 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
             if (emailDb.getEmailCount() < emailFolder.getMessageCount()) {
                 for (int i = emailDb.getEmailCount(); i < emailFolder.getMessageCount(); i++) {
                     Message message = emailFolder.getMessage(i + 1); // emailFolder counting starts at 1 instead of 0!
-                    EmailModel emailToAddToDb = null;
+                    EmailModel emailToAddToDb;
 
-                    if (KompEntriesHelper.encryptionLibraryExists()) {
+                    if (KompEntriesHelper.encryptionLibraryExists() && emailFolder.getName().equals("INBOX")) {
                         EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
                         String headerState = eer.getHeaderState(message);
                         emailToAddToDb = checkHeaderState(emailsToAutoReply, message, headerState);
+                    } else {
+                        emailToAddToDb = EmailModelHelper.buildEmailFromMessage(mContext, message);
                     }
 
                     if (emailToAddToDb != null) {
@@ -186,7 +192,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
             emailFolder.close(false);
             store.close();
 
-        } catch (MessagingException | IOException | NoSuchAlgorithmException | InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | InvalidKeyException | BadPaddingException e) {
+        } catch (MessagingException | IOException e) {
             e.printStackTrace();
         }
 
@@ -194,57 +200,71 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
     }
 
 
+    // Checks header state and does the appropriate action like creating kompEntries, keys etc
     private EmailModel checkHeaderState(List<MimeMessage> emailsToAutoReply, Message message,
-                                        String headerState) throws MessagingException, IOException, InvalidKeyException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, NoSuchPaddingException, InvalidAlgorithmParameterException {
+                                        String headerState) {
         KompDb entriesDb = KompDb.get(mContext);
         EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
-        EmailModel emailToAddToDb;
-        switch (headerState) {
-            case HeaderFields.KompState.RECIPIENT_GETS_SENDER_PUBLIC_KEY: {
-                // recipient gets public key and sends his own public key to sender, save to db also
-                emailToAddToDb = EmailModelHelper.buildEmailFromMessage(mContext, message);
+        EmailModel emailToAddToDb =  null;
 
-                KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
-                assert keyPairRecipient != null;
+        try {
+            switch (headerState) {
+                case HeaderFields.KompState.RECIPIENT_GETS_SENDER_PUBLIC_KEY: {
+                    // recipient gets public key and sends his own public key to sender, save to db also
 
-                KompEntry entry = KompEntriesHelper.createRecipientEntry(message, keyPairRecipient);
-                entriesDb.addEntry(entry);
+                    emailToAddToDb = EmailModelHelper.buildEmailFromMessage(mContext, message);
 
-                Session session = EmailConfigUtils.getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, EmailConfigUtils.getSmtpProps(EmailCredentials.EMAIL_SEND));
-                MimeMessage messageBack = eer.createMessageWithPublicKey(session, message, keyPairRecipient);
-                emailsToAutoReply.add(messageBack);
-                break;
-            }
-            case HeaderFields.KompState.SENDER_GETS_RECIPIENT_PUBLIC_KEY: {
-                emailToAddToDb = EmailModelHelper.buildEmailFromMessage(mContext, message);
-                KompEntriesHelper.updateAndCompleteSenderEntry(mContext, message); // get recipient's key and complete encryption db for recipient
+                    KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
+                    assert keyPairRecipient != null;
 
-                // get messages where sender was waiting to receive recipient's key from sharedprefs
-                List<MimeMessage> messagesForRecipient = EmailSharedPrefsUtils.getOriginalMessagesForEmail(mContext, message.getFrom()[0].toString());
-                EmailSharedPrefsUtils.removeOriginalMessagesForEmail(mContext, message.getFrom()[0].toString());
+                    KompEntry entry = KompEntriesHelper.createRecipientEntry(message, keyPairRecipient);
+                    entriesDb.addEntry(entry);
 
-                List<MimeMessage> messagesForRecipientEncrypted = KompEntriesHelper.encryptMessagesForRecipient(mContext, messagesForRecipient);
-                emailsToAutoReply.addAll(messagesForRecipientEncrypted);
-                break;
-            }
-            case HeaderFields.KompState.ENCRYPTED_EMAIL: {
-                SecretKey secretKey = KompEntriesHelper.getSecretSharedKeyFromDb(mContext, message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
-                String iv = eer.getHeaderIv(message);
-                String decryptedText = null;
-                try {
-                    decryptedText = EncryptionHelper.decrypt(message.getContent().toString(), secretKey, iv);
-                } catch (BadPaddingException e) {
-                    e.printStackTrace();
+                    Session session = EmailConfigUtils.getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, EmailConfigUtils.getSmtpProps(EmailCredentials.EMAIL_SEND));
+                    MimeMessage messageBack = eer.createMessageWithPublicKey(session, message, keyPairRecipient);
+                    emailsToAutoReply.add(messageBack);
+                    break;
                 }
+                case HeaderFields.KompState.SENDER_GETS_RECIPIENT_PUBLIC_KEY: {
+                    emailToAddToDb = EmailModelHelper.buildEmailFromMessage(mContext, message);
+                    KompEntriesHelper.updateAndCompleteSenderEntry(mContext, message); // get recipient's key and complete encryption db for recipient
 
-                emailToAddToDb = EmailModelHelper.buildDecryptedEmail(message, decryptedText);
-                break;
+                    // get messages where sender was waiting to receive recipient's key from sharedprefs
+                    List<MimeMessage> messagesForRecipient = EmailSharedPrefsUtils.getOriginalMessagesForEmail(mContext, message.getFrom()[0].toString());
+                    EmailSharedPrefsUtils.removeOriginalMessagesForEmail(mContext, message.getFrom()[0].toString());
+
+                    List<MimeMessage> messagesForRecipientEncrypted = KompEntriesHelper.encryptMessagesForRecipient(mContext, messagesForRecipient);
+                    emailsToAutoReply.addAll(messagesForRecipientEncrypted);
+                    break;
+                }
+                case HeaderFields.KompState.ENCRYPTED_EMAIL: {
+                    SecretKey secretKey = KompEntriesHelper.getSecretSharedKeyFromDb(mContext, message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
+                    String iv = eer.getHeaderIv(message);
+                    String decryptedText = null;
+                    try {
+                        decryptedText = EncryptionHelper.decrypt(message.getContent().toString(), secretKey, iv);
+                    } catch (BadPaddingException e) {
+                        e.printStackTrace();
+                    }
+
+                    emailToAddToDb = EmailModelHelper.buildDecryptedEmail(message, decryptedText);
+                    break;
+                }
+                default: {
+                    assert headerState.equals(HeaderFields.HeaderX.NO_HEADER_STRING);
+                    emailToAddToDb = EmailModelHelper.buildEmailFromMessage(mContext, message);
+                    break;
+                }
             }
-            default: {
-                assert headerState.equals(HeaderFields.HeaderX.NO_HEADER_STRING);
-                emailToAddToDb = EmailModelHelper.buildEmailFromMessage(mContext, message);
-                break;
-            }
+        } catch (MessagingException |
+                IOException |
+                NoSuchAlgorithmException |
+                InvalidAlgorithmParameterException |
+                NoSuchPaddingException |
+                IllegalBlockSizeException |
+                InvalidKeyException |
+                BadPaddingException e) {
+            e.printStackTrace();
         }
         return emailToAddToDb;
     }

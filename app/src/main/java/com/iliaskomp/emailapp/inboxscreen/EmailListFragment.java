@@ -21,7 +21,6 @@ import com.iliaskomp.emailapp.models.EmailDB;
 import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.models.InboxDB;
 import com.iliaskomp.emailapp.models.SentDB;
-import com.iliaskomp.emailapp.network.AsyncResponseForFetchEmail;
 import com.iliaskomp.emailapp.network.FetchMail;
 import com.iliaskomp.emailapp.newmailscreen.NewMailActivity;
 import com.iliaskomp.emailapp.utils.Config;
@@ -29,11 +28,13 @@ import com.iliaskomp.emailapp.utils.DateFormatHelper;
 
 import java.util.List;
 
+//import com.iliaskomp.emailapp.network.AsyncResponseForFetchEmail;
+
 /**
  * Created by IliasKomp on 13/02/17.
  */
 
-public class EmailListFragment extends Fragment implements AsyncResponseForFetchEmail {
+public class EmailListFragment extends Fragment implements FetchMail.AsyncResponseForFetchEmail {
     private static final String ARGS_FOLDER = "folderName";
     private static final String ARGS_EMAIL = "email";
     private static final String ARGS_PASSWORD = "password";

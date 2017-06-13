@@ -15,10 +15,9 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
-import static com.iliaskomp.email.HeaderFields.KompState
-        .RECIPIENT_GETS_SENDER_PUBLIC_KEY;
 import static com.iliaskomp.email.HeaderFields.HeaderX.PUBLIC_KEY_SENDER;
 import static com.iliaskomp.email.HeaderFields.HeaderX.STATE;
+import static com.iliaskomp.email.HeaderFields.KompState.RECIPIENT_GETS_SENDER_PUBLIC_KEY;
 
 /**
  * Created by IliasKomp on 28/03/17.
@@ -51,10 +50,10 @@ public class EmailEncryptionSender {
         return keyPair;
     }
 
-    // TODO First need to check db for email. //No need for message here.
     // TODO multipart messages??
     // Generate message for the first communication between sender/recipient
     // Constructs a message with generic info as message and public key as header.
+    // Message is not needed for its content  but sender/recip/date.
     public MimeMessage getEmailFirstTimeSending(MimeMessage message, Session session, KeyPair
             keyPairSender)
             throws InvalidKeySpecException, InvalidAlgorithmParameterException,
@@ -71,9 +70,9 @@ public class EmailEncryptionSender {
 
         // Sender encodes encryption state and his public key in order to send it to recipient
         //TODO fold public key?
+        String publicKey = DHHelper.PublicKeyClass.keyToString(keyPairSender.getPublic());
         formattedMessage.addHeader(STATE, RECIPIENT_GETS_SENDER_PUBLIC_KEY);
-        formattedMessage.addHeader(PUBLIC_KEY_SENDER, DHHelper.PublicKeyClass.keyToString
-                (keyPairSender.getPublic()));
+        formattedMessage.addHeader(PUBLIC_KEY_SENDER, publicKey);
 
         return formattedMessage;
     }
