@@ -43,6 +43,7 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
 
     private Context mContext;
     private ProgressDialog mProgressDialog;
+    private boolean mSavingMessage = false;
 
     public SendMail(Context context) {
         mContext = context;
@@ -52,7 +53,11 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
     protected void onPreExecute() {
         super.onPreExecute();
         //Showing progress dialog while sending email
-        mProgressDialog = ProgressDialog.show(mContext, "Sending message", "Please wait...", false, false);
+        if (mSavingMessage) {
+            mProgressDialog = ProgressDialog.show(mContext, "Saving message (will be sent after securing encryption", "Please wait...", false, false);
+        } else {
+            mProgressDialog = ProgressDialog.show(mContext, "Sending message", "Please wait...", false, false);
+        }
 
     }
 
@@ -62,7 +67,11 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
         //Dismissing the progress dialog
         mProgressDialog.dismiss();
         //Showing a success message
-        Toast.makeText(mContext, "Message Sent", Toast.LENGTH_LONG).show();
+        if (mSavingMessage) {
+            Toast.makeText(mContext, "Message Saved (Saving message will be sent after securing encryption)", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(mContext, "Message Sent", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -116,21 +125,34 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
                         // if email of sender/recipient are not on encryption database add it
                         // (first state with only sender's keys)
                         if (entry == null) {
-                            encryptionMm = ees.getEmailFirstTimeSending(message, session,
-                                    keyPairSender);
+                            try {
+                                encryptionMm = ees.getEmailFirstTimeSending(message, session,
+                                        keyPairSender);
+                            } catch (InvalidKeySpecException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidParameterSpecException | IOException e) {
+                                e.printStackTrace();
+                            }
                             KompEntry newEntry = KompEntriesHelper
                                     .createSenderEntryNonComplete(message, keyPairSender);
                             entriesDb.addEntry(newEntry);
+                            mSavingMessage = true;
                             // else if recipient exists in db but still hasn't send his public key
                             // do nothing (komp step message already send)
-                        } else if (entry.getState() == KompEntry.State.SENDER_ENTRY_NON_COMPLETE) {
-
+                        } else {
+                            if (entry.getState() == KompEntry.State.SENDER_ENTRY_NON_COMPLETE) {
+                                mSavingMessage = true;
+                            }
                             // else if recipient exists in database get secret key, encrypt
                             // message with it and send it
-                        } else {
-                            SecretKey secretKey = DHHelper.SecretKeyClass.stringToKey(entry
-                                    .getSharedSecretKey());
-                            encryptionMm = eer.createEncryptedMessage(session, message, secretKey);
+                            else {
+                                SecretKey secretKey = DHHelper.SecretKeyClass.stringToKey(entry
+                                        .getSharedSecretKey());
+                                try {
+                                    encryptionMm = eer.createEncryptedMessage(session, message,
+                                            secretKey);
+                                } catch (IOException | MessagingException | IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchAlgorithmException | NoSuchPaddingException e) {
+                                    e.printStackTrace();
+                                }
+                            }
                         }
                         break;
                 }
@@ -146,7 +168,8 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
 //            else {
 //                throw new NullPointerException("Message to sent is null");
 //            }
-        } catch (MessagingException | IOException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidParameterSpecException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException | InvalidKeyException e) {
+        }
+        catch (MessagingException  e) {
             e.printStackTrace();
         }
         return null;
