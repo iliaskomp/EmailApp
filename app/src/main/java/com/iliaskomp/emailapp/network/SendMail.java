@@ -86,33 +86,30 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
 //            MimeMessage originalMm = SendMailUtils.createMimeMessage(session, EmailCredentials.EMAIL_SEND,
 //                    recipient, subject, content);
             //============================================================//
-            EmailEncryptionSender ees = new EmailEncryptionSender();
-            EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
 
 
             // if recipient doesn't exist, create key pair and send first message with public key
-            KeyPair keyPairSender = ees.createKeyPair();
-            Message encryptionMm;
-            KompDb entriesDb = KompDb.get(mContext);
+            Message encryptionMm = null;
 
             //1st interaction
             if (KompEntriesHelper.encryptionLibraryExists()) {
+                EmailEncryptionSender ees = new EmailEncryptionSender();
+                EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
+                KeyPair keyPairSender = ees.createKeyPair();
+                KompDb entriesDb = KompDb.get(mContext);
+
                 String headerState = eer.getHeaderState(message);
-
                 switch (headerState) {
-                    case HeaderFields.KompState.SENDER_GETS_RECIPIENT_PUBLIC_KEY:  // recipient
-                        // sends his public key
-                        encryptionMm = message; // then message is sent from FetchMail correctly
-                        // with komp headers
-
+                    case HeaderFields.KompState.SENDER_GETS_RECIPIENT_PUBLIC_KEY:  // recipient sends his public key
+                        encryptionMm = message; // then message is sent from FetchMail correctly with komp headers
                         break;
                     case HeaderFields.KompState.ENCRYPTED_EMAIL:  // sender sends encrypted email
-                        encryptionMm = message; // then message is sent from FetchMail correctly
-                        // with komp headers
-
+                        encryptionMm = message; // then message is sent from FetchMail correctly here with komp headers
                         break;
-                    default:  // first time sending message so need to save original message and
-                        // send info email with sender's public key
+                    // need to construct message here
+                    // first time sending message so need to save original message and
+                    // send info email with sender's public key
+                    default:
                         EmailSharedPrefsUtils.saveOriginalMessage(mContext, message);
                         KompEntry entry = KompEntriesHelper
                                 .getUsersEncryptionEntryIfExists(mContext, message);
@@ -124,6 +121,10 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
                             KompEntry newEntry = KompEntriesHelper
                                     .createSenderEntryNonComplete(message, keyPairSender);
                             entriesDb.addEntry(newEntry);
+                            // else if recipient exists in db but still hasn't send his public key
+                            // do nothing (komp step message already send)
+                        } else if (entry.getState() == KompEntry.State.SENDER_ENTRY_NON_COMPLETE) {
+
                             // else if recipient exists in database get secret key, encrypt
                             // message with it and send it
                         } else {
@@ -141,9 +142,10 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
             //Sending email
             if (encryptionMm != null) {
                 Transport.send(encryptionMm);
-            } else {
-                throw new NullPointerException("Message to sent is null");
             }
+//            else {
+//                throw new NullPointerException("Message to sent is null");
+//            }
         } catch (MessagingException | IOException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidParameterSpecException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException | InvalidKeyException e) {
             e.printStackTrace();
         }
