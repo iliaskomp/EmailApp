@@ -40,7 +40,7 @@ public class EncryptionHelper {
         String ivString = Base64.encodeToString(ivBytes, Base64.NO_WRAP);
 
         String[] result = new String[2];
-        result[0] = textEncrypted; // TODO check text is not corrupt with repetitions?
+        result[0] = textEncrypted;
         result[1] = ivString;
 
 		return result;
@@ -68,8 +68,7 @@ public class EncryptionHelper {
         try {
             DHParameterSpec paramsFromSender = DHHelper.PublicKeyClass.keyToParams(publicKeySender);
             return DHAlgorithm.generateKeyPairFromParameters(paramsFromSender.getP(), paramsFromSender.getG());
-        } catch (InvalidKeySpecException |
-                InvalidAlgorithmParameterException |
+        } catch (InvalidAlgorithmParameterException |
                 NoSuchAlgorithmException e) {
             e.printStackTrace();
         }

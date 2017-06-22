@@ -130,12 +130,10 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
                         // if email of sender/recipient are not on encryption database add it
                         // (first state with only sender's keys)
                         if (entry == null) {
-                            try {
-                                encryptionMm = MessageBuilder.createEmailFirstTimeSending(message, session,
-                                        keyPairSender);
-                            } catch (InvalidKeySpecException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidParameterSpecException | IOException e) {
-                                e.printStackTrace();
-                            }
+
+                            encryptionMm = MessageBuilder.createEmailFirstTimeSending(message, session,
+                                    keyPairSender);
+
                             KompEntry newEntry = KompEntriesHelper
                                     .createSenderEntryNonComplete(message, keyPairSender);
                             entriesDb.addEntry(newEntry);

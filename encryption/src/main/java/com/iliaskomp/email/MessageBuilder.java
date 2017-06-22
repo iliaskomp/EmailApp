@@ -4,12 +4,9 @@ import com.iliaskomp.encryption.DHHelper;
 import com.iliaskomp.encryption.EncryptionHelper;
 
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.InvalidParameterSpecException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -32,15 +29,12 @@ import static com.iliaskomp.email.HeaderFields.KompState.RECIPIENT_GETS_SENDER_P
 
 public class MessageBuilder {
 
-    // TODO multipart messages??
     // Generate message for the first communication between sender/recipient
     // Constructs a message with generic info as message and public key as header.
     // Message is not needed for its content  but sender/recip/date.
     public static MimeMessage createEmailFirstTimeSending(MimeMessage message, Session session, KeyPair
             keyPairSender)
-            throws InvalidKeySpecException, InvalidAlgorithmParameterException,
-            NoSuchAlgorithmException, InvalidParameterSpecException, IOException,
-            MessagingException {
+            throws MessagingException {
 
         MimeMessage formattedMessage = new MimeMessage(session);
 
@@ -51,7 +45,6 @@ public class MessageBuilder {
         formattedMessage.setText(createMessageStepOne(message.getFrom()[0].toString()));
 
         // Sender encodes encryption state and his public key in order to send it to recipient
-        //TODO fold public key?
         String publicKey = DHHelper.PublicKeyClass.keyToString(keyPairSender.getPublic());
         formattedMessage.addHeader(STATE, RECIPIENT_GETS_SENDER_PUBLIC_KEY);
         formattedMessage.addHeader(PUBLIC_KEY_SENDER, publicKey);
@@ -73,7 +66,6 @@ public class MessageBuilder {
         messageBack.removeHeader(STATE);
         messageBack.removeHeader(PUBLIC_KEY_SENDER);
 
-        //TODO fold public key?
         String publicKeyString = DHHelper.PublicKeyClass.keyToString(keyPairRecipient.getPublic());
         messageBack.addHeader(STATE, KompState.SENDER_GETS_RECIPIENT_PUBLIC_KEY);
         messageBack.addHeader(HeaderX.PUBLIC_KEY_RECIPIENT, publicKeyString);

@@ -19,6 +19,7 @@ import static com.iliaskomp.email.HeaderFields.HeaderX.PUBLIC_KEY_SENDER;
  */
 
 public class HeaderUtils {
+
     // if header encryption state is not found, it returns HeaderX.NO_HEADER_STRING
     public static String getHeaderState(Message message) throws MessagingException {
         HashMap<String, String> headers = getHeadersMapFromEnumeration(message
@@ -70,7 +71,7 @@ public class HeaderUtils {
         return null;
     }
 
-    public static HashMap<String, String> getHeadersMapFromEnumeration(Enumeration headers) {
+    private static HashMap<String, String> getHeadersMapFromEnumeration(Enumeration headers) {
         HashMap<String, String> headersMap = new HashMap<>();
         while (headers.hasMoreElements()) {
             Header h = (Header) headers.nextElement();

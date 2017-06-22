@@ -3,7 +3,6 @@ package com.iliaskomp.encryption;
 import com.iliaskomp.libs.Base64;
 
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -53,9 +52,7 @@ public class DHHelper {
         }
 
         // Get params from public key
-        public static DHParameterSpec keyToParams(PublicKey publicKey) throws
-                NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-                InvalidKeySpecException {
+        public static DHParameterSpec keyToParams(PublicKey publicKey) {
             return ((DHPublicKey) publicKey).getParams();
         }
     }
@@ -110,7 +107,6 @@ public class DHHelper {
 
         public static SecretKey stringToKey(String string) {
             byte[] stringBytes = Base64.decode(string, Base64.NO_WRAP);
-//          SecretKeyFactory kf = SecretKeyFactory.getInstance("PBEWithHmacSHA256AndAES_128");
             SecretKeySpec spec = new SecretKeySpec(stringBytes, "AES");
             return decode(spec.getEncoded());
         }

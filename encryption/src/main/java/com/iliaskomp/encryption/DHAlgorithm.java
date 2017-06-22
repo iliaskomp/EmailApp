@@ -48,8 +48,7 @@ public class DHAlgorithm {
 
     // returns keypair kp.getPublic(), kp.getPrivate()
     public static KeyPair generateKeyPairFromParameters(BigInteger p, BigInteger g)
-            throws NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            InvalidKeySpecException {
+            throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
 
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("DH");
 
@@ -68,53 +67,24 @@ public class DHAlgorithm {
         // Generates the shared secret
         byte[] secret = keyAgreement.generateSecret();
 
-        // use a Key Derivation Function?
         MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
         byte[] keyEncoded = Arrays.copyOf(sha256.digest(secret), AES_KEY_SIZE / Byte.SIZE);
         // Generate AES key
         return new SecretKeySpec(keyEncoded, "AES");
     }
 
-    // ============================================= HELPER
-	// ======================================================
-
     //    p = dhSpec.getP();;
     //    g = dhSpec.getG();
-    private static DHParameterSpec generateParameters(int bits) throws NoSuchAlgorithmException,
-			InvalidParameterSpecException {
+    private static DHParameterSpec generateParameters(int bits) throws NoSuchAlgorithmException {
 
         AlgorithmParameterGenerator generator = AlgorithmParameterGenerator.getInstance("DH");
         generator.init(bits);
         return new DHParameterSpec(pParameter, gParameter);
-
-//		AlgorithmParameters params = generator.generateParameters();
-//	    DHParameterSpec dhSpec = (DHParameterSpec) params.getParameterSpec(DHParameterSpec.class);
-//		System.out.println("G: " + dhSpec.getG() + "\nP: " + dhSpec.getP());
     }
 
     // Default 1024 bits
-    private static DHParameterSpec generateParameters() throws NoSuchAlgorithmException,
-			InvalidParameterSpecException {
+    private static DHParameterSpec generateParameters() throws NoSuchAlgorithmException {
         return generateParameters(DH_PARAMETERS_SIZE);
     }
 
-    // KeyAgreement =====================================
-
-//	public void initKeyAgreement(KeyAgreement keyAgreement, PrivateKey privateKey)
-//			throws NoSuchAlgorithmException, InvalidKeyException {
-//		keyAgreement.init(privateKey);
-//	}
-//
-//	public KeyAgreement generateKeyAgreement() throws NoSuchAlgorithmException {
-//		return KeyAgreement.getInstance("DH");
-//	}
-//
-//	public byte[] generateSecretKeyEncoded(KeyAgreement keyAgreement) {
-//		return keyAgreement.generateSecret();
-//	}
-//
-//	public SecretKey generateSecretKey(KeyAgreement keyAgreement)
-//			throws InvalidKeyException, IllegalStateException, NoSuchAlgorithmException {
-//		return keyAgreement.generateSecret("AES");
-//	}
 }
