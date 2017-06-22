@@ -5,9 +5,8 @@ package com.iliaskomp.email;
  */
 
 public class HeaderFields {
-    // SENDER ======================================================================
 
-    // Header names
+    // Header field names
     public static final class HeaderX {
         public static final String STATE = "X-komp-state";
         public static final String PUBLIC_KEY_SENDER = "X-komp-sender-public-key";
@@ -17,8 +16,7 @@ public class HeaderFields {
         public static final String NO_HEADER_STRING = "no_header_string";
     }
 
-    // Header fields
-    // SCENARIO 1: FIRST INTERACTION
+    // Header states
     public static final class KompState {
         public static final String RECIPIENT_GETS_SENDER_PUBLIC_KEY =
                 "first_interaction_recipient_gets_sender_public_key";
@@ -28,9 +26,4 @@ public class HeaderFields {
 
         public static final String ENCRYPTED_EMAIL = "sender_sends_encrypted_to_known_recipient";
     }
-
-    // SCENARIO 3: RECIPIENT NO LIBRARY
-//    public static final class RecipientNoLibraryState {
-//        public static final String RECIPIENT_ANSWER = "recipient_no_library";
-//    }
 }

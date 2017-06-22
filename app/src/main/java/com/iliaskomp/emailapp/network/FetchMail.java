@@ -9,15 +9,17 @@ import android.widget.Toast;
 
 import com.iliaskomp.email.EmailEncryptionRecipient;
 import com.iliaskomp.email.HeaderFields;
+import com.iliaskomp.email.HeaderUtils;
+import com.iliaskomp.email.MessageBuilder;
 import com.iliaskomp.emailapp.database.email.EmailDbSchema;
 import com.iliaskomp.emailapp.models.EmailDB;
 import com.iliaskomp.emailapp.models.EmailModel;
 import com.iliaskomp.emailapp.models.InboxDB;
-import com.iliaskomp.emailapp.models.SentDB;
 import com.iliaskomp.emailapp.models.KompDb;
 import com.iliaskomp.emailapp.models.KompEntry;
-import com.iliaskomp.emailapp.network.utils.EmailModelHelper;
+import com.iliaskomp.emailapp.models.SentDB;
 import com.iliaskomp.emailapp.network.utils.EmailConfigUtils;
+import com.iliaskomp.emailapp.network.utils.EmailModelHelper;
 import com.iliaskomp.emailapp.network.utils.KompEntriesHelper;
 import com.iliaskomp.emailapp.utils.EmailCredentials;
 import com.iliaskomp.encryption.EncryptionHelper;
@@ -176,7 +178,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
 
                     if (KompEntriesHelper.encryptionLibraryExists() && emailFolder.getName().equals("INBOX")) {
                         EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
-                        String headerState = eer.getHeaderState(message);
+                        String headerState = HeaderUtils.getHeaderState(message);
                         emailToAddToDb = checkHeaderState(emailsToAutoReply, message, headerState);
                     } else {
                         emailToAddToDb = EmailModelHelper.buildEmailFromMessage(mContext, message);
@@ -214,14 +216,14 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
 
                     emailToAddToDb = EmailModelHelper.buildEmailFromMessage(mContext, message);
 
-                    KeyPair keyPairRecipient = eer.createKeyPairFromSender(message);
+                    KeyPair keyPairRecipient = eer.generateRecipientKeyPairFromSender(message);
                     assert keyPairRecipient != null;
 
                     KompEntry entry = KompEntriesHelper.createRecipientEntry(message, keyPairRecipient);
                     entriesDb.addEntry(entry);
 
                     Session session = EmailConfigUtils.getSentSession(EmailCredentials.EMAIL_SEND, EmailCredentials.PASSWORD_SEND, EmailConfigUtils.getSmtpProps(EmailCredentials.EMAIL_SEND));
-                    MimeMessage messageBack = eer.createMessageWithPublicKey(session, message, keyPairRecipient);
+                    MimeMessage messageBack = MessageBuilder.createRecipientMessageWithPublicKey(session, message, keyPairRecipient);
                     emailsToAutoReply.add(messageBack);
                     break;
                 }
@@ -239,7 +241,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                 }
                 case HeaderFields.KompState.ENCRYPTED_EMAIL: {
                     SecretKey secretKey = KompEntriesHelper.getSecretSharedKeyFromDb(mContext, message.getAllRecipients()[0].toString(), message.getFrom()[0].toString());
-                    String iv = eer.getHeaderIv(message);
+                    String iv = HeaderUtils.getHeaderIv(message);
                     String decryptedText = null;
                     try {
                         decryptedText = EncryptionHelper.decrypt(message.getContent().toString(), secretKey, iv);

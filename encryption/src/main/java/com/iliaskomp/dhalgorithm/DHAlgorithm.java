@@ -26,7 +26,7 @@ public class DHAlgorithm {
     // 2048 MODP Group: https://tools.ietf.org/html/rfc3526#section-1
     private static final BigInteger gParameter = new BigInteger("2");
     private static final BigInteger pParameter = DHHelper.hexToBigInteger(
-            "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD1" +
+                    "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD1" +
                     "29024E088A67CC74020BBEA63B139B22514A08798E3404DD" +
                     "EF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245" +
                     "E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7ED" +
@@ -35,19 +35,19 @@ public class DHAlgorithm {
                     "83655D23DCA3AD961C62F356208552BB9ED529077096966D" +
                     "670C354E4ABC9804F1746C08CA237327FFFFFFFFFFFFFFFF");
 
-    public KeyPair generateKeyPair() throws NoSuchAlgorithmException, InvalidParameterSpecException,
+    public static KeyPair generateKeyPair(DHAlgorithm dhAlgorithm) throws NoSuchAlgorithmException, InvalidParameterSpecException,
             InvalidAlgorithmParameterException, InvalidKeySpecException {
         // generate DH parameters
-        DHParameterSpec kp = generateParameters();
+        DHParameterSpec kp = DHAlgorithm.generateParameters();
         BigInteger p = kp.getP();
         BigInteger g = kp.getG();
 
         // generates public/private key from p, g
-        return generateKeyPairFromParameters(p, g);
+        return DHAlgorithm.generateKeyPairFromParameters(p, g);
     }
 
     // returns keypair kp.getPublic(), kp.getPrivate()
-    public KeyPair generateKeyPairFromParameters(BigInteger p, BigInteger g)
+    public static KeyPair generateKeyPairFromParameters(BigInteger p, BigInteger g)
             throws NoSuchAlgorithmException, InvalidAlgorithmParameterException,
             InvalidKeySpecException {
 
@@ -58,7 +58,7 @@ public class DHAlgorithm {
         return kpg.generateKeyPair();
     }
 
-    public SecretKey agreeSecretKey(PrivateKey privateKeySelf, PublicKey publicKeyOther)
+    public static SecretKey agreeSecretKey(PrivateKey privateKeySelf, PublicKey publicKeyOther)
             throws NoSuchAlgorithmException, InvalidKeyException, IllegalStateException {
 
         KeyAgreement keyAgreement = KeyAgreement.getInstance("DH");
@@ -80,7 +80,7 @@ public class DHAlgorithm {
 
     //    p = dhSpec.getP();;
     //    g = dhSpec.getG();
-    private DHParameterSpec generateParameters(int bits) throws NoSuchAlgorithmException,
+    private static DHParameterSpec generateParameters(int bits) throws NoSuchAlgorithmException,
 			InvalidParameterSpecException {
 
         AlgorithmParameterGenerator generator = AlgorithmParameterGenerator.getInstance("DH");
@@ -93,7 +93,7 @@ public class DHAlgorithm {
     }
 
     // Default 1024 bits
-    private DHParameterSpec generateParameters() throws NoSuchAlgorithmException,
+    private static DHParameterSpec generateParameters() throws NoSuchAlgorithmException,
 			InvalidParameterSpecException {
         return generateParameters(DH_PARAMETERS_SIZE);
     }

@@ -9,6 +9,8 @@ import com.iliaskomp.dhalgorithm.DHHelper;
 import com.iliaskomp.email.EmailEncryptionRecipient;
 import com.iliaskomp.email.EmailEncryptionSender;
 import com.iliaskomp.email.HeaderFields;
+import com.iliaskomp.email.HeaderUtils;
+import com.iliaskomp.email.MessageBuilder;
 import com.iliaskomp.emailapp.models.KompDb;
 import com.iliaskomp.emailapp.models.KompEntry;
 import com.iliaskomp.emailapp.network.utils.EmailConfigUtils;
@@ -107,7 +109,7 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
                 KeyPair keyPairSender = ees.createKeyPair();
                 KompDb entriesDb = KompDb.get(mContext);
 
-                String headerState = eer.getHeaderState(message);
+                String headerState = HeaderUtils.getHeaderState(message);
                 switch (headerState) {
                     case HeaderFields.KompState.SENDER_GETS_RECIPIENT_PUBLIC_KEY:  // recipient sends his public key
                         encryptionMm = message; // then message is sent from FetchMail correctly with komp headers
@@ -126,7 +128,7 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
                         // (first state with only sender's keys)
                         if (entry == null) {
                             try {
-                                encryptionMm = ees.getEmailFirstTimeSending(message, session,
+                                encryptionMm = MessageBuilder.createEmailFirstTimeSending(message, session,
                                         keyPairSender);
                             } catch (InvalidKeySpecException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidParameterSpecException | IOException e) {
                                 e.printStackTrace();
@@ -147,7 +149,7 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
                                 SecretKey secretKey = DHHelper.SecretKeyClass.stringToKey(entry
                                         .getSharedSecretKey());
                                 try {
-                                    encryptionMm = eer.createEncryptedMessage(session, message,
+                                    encryptionMm = MessageBuilder.createEncryptedMessage(session, message,
                                             secretKey);
                                 } catch (IOException | MessagingException | IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchAlgorithmException | NoSuchPaddingException e) {
                                     e.printStackTrace();

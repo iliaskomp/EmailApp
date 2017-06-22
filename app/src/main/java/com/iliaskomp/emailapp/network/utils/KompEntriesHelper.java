@@ -5,6 +5,8 @@ import android.content.Context;
 import com.iliaskomp.dhalgorithm.DHAlgorithm;
 import com.iliaskomp.dhalgorithm.DHHelper;
 import com.iliaskomp.email.EmailEncryptionRecipient;
+import com.iliaskomp.email.HeaderUtils;
+import com.iliaskomp.email.MessageBuilder;
 import com.iliaskomp.emailapp.models.KompDb;
 import com.iliaskomp.emailapp.models.KompEntry;
 import com.iliaskomp.emailapp.utils.EmailCredentials;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,8 +57,8 @@ public class KompEntriesHelper {
         EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
         DHAlgorithm dhAlgorithm = new DHAlgorithm();
 
-        PublicKey theirPublicKey = eer.getSenderPublicKeyFromHeader(message);
-        SecretKey secretKey = dhAlgorithm.agreeSecretKey(keyPair.getPrivate(), theirPublicKey);
+        PublicKey theirPublicKey = HeaderUtils.getHeaderSenderPublicKey(message);
+        SecretKey secretKey = DHAlgorithm.agreeSecretKey(keyPair.getPrivate(), theirPublicKey);
 
         KompEntry entry = new KompEntry(message.getAllRecipients()[0].toString(),
                 message.getFrom()[0].toString());
@@ -73,7 +76,7 @@ public class KompEntriesHelper {
             throws MessagingException, InvalidKeyException, NoSuchAlgorithmException {
 
         EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
-        PublicKey theirPublicKey = eer.getRecipientPublicKeyFromHeader(message);
+        PublicKey theirPublicKey = HeaderUtils.getHeaderRecipientPublicKey(message);
 
         KompDb db = KompDb.get(context);
         KompEntry oldEntry = db.getEntryFromEmails(
@@ -90,9 +93,8 @@ public class KompEntriesHelper {
 
             newEntry.setTheirPublicKey(DHHelper.PublicKeyClass.keyToString(theirPublicKey));
 
-            DHAlgorithm dhAlgorithm = new DHAlgorithm();
-            SecretKey secretKey = dhAlgorithm.agreeSecretKey(DHHelper.
-                    PrivateKeyClass.stringToKey(oldEntry.getMyPrivateKey()), theirPublicKey);
+            PrivateKey privateKey = DHHelper.PrivateKeyClass.stringToKey(oldEntry.getMyPrivateKey());
+            SecretKey secretKey = DHAlgorithm.agreeSecretKey(privateKey, theirPublicKey);
             newEntry.setSharedSecretKey(DHHelper.SecretKeyClass.keyToString(secretKey));
 
             db.updateEntry(message.getAllRecipients()[0].toString(),
@@ -139,7 +141,7 @@ public class KompEntriesHelper {
             SecretKey secretKey = getSecretSharedKeyFromDb(context, message.getFrom()[0].toString(),
                     message.getAllRecipients()[0].toString());
 
-            MimeMessage encryptedMessage = eer.createEncryptedMessage(session, message, secretKey);
+            MimeMessage encryptedMessage = MessageBuilder.createEncryptedMessage(session, message, secretKey);
             messages.add(encryptedMessage);
         }
         return messages;
