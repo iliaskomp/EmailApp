@@ -2,14 +2,13 @@ package com.iliaskomp.emailapp.network.utils;
 
 import android.content.Context;
 
-import com.iliaskomp.dhalgorithm.DHAlgorithm;
-import com.iliaskomp.dhalgorithm.DHHelper;
-import com.iliaskomp.email.EmailEncryptionRecipient;
+import com.iliaskomp.encryption.DHHelper;
 import com.iliaskomp.email.HeaderUtils;
 import com.iliaskomp.email.MessageBuilder;
 import com.iliaskomp.emailapp.models.KompDb;
 import com.iliaskomp.emailapp.models.KompEntry;
 import com.iliaskomp.emailapp.utils.EmailCredentials;
+import com.iliaskomp.encryption.EncryptionHelper;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -54,11 +53,8 @@ public class KompEntriesHelper {
     public static KompEntry createRecipientEntry(Message message, KeyPair keyPair)
             throws MessagingException, InvalidKeyException, NoSuchAlgorithmException {
 
-        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
-        DHAlgorithm dhAlgorithm = new DHAlgorithm();
-
         PublicKey theirPublicKey = HeaderUtils.getHeaderSenderPublicKey(message);
-        SecretKey secretKey = DHAlgorithm.agreeSecretKey(keyPair.getPrivate(), theirPublicKey);
+        SecretKey secretKey = EncryptionHelper.generateSecretKey(keyPair.getPrivate(), theirPublicKey);
 
         KompEntry entry = new KompEntry(message.getAllRecipients()[0].toString(),
                 message.getFrom()[0].toString());
@@ -75,7 +71,6 @@ public class KompEntriesHelper {
     public static void updateAndCompleteSenderEntry(Context context, Message message)
             throws MessagingException, InvalidKeyException, NoSuchAlgorithmException {
 
-        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
         PublicKey theirPublicKey = HeaderUtils.getHeaderRecipientPublicKey(message);
 
         KompDb db = KompDb.get(context);
@@ -94,7 +89,7 @@ public class KompEntriesHelper {
             newEntry.setTheirPublicKey(DHHelper.PublicKeyClass.keyToString(theirPublicKey));
 
             PrivateKey privateKey = DHHelper.PrivateKeyClass.stringToKey(oldEntry.getMyPrivateKey());
-            SecretKey secretKey = DHAlgorithm.agreeSecretKey(privateKey, theirPublicKey);
+            SecretKey secretKey = EncryptionHelper.generateSecretKey(privateKey, theirPublicKey);
             newEntry.setSharedSecretKey(DHHelper.SecretKeyClass.keyToString(secretKey));
 
             db.updateEntry(message.getAllRecipients()[0].toString(),
@@ -132,7 +127,6 @@ public class KompEntriesHelper {
             NoSuchAlgorithmException, IllegalBlockSizeException, NoSuchPaddingException {
 
         List<MimeMessage> messages = new ArrayList<>();
-        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
 
         for (MimeMessage message : messagesForRecipient) {
             Properties props = EmailConfigUtils.getSmtpProps(message.getAllRecipients()[0].toString());
@@ -149,7 +143,7 @@ public class KompEntriesHelper {
 
     public static boolean encryptionLibraryExists() {
         try {
-            Class cls = Class.forName("com.iliaskomp.email.EmailEncryptionRecipient");
+            Class cls = Class.forName("com.iliaskomp.email.MessageBuilder");
             return true;
         } catch (ClassNotFoundException e) {
             return false;

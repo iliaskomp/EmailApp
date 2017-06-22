@@ -5,9 +5,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
-import com.iliaskomp.dhalgorithm.DHHelper;
-import com.iliaskomp.email.EmailEncryptionRecipient;
-import com.iliaskomp.email.EmailEncryptionSender;
+import com.iliaskomp.encryption.DHHelper;
 import com.iliaskomp.email.HeaderFields;
 import com.iliaskomp.email.HeaderUtils;
 import com.iliaskomp.email.MessageBuilder;
@@ -16,6 +14,7 @@ import com.iliaskomp.emailapp.models.KompEntry;
 import com.iliaskomp.emailapp.network.utils.EmailConfigUtils;
 import com.iliaskomp.emailapp.network.utils.KompEntriesHelper;
 import com.iliaskomp.emailapp.utils.EmailCredentials;
+import com.iliaskomp.encryption.EncryptionHelper;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -104,9 +103,13 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
 
             //1st interaction
             if (KompEntriesHelper.encryptionLibraryExists()) {
-                EmailEncryptionSender ees = new EmailEncryptionSender();
-                EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
-                KeyPair keyPairSender = ees.createKeyPair();
+                KeyPair keyPairSender = null;
+                try {
+                    keyPairSender = EncryptionHelper.createKeyPair();
+                } catch (NoSuchAlgorithmException | InvalidParameterSpecException
+                        | InvalidAlgorithmParameterException | InvalidKeySpecException e) {
+                    e.printStackTrace();
+                }
                 KompDb entriesDb = KompDb.get(mContext);
 
                 String headerState = HeaderUtils.getHeaderState(message);

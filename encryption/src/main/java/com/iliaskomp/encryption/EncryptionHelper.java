@@ -1,17 +1,26 @@
 package com.iliaskomp.encryption;
 
+import com.iliaskomp.email.HeaderUtils;
 import com.iliaskomp.libs.Base64;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
+import javax.mail.Message;
+import javax.mail.MessagingException;
 
 public class EncryptionHelper {
 
@@ -50,5 +59,32 @@ public class EncryptionHelper {
 		byte[] textBytesDecrypted = cipher2.doFinal(textEncryptedBytesR);
 
 		return new String(textBytesDecrypted);
+	}
+
+	public static KeyPair generateRecipientKeyPairFromSender(Message message) throws MessagingException {
+
+        PublicKey publicKeySender = HeaderUtils.getHeaderSenderPublicKey(message);
+
+        try {
+            DHParameterSpec paramsFromSender = DHHelper.PublicKeyClass.keyToParams(publicKeySender);
+            return DHAlgorithm.generateKeyPairFromParameters(paramsFromSender.getP(), paramsFromSender.getG());
+        } catch (InvalidKeySpecException |
+                InvalidAlgorithmParameterException |
+                NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+	public static KeyPair createKeyPair() throws InvalidKeySpecException,
+			InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+			InvalidParameterSpecException {
+
+		return DHAlgorithm.generateKeyPair();
+    }
+
+    public static SecretKey generateSecretKey(PrivateKey privateKeySelf, PublicKey publicKeyOther)
+			throws InvalidKeyException, NoSuchAlgorithmException {
+		return DHAlgorithm.agreeSecretKey(privateKeySelf, publicKeyOther);
 	}
 }

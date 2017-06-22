@@ -1,4 +1,4 @@
-package com.iliaskomp.dhalgorithm;
+package com.iliaskomp.encryption;
 
 import com.iliaskomp.libs.Base64;
 

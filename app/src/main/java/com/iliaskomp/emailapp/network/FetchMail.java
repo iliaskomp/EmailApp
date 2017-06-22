@@ -7,7 +7,6 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.iliaskomp.email.EmailEncryptionRecipient;
 import com.iliaskomp.email.HeaderFields;
 import com.iliaskomp.email.HeaderUtils;
 import com.iliaskomp.email.MessageBuilder;
@@ -177,7 +176,6 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
                     EmailModel emailToAddToDb;
 
                     if (KompEntriesHelper.encryptionLibraryExists() && emailFolder.getName().equals("INBOX")) {
-                        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
                         String headerState = HeaderUtils.getHeaderState(message);
                         emailToAddToDb = checkHeaderState(emailsToAutoReply, message, headerState);
                     } else {
@@ -206,7 +204,6 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
     private EmailModel checkHeaderState(List<MimeMessage> emailsToAutoReply, Message message,
                                         String headerState) {
         KompDb entriesDb = KompDb.get(mContext);
-        EmailEncryptionRecipient eer = new EmailEncryptionRecipient();
         EmailModel emailToAddToDb =  null;
 
         try {
@@ -216,7 +213,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
 
                     emailToAddToDb = EmailModelHelper.buildEmailFromMessage(mContext, message);
 
-                    KeyPair keyPairRecipient = eer.generateRecipientKeyPairFromSender(message);
+                    KeyPair keyPairRecipient = EncryptionHelper.generateRecipientKeyPairFromSender(message);
                     assert keyPairRecipient != null;
 
                     KompEntry entry = KompEntriesHelper.createRecipientEntry(message, keyPairRecipient);

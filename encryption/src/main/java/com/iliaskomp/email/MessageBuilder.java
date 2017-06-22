@@ -1,6 +1,6 @@
 package com.iliaskomp.email;
 
-import com.iliaskomp.dhalgorithm.DHHelper;
+import com.iliaskomp.encryption.DHHelper;
 import com.iliaskomp.encryption.EncryptionHelper;
 
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package com.iliaskomp.dhalgorithm;
+package com.iliaskomp.encryption;
 
 import java.math.BigInteger;
 import java.security.AlgorithmParameterGenerator;
@@ -35,7 +35,7 @@ public class DHAlgorithm {
                     "83655D23DCA3AD961C62F356208552BB9ED529077096966D" +
                     "670C354E4ABC9804F1746C08CA237327FFFFFFFFFFFFFFFF");
 
-    public static KeyPair generateKeyPair(DHAlgorithm dhAlgorithm) throws NoSuchAlgorithmException, InvalidParameterSpecException,
+    public static KeyPair generateKeyPair() throws NoSuchAlgorithmException, InvalidParameterSpecException,
             InvalidAlgorithmParameterException, InvalidKeySpecException {
         // generate DH parameters
         DHParameterSpec kp = DHAlgorithm.generateParameters();
