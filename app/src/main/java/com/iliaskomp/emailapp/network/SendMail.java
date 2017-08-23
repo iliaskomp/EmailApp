@@ -163,7 +163,6 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
                 // no library, just send the normal message
                 encryptionMm = message;
             }
-            //TODO create emailModel and add to sentDB?
             //Sending email
             if (encryptionMm != null) {
                 Transport.send(encryptionMm);

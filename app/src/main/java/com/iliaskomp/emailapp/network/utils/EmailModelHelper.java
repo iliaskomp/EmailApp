@@ -27,7 +27,7 @@ public class EmailModelHelper {
 
         email.setSender(message.getFrom()[0].toString());
         email.setSubject(message.getSubject());
-        email.setRecipient(message.getAllRecipients()[0].toString()); // TODO assuming one recipient
+        email.setRecipient(message.getAllRecipients()[0].toString());
         email.setFullDate(message.getSentDate());
         email.setMessage(getEmailContentFromMessageObjects(message));
         email.setHeaders(HeadersFormatHelper.getHeadersStringFromEnumeration(message.getAllHeaders()));
@@ -50,11 +50,9 @@ public class EmailModelHelper {
         return email;
     }
 
-    //TODO image support etc
     private static String getEmailContentFromMessageObjects(Part messageObject) throws
             MessagingException, IOException {
         Message message = (Message) messageObject;
-//         String type = message.getContentType();
         String result = "";
 
         if (message.isMimeType("text/plain")) {

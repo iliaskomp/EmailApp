@@ -19,6 +19,9 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * Takes care of the Diffie-Hellman related process
+ */
 public class DHAlgorithm {
     private static final int AES_KEY_SIZE = 128;
     private static final int DH_PARAMETERS_SIZE = 2048;
@@ -35,6 +38,15 @@ public class DHAlgorithm {
                     "83655D23DCA3AD961C62F356208552BB9ED529077096966D" +
                     "670C354E4ABC9804F1746C08CA237327FFFFFFFFFFFFFFFF");
 
+    /**
+     * Generate a Diffie Hellman key pair.
+     *
+     * @return the key pair
+     * @throws NoSuchAlgorithmException           the no such algorithm exception
+     * @throws InvalidParameterSpecException      the invalid parameter spec exception
+     * @throws InvalidAlgorithmParameterException the invalid algorithm parameter exception
+     * @throws InvalidKeySpecException            the invalid key spec exception
+     */
     public static KeyPair generateKeyPair() throws NoSuchAlgorithmException, InvalidParameterSpecException,
             InvalidAlgorithmParameterException, InvalidKeySpecException {
         // generate DH parameters
@@ -46,7 +58,15 @@ public class DHAlgorithm {
         return DHAlgorithm.generateKeyPairFromParameters(p, g);
     }
 
-    // returns keypair kp.getPublic(), kp.getPrivate()
+    /**
+     * Generate a Diffie Hellman key pair with parameters p and g.
+     *
+     * @param p the p
+     * @param g the g
+     * @return the key pair
+     * @throws NoSuchAlgorithmException           the no such algorithm exception
+     * @throws InvalidAlgorithmParameterException the invalid algorithm parameter exception
+     */
     public static KeyPair generateKeyPairFromParameters(BigInteger p, BigInteger g)
             throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
 
@@ -57,6 +77,16 @@ public class DHAlgorithm {
         return kpg.generateKeyPair();
     }
 
+    /**
+     * Generate a secret key given a private key and a public key of another user
+     *
+     * @param privateKeySelf the private key of the user
+     * @param publicKeyOther the public key of the other user
+     * @return the secret key
+     * @throws NoSuchAlgorithmException the no such algorithm exception
+     * @throws InvalidKeyException      the invalid key exception
+     * @throws IllegalStateException    the illegal state exception
+     */
     public static SecretKey agreeSecretKey(PrivateKey privateKeySelf, PublicKey publicKeyOther)
             throws NoSuchAlgorithmException, InvalidKeyException, IllegalStateException {
 
@@ -73,8 +103,6 @@ public class DHAlgorithm {
         return new SecretKeySpec(keyEncoded, "AES");
     }
 
-    //    p = dhSpec.getP();;
-    //    g = dhSpec.getG();
     private static DHParameterSpec generateParameters(int bits) throws NoSuchAlgorithmException {
 
         AlgorithmParameterGenerator generator = AlgorithmParameterGenerator.getInstance("DH");

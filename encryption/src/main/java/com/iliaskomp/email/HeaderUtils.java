@@ -15,12 +15,18 @@ import static com.iliaskomp.email.HeaderFields.HeaderX.PUBLIC_KEY_RECIPIENT;
 import static com.iliaskomp.email.HeaderFields.HeaderX.PUBLIC_KEY_SENDER;
 
 /**
- * Created by IliasKomp on 22/06/17.
+ * Header related utilities
  */
-
 public class HeaderUtils {
 
-    // if header encryption state is not found, it returns HeaderX.NO_HEADER_STRING
+    /**
+     * Extracts the encryption state from a message's headers.
+     *
+     * @param message the message
+     * @return the header state (if header encryption state is not found, it returns HeaderX.NO_HEADER_STRING)
+     * @throws MessagingException the messaging exception
+     */
+//
     public static String getHeaderState(Message message) throws MessagingException {
         HashMap<String, String> headers = getHeadersMapFromEnumeration(message
                 .getAllHeaders());
@@ -33,6 +39,13 @@ public class HeaderUtils {
         return HeaderFields.HeaderX.NO_HEADER_STRING;
     }
 
+    /**
+     * Extracts the IV (Initialization Vector) from a message's headers.
+     *
+     * @param message the message
+     * @return the header iv (if header encryption state is not found, it returns HeaderX.NO_HEADER_STRING)
+     * @throws MessagingException the messaging exception
+     */
     public static String getHeaderIv(Message message) throws MessagingException {
         HashMap<String, String> headers = getHeadersMapFromEnumeration(message
                 .getAllHeaders());
@@ -45,6 +58,13 @@ public class HeaderUtils {
         return HeaderFields.HeaderX.NO_HEADER_STRING;
     }
 
+    /**
+     * Extracts the sender's public key from a message's headers.
+     *
+     * @param message the message
+     * @return the sender's public key (null if no public key is found)
+     * @throws MessagingException the messaging exception
+     */
     public static PublicKey getHeaderSenderPublicKey(Message message) throws MessagingException {
         HashMap<String, String> headers =
                 getHeadersMapFromEnumeration(message.getAllHeaders());
@@ -58,6 +78,13 @@ public class HeaderUtils {
         return null;
     }
 
+    /**
+     * Extracts the recipient's public key from a message's headers.
+     *
+     * @param message the message
+     * @return the header recipient public key (null if no public key is found)
+     * @throws MessagingException the messaging exception
+     */
     public static PublicKey getHeaderRecipientPublicKey(Message message) throws MessagingException {
         HashMap<String, String> headers =
                 getHeadersMapFromEnumeration(message.getAllHeaders());

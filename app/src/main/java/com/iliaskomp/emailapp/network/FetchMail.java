@@ -122,7 +122,7 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
 
         EmailDB emailDb = null;
         KompDb entriesDb = KompDb.get(mContext);
-        List<MimeMessage> emailsToAutoReply = new ArrayList<>(); //TODO
+        List<MimeMessage> emailsToAutoReply = new ArrayList<>();
 
 
         // check if needing to fetch inbox or sent folder for email db
@@ -166,7 +166,6 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
             }
 
 //========================================================================================================================================
-            //TODO only if folder is inbox, search for parameters, komp etc. NOT with sent folder
             // if db has no emails get all message emails else get only unfetched messages
             assert emailDb != null;
             assert emailFolder != null;

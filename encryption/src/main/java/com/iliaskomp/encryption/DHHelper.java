@@ -16,11 +16,17 @@ import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * Helper for the Diffie-Hellman protocol
+ */
 public class DHHelper {
 
+    /**
+     * The Public key class.
+     * Includes public key related helper methods
+     */
     public static class PublicKeyClass {
-
-        public static PublicKey decode(byte[] key) throws NoSuchAlgorithmException,
+        private static PublicKey decode(byte[] key) throws NoSuchAlgorithmException,
                 InvalidKeySpecException {
 
             KeyFactory keyFactory = KeyFactory.getInstance("DH");
@@ -29,15 +35,27 @@ public class DHHelper {
             return keyFactory.generatePublic(x509KeySpec);
         }
 
-        public static byte[] encode(PublicKey key) {
+        private static byte[] encode(PublicKey key) {
             return key.getEncoded();
         }
 
+        /**
+         * Convert a public key to string
+         *
+         * @param publicKey the public key
+         * @return the public key as string
+         */
         public static String keyToString(PublicKey publicKey) {
             byte[] publicKeyEncodedSender = encode(publicKey);
             return Base64.encodeToString(publicKeyEncodedSender, Base64.NO_WRAP);
         }
 
+        /**
+         * Convert string to public key
+         *
+         * @param string the string
+         * @return the public key
+         */
         public static PublicKey stringToKey(String string) {
             try {
                 byte[] stringBytes = Base64.decode(string, Base64.NO_WRAP);
@@ -51,18 +69,27 @@ public class DHHelper {
             return null;
         }
 
-        // Get params from public key
+        /**
+         * Extract Diffie Hellman parameters from a public key
+         *
+         * @param publicKey the public key
+         * @return the dh parameter spec containing the parameters
+         */
         public static DHParameterSpec keyToParams(PublicKey publicKey) {
             return ((DHPublicKey) publicKey).getParams();
         }
     }
 
+    /**
+     * The Private key class.
+     * Includes private key related helper methods
+     */
     public static class PrivateKeyClass {
         private static byte[] encode(PrivateKey key) {
             return key.getEncoded();
         }
 
-        public static PrivateKey decodePrivateKey(byte[] key) throws NoSuchAlgorithmException,
+        private static PrivateKey decode(byte[] key) throws NoSuchAlgorithmException,
                 InvalidKeySpecException {
 
             KeyFactory keyFactory = KeyFactory.getInstance("DH");
@@ -71,11 +98,23 @@ public class DHHelper {
             return keyFactory.generatePrivate(x509KeySpec);
         }
 
+        /**
+         * Convert a private key to string
+         *
+         * @param privateKey the private key
+         * @return the private key as string
+         */
         public static String keyToString(PrivateKey privateKey) {
             byte[] privateKeyEncodedSender = encode(privateKey);
             return Base64.encodeToString(privateKeyEncodedSender, Base64.NO_WRAP);
         }
 
+        /**
+         * Convert a string to private key.
+         *
+         * @param string the string
+         * @return the private key
+         */
         public static PrivateKey stringToKey(String string) {
             try {
                 byte[] stringBytes = Base64.decode(string, Base64.NO_WRAP);
@@ -90,21 +129,37 @@ public class DHHelper {
         }
     }
 
+    /**
+     * The Secret key class.
+     * Includes secret key related helper methods
+     */
     public static class SecretKeyClass {
 
-        public static byte[] encode(SecretKey key) {
+        private static byte[] encode(SecretKey key) {
             return key.getEncoded();
         }
 
-        public static SecretKey decode(byte[] encodedKey) {
+        private static SecretKey decode(byte[] encodedKey) {
             return new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES");
         }
 
+        /**
+         * Convert a secret key to string.
+         *
+         * @param secretKey the secret key
+         * @return the secret key as string
+         */
         public static String keyToString(SecretKey secretKey) {
             byte[] secretKeyEncodedSender = encode(secretKey);
             return Base64.encodeToString(secretKeyEncodedSender, Base64.NO_WRAP);
         }
 
+        /**
+         * Convert a string to secret key.
+         *
+         * @param string the string
+         * @return the secret key
+         */
         public static SecretKey stringToKey(String string) {
             byte[] stringBytes = Base64.decode(string, Base64.NO_WRAP);
             SecretKeySpec spec = new SecretKeySpec(stringBytes, "AES");
@@ -112,6 +167,12 @@ public class DHHelper {
         }
     }
 
+    /**
+     * Convert hex to big integer.
+     *
+     * @param hex the hex
+     * @return the big integer
+     */
     public static BigInteger hexToBigInteger(String hex) {
         return new BigInteger(hex, 16);
     }

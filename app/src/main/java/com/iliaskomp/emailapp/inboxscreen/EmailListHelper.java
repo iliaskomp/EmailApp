@@ -7,6 +7,9 @@ package com.iliaskomp.emailapp.inboxscreen;
 public class EmailListHelper {
     //Gets a string and returns the trimmed first line of that string
     public static String formatShortMessageForEmailList(String message) {
-        return message.trim().split("\r\n|\r|\n", 2)[0];
+        if (message != null) {
+            return message.trim().split("\r\n|\r|\n", 2)[0];
+        }
+        return "";
     }
 }
