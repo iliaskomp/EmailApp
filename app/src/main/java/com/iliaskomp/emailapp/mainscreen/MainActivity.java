@@ -12,6 +12,11 @@ import com.iliaskomp.emailapp.inboxscreen.EmailListActivity;
 import com.iliaskomp.emailapp.newmailscreen.NewMailActivity;
 import com.iliaskomp.emailapp.utils.EmailCredentials;
 
+/**
+ * The main activity.
+ * Entry point for the application
+ * Presents the home screen.
+ */
 public class MainActivity extends AppCompatActivity {
 
     @Override

@@ -14,14 +14,20 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Created by IliasKomp on 13/02/17.
+ * Inbox Database that implements the Email Database.
+ * This class provides easy access for converted database elements to objects.
  */
-
 public class InboxDB implements EmailDB {
     private static InboxDB sInboxDB;
     private Context mContext;
     private static SQLiteDatabase sDatabase;
 
+    /**
+     * Get inbox database.
+     *
+     * @param context the context
+     * @return the inbox db
+     */
     public static InboxDB get(Context context) {
         if (sInboxDB == null) {
             sInboxDB = new InboxDB(context);

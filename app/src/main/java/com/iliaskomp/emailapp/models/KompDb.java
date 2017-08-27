@@ -14,7 +14,8 @@ import java.util.List;
 import static com.iliaskomp.emailapp.database.usersencryption.KompSchema.UsersTable;
 
 /**
- * Created by IliasKomp on 28/05/17.
+ * Database for the komp encryption entries.
+ * This class provides easy access for converted database elements to objects.
  */
 
 public class KompDb {

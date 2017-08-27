@@ -5,13 +5,23 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 /**
- * Created by IliasKomp on 15/02/17.
+ * Sent base helper. Creates the database.
  */
-
 public class SentBaseHelper extends SQLiteOpenHelper {
+    /**
+     * The constant VERSION.
+     */
     public static final int VERSION = 1;
+    /**
+     * The constant DATABASE_NAME.
+     */
     public static final String DATABASE_NAME = "sentEmailBase.db";
 
+    /**
+     * Instantiates a new Sent base helper.
+     *
+     * @param context the context
+     */
     public SentBaseHelper(Context context) {
         super(context, DATABASE_NAME, null , VERSION);
     }

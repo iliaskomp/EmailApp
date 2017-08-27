@@ -11,9 +11,9 @@ import com.iliaskomp.emailapp.emailscreen.EmailPagerActivity;
 import com.iliaskomp.emailapp.models.EmailModel;
 
 /**
- * Created by iliaskomp on 11/02/17.
+ * Email List Activity
+ * Calls the Email List Fragment for the screen.
  */
-
 public class EmailListActivity extends SingleFragmentActivity implements EmailListFragment.Callbacks {
     private static final String EXTRA_FOLDER_NAME = "com.iliaskomp.emailapp.foldername";
 
@@ -44,6 +44,16 @@ public class EmailListActivity extends SingleFragmentActivity implements EmailLi
         }
     }
 
+    /**
+     * Static new intent method.
+     * Other classes call this method when they send an intent to this class.
+     *
+     * @param context    the context
+     * @param folderName the folder name
+     * @param email      the email
+     * @param password   the password
+     * @return the intent
+     */
     public static Intent newIntent(Context context, String folderName, String email, String password) {
         mFolderName = folderName;
         mEmail = email;

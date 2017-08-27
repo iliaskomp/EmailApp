@@ -20,12 +20,19 @@ import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
 /**
- * Created by IliasKomp on 11/06/17.
+ * Saves and retrieves email messages.
+ * Those messages are temporarily saved until a secret key has been established with the
+ * recipient, and then are retrieves and sent, encrypted with the secret key.
  */
-
 public class EmailSharedPrefsUtils {
 
-    // filename format e.g "mm-example@gmail.com-0"
+    /**
+     * Save original message. (example file format: mm-example@gmail.com-0)
+     *
+     * @param context the context
+     * @param message the message
+     * @throws MessagingException the messaging exception
+     */
     public static void saveOriginalMessage(Context context, MimeMessage message) throws MessagingException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
@@ -62,6 +69,14 @@ public class EmailSharedPrefsUtils {
         return filename;
     }
 
+    /**
+     * Retrieves original messages for an email address.
+     *
+     * @param context   the context
+     * @param emailName the email address name
+     * @return the original messages for an email address
+     * @throws MessagingException the messaging exception
+     */
     public static List<MimeMessage> getOriginalMessagesForEmail(Context context, String emailName) throws MessagingException {
         List<MimeMessage> messages = new ArrayList<>();
 
@@ -81,6 +96,12 @@ public class EmailSharedPrefsUtils {
         return messages;
     }
 
+    /**
+     * Remove original messages for email address.
+     *
+     * @param context   the context
+     * @param emailName the email address name
+     */
     public static void removeOriginalMessagesForEmail(Context context, String emailName) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         Map<String,?> keys = prefs.getAll();

@@ -8,7 +8,7 @@ import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 
 /**
- * Created by IliasKomp on 22/05/17.
+ * Email provider related utilities
  */
 
 public class EmailConfigUtils {

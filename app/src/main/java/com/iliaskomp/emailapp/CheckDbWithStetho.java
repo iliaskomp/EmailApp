@@ -6,9 +6,9 @@ import android.app.Application;
 import com.facebook.stetho.Stetho;
 
 /**
- * Created by IliasKomp on 11/06/17.
+ * For testing purposes.
+ * Stetho is used to check the database inside the smartphone.
  */
-
 public class CheckDbWithStetho extends Application {
     @Override
     public void onCreate() {

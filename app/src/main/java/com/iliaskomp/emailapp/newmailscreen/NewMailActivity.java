@@ -24,9 +24,9 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 /**
- * Created by elias on 11/02/17.
+ * Activity for the New Mail Screen.
+ * The user can write and send an email.
  */
-
 public class NewMailActivity extends AppCompatActivity{
     private static final String EXTRA_EMAIL_ID = "com.iliaskomp.email_id";
     private static final String EXTRA_EMAIL_NAME = "com.iliaskomp.email_name";
@@ -88,9 +88,18 @@ public class NewMailActivity extends AppCompatActivity{
             e.printStackTrace();
         }
         sm.execute(mm);
-//        sm.execute(emailName, password, );
     }
 
+    /**
+     * Static new intent method.
+     * Other classes call this method when they send an intent to this class.
+     *
+     * @param contextPackage the context package
+     * @param emailId        the email id
+     * @param email          the email
+     * @param password       the password
+     * @return the intent
+     */
     public static Intent newIntent(Context contextPackage, UUID emailId,  String email, String password) {
         Intent intent = new Intent(contextPackage, NewMailActivity.class);
         intent.putExtra(EXTRA_EMAIL_ID, emailId);
@@ -98,12 +107,6 @@ public class NewMailActivity extends AppCompatActivity{
         intent.putExtra(EXTRA_PASSWORD, password);
         return intent;
     }
-
-//    public static Intent newIntent(Context contextPackage, UUID emailId) {
-//        Intent intent = new Intent(contextPackage, NewMailActivity.class);
-//        intent.putExtra(EXTRA_EMAIL_ID, emailId);
-//        return intent;
-//    }
 
     private MimeMessage createMessage(String recipient, String subject, String message) throws MessagingException {
         Properties props = EmailConfigUtils.getSmtpProps(EmailCredentials.EMAIL_SEND);

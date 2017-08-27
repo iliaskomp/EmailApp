@@ -7,9 +7,15 @@ import java.util.Map;
 import javax.mail.Header;
 
 /**
- * Created by IliasKomp on 15/02/17.
+ * Helper for header formatting
  */
 public class HeadersFormatHelper {
+    /**
+     * Gets headers map from enumeration of headers.
+     *
+     * @param headers the headers
+     * @return the headers' map
+     */
     public static HashMap<String, String> getHeadersMapFromEnumeration(Enumeration headers) {
         HashMap<String, String> headersMap = new HashMap<>();
         while (headers.hasMoreElements()) {
@@ -19,6 +25,12 @@ public class HeadersFormatHelper {
         return headersMap;
     }
 
+    /**
+     * Gets headers as a string from a headers' map.
+     *
+     * @param headersMap the headers' map
+     * @return the headers as a string
+     */
     public static String getHeadersStringTextFromMap(HashMap<String, String> headersMap) {
         String output = "";
 
@@ -29,6 +41,12 @@ public class HeadersFormatHelper {
         return output;
     }
 
+    /**
+     * Gets headers' string from enumeration.
+     *
+     * @param headersEnum the headers enum
+     * @return the headers as a string
+     */
     public static String getHeadersStringFromEnumeration(Enumeration headersEnum) {
         return getHeadersStringTextFromMap(getHeadersMapFromEnumeration(headersEnum));
     }

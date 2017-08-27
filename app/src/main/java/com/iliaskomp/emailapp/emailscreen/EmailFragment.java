@@ -23,9 +23,9 @@ import com.iliaskomp.emailapp.utils.DateFormatHelper;
 import java.util.UUID;
 
 /**
- * Created by IliasKomp on 13/02/17.
+ * Email fragment.
+ * Presents the email screen when a user clicks on a specific email from the email list.
  */
-
 public class EmailFragment extends Fragment {
     private static final String ARG_EMAIL_ID = "email_id";
     private static final String ARG_EMAIL_NAME = "email_name";
@@ -94,6 +94,15 @@ public class EmailFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Static new intent method.
+     * Other classes call this method when they send an intent to this class.
+     *
+     * @param emailId  the email id
+     * @param email    the email
+     * @param password the password
+     * @return the email fragment
+     */
     public static EmailFragment newInstance(UUID emailId, String email, String password) {
         Bundle args = new Bundle();
         args.putSerializable(ARG_EMAIL_ID, emailId);

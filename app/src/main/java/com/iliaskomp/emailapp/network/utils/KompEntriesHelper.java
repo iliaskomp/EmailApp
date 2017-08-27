@@ -30,12 +30,20 @@ import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
 /**
- * Created by IliasKomp on 13/06/17.
+ * Helper about the KompDB where the encryption information is saved like key and email information.
  */
-
 public class KompEntriesHelper {
 
-    // create new user encryption entry for sender (non-complete until receiving recipient's key)
+    /**
+     * Create non complete komp entry for the first interaction of the sender.
+     * Recipient's public key is still needed as well as the secret key to be generated
+     * from the recipient's public key.
+     *
+     * @param message the message
+     * @param keyPair the key pair
+     * @return the komp entry
+     * @throws MessagingException the messaging exception
+     */
     public static KompEntry createSenderEntryNonComplete (
             MimeMessage message, KeyPair keyPair) throws MessagingException {
 
@@ -49,7 +57,17 @@ public class KompEntriesHelper {
         return entry;
     }
 
-    // recipient creates complete entry after getting sender's public key. keyPair: recipient's keypair
+    /**
+     * Create recipient komp entry.
+     * Recipient creates complete entry after getting sender's public key
+     *
+     * @param message the message
+     * @param keyPair the key pair
+     * @return the komp entry
+     * @throws MessagingException       the messaging exception
+     * @throws InvalidKeyException      the invalid key exception
+     * @throws NoSuchAlgorithmException the no such algorithm exception
+     */
     public static KompEntry createRecipientEntry(Message message, KeyPair keyPair)
             throws MessagingException, InvalidKeyException, NoSuchAlgorithmException {
 
@@ -67,7 +85,15 @@ public class KompEntriesHelper {
         return entry;
     }
 
-    // update and complete sender's db entry (second step after receiving recipient's public key)
+    /**
+     * Update and complete sender's komp entry after receiving recipient's public key.
+     *
+     * @param context the context
+     * @param message the message
+     * @throws MessagingException       the messaging exception
+     * @throws InvalidKeyException      the invalid key exception
+     * @throws NoSuchAlgorithmException the no such algorithm exception
+     */
     public static void updateAndCompleteSenderEntry(Context context, Message message)
             throws MessagingException, InvalidKeyException, NoSuchAlgorithmException {
 
@@ -97,7 +123,15 @@ public class KompEntriesHelper {
         }
     }
 
-    // try to get entry for message's sender and recipient. returns null if no entry is found
+    /**
+     * Gets encryption entry if it exists for a specific email address.
+     *
+     * @param context the context
+     * @param message the message
+     * @return the users encryption entry if exists
+     * @throws MessagingException the messaging exception
+     */
+// try to get entry for message's sender and recipient. returns null if no entry is found
     public static KompEntry getUsersEncryptionEntryIfExists(Context context, MimeMessage message)
             throws MessagingException {
 
@@ -110,7 +144,15 @@ public class KompEntriesHelper {
         return null;
     }
 
-    // get secret key from db for sender and recipient email
+    /**
+     * Gets secret shared key from db for sender and recipient's email address.
+     *
+     * @param context    the context
+     * @param myEmail    the my email
+     * @param theirEmail the their email
+     * @return the secret shared key from db
+     * @throws MessagingException the messaging exception
+     */
     public static SecretKey getSecretSharedKeyFromDb(Context context, String myEmail,
                                                      String theirEmail) throws MessagingException {
 
@@ -120,7 +162,22 @@ public class KompEntriesHelper {
         return DHHelper.SecretKeyClass.stringToKey(keyString);
     }
 
-    //messagesForRecipient: messages that were saved by sender while waiting for R's public key
+    /**
+     * Encrypt all the messages for the recipient. They were previously saved until a secret shared
+     * key had been established.
+     *
+     * @param context              the context
+     * @param messagesForRecipient the messages that were temporarily saved in order to establish
+     *                             a shared secret key.
+     * @return the list
+     * @throws IOException               the io exception
+     * @throws MessagingException        the messaging exception
+     * @throws InvalidKeyException       the invalid key exception
+     * @throws BadPaddingException       the bad padding exception
+     * @throws NoSuchAlgorithmException  the no such algorithm exception
+     * @throws IllegalBlockSizeException the illegal block size exception
+     * @throws NoSuchPaddingException    the no such padding exception
+     */
     public static List<MimeMessage> encryptMessagesForRecipient(Context context,
                                                                 List<MimeMessage> messagesForRecipient)
             throws IOException, MessagingException, InvalidKeyException, BadPaddingException,
@@ -141,6 +198,11 @@ public class KompEntriesHelper {
         return messages;
     }
 
+    /**
+     * Checks if the komp encryption library exists
+     *
+     * @return if the komp encryption library exists.
+     */
     public static boolean encryptionLibraryExists() {
         try {
             Class cls = Class.forName("com.iliaskomp.email.MessageBuilder");

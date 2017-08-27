@@ -37,15 +37,19 @@ import javax.mail.Transport;
 import javax.mail.internet.MimeMessage;
 
 /**
- * Created by iliaskomp on 11/02/17.
+ * Sends email using JavaMail library.
  */
-
 public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
 
     private Context mContext;
     private ProgressDialog mProgressDialog;
     private boolean mSavingMessage = false;
 
+    /**
+     * Instantiates a new Send mail.
+     *
+     * @param context the context
+     */
     public SendMail(Context context) {
         mContext = context;
     }
@@ -93,10 +97,6 @@ public class SendMail extends AsyncTask<MimeMessage, Void, Void> {
         });
 
         try {
-//            MimeMessage originalMm = SendMailUtils.createMimeMessage(session, EmailCredentials.EMAIL_SEND,
-//                    recipient, subject, content);
-            //============================================================//
-
 
             // if recipient doesn't exist, create key pair and send first message with public key
             Message encryptionMm = null;

@@ -17,7 +17,7 @@ import javax.mail.Part;
 import javax.mail.internet.MimeMultipart;
 
 /**
- * Created by IliasKomp on 13/06/17.
+ * Helper class to convert a MimeMessage to the EmailModel defined in this app
  */
 
 public class EmailModelHelper {
@@ -76,41 +76,6 @@ public class EmailModelHelper {
         } else {
             result = "invalid";
         }
-
-//        else if (message.isMimeType("image/jpeg")) {
-//            System.out.println("--------> image/jpeg");
-//            Object o = message.getContent();
-//
-//            InputStream x = (InputStream) o;
-//            // Construct the required byte array
-//            System.out.println("x.length = " + x.available());
-//            while ((i = (int) ((InputStream) x).available()) > 0) {
-//                int result = (int) (((InputStream) x).read(bArray));
-//                if (result == -1) {
-//                    int i = 0;
-//                }
-//                byte[] bArray = new byte[x.available()];
-//
-//                break;
-//            }
-//            FileOutputStream f2 = new FileOutputStream("/tmp/image.jpg");
-//            f2.write(bArray);
-//        }
-
-//        else if (message.getContentType().contains("image/")) {
-//                Log.d("content type", message.getContentType());
-//                File f = new File("image" + new Date().getTime() + ".jpg");
-//                DataOutputStream output = new DataOutputStream(
-//                        new BufferedOutputStream(new FileOutputStream(f)));
-//                com.sun.mail.util.BASE64DecoderStream test =
-//                        (com.sun.mail.util.BASE64DecoderStream) message
-//                                .getContent();
-//                byte[] buffer = new byte[1024];
-//                int bytesRead;
-//                while ((bytesRead = test.read(buffer)) != -1) {
-//                    output.write(buffer, 0, bytesRead);
-//                }
-//
         return result;
     }
 }

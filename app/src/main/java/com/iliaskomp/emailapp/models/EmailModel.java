@@ -6,9 +6,8 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * Created by elias on 11/02/17.
+ * Email Model used for this application
  */
-
 public class EmailModel {
 //    private static final int STATE_RECIPIENT_TO_SEND_BACK = 1;
 //    private static final int STATE_RECIPIENT_HAS_SEND_BACK = 2;
@@ -31,22 +30,18 @@ public class EmailModel {
 //    private UsersEncryptionEntry mEncryptionEntry = null;
     private int stateOfEncryption = STATE_NO_KOMP;
 
-//    private HashMap<String, String> mHeadersMap;
-
-//    public EmailModel(String mSender, String mRecipient, String mSubject, String mMessage, String mHeadersMap) {
-//        this.mSender = mSender;
-//        this.mRecipient = mRecipient;
-//        this.mSubject = mSubject;
-//        this.mMessage = mMessage;
-//        this.mHeadersMap = mHeadersMap;
-//        mId = UUID.randomUUID();
-//
-//    }
-
+    /**
+     * Instantiates a new Email model.
+     */
     public EmailModel() {
         mId = UUID.randomUUID();
     }
 
+    /**
+     * Instantiates a new Email model with an defined id.
+     *
+     * @param id the id
+     */
     public EmailModel(UUID id) {
         mId = id;
     }
@@ -62,62 +57,137 @@ public class EmailModel {
                 "\nSent Date: " + mFullDate;
     }
 
+    /**
+     * Gets recipient.
+     *
+     * @return the recipient
+     */
     public String getRecipient() {
         return mRecipient;
     }
 
+    /**
+     * Gets subject.
+     *
+     * @return the subject
+     */
     public String getSubject() {
         return mSubject;
     }
 
+    /**
+     * Gets message.
+     *
+     * @return the message
+     */
     public String getMessage() {
         return mMessage;
     }
 
+    /**
+     * Sets recipient.
+     *
+     * @param recipient the recipient
+     */
     public void setRecipient(String recipient) {
         this.mRecipient = recipient;
     }
 
+    /**
+     * Sets subject.
+     *
+     * @param subject the subject
+     */
     public void setSubject(String subject) {
         this.mSubject = subject;
     }
 
+    /**
+     * Sets message.
+     *
+     * @param message the message
+     */
     public void setMessage(String message) {
         this.mMessage = message;
     }
 
+    /**
+     * Gets sender.
+     *
+     * @return the sender
+     */
     public String getSender() {
         return mSender;
     }
 
+    /**
+     * Sets sender.
+     *
+     * @param sender the sender
+     */
     public void setSender(String sender) {
         this.mSender = sender;
     }
 
+    /**
+     * Gets headers.
+     *
+     * @return the headers
+     */
     public String getHeaders() {
         return mHeaders;
     }
 
+    /**
+     * Sets headers.
+     *
+     * @param headers the headers
+     */
     public void setHeaders(String headers) {
         mHeaders = headers;
     }
 
+    /**
+     * Gets full date.
+     *
+     * @return the full date
+     */
     public Date getFullDate() {
         return mFullDate;
     }
 
+    /**
+     * Sets full date.
+     *
+     * @param fullDate the full date
+     */
     public void setFullDate(Date fullDate) {
         this.mFullDate = fullDate;
     }
 
+    /**
+     * Gets formatted date string.
+     *
+     * @return the formatted date string
+     */
     public String getFormattedDateString() {
         return DateFormatHelper.getFormatttedDateStringFromFullDate(mFullDate);
     }
 
+    /**
+     * Gets formatted date.
+     *
+     * @return the formatted date
+     */
     public Date getFormattedDate() {
         return DateFormatHelper.getFormattedDateFromFullDate(mFullDate);
     }
 
+    /**
+     * Gets id.
+     *
+     * @return the id
+     */
     public UUID getId() {
         return mId;
     }
@@ -131,10 +201,20 @@ public class EmailModel {
 //        mEncryptionEntry = encryptionEntry;
 //    }
 
+    /**
+     * Gets state of encryption.
+     *
+     * @return the state of encryption
+     */
     public int getStateOfEncryption() {
         return stateOfEncryption;
     }
 
+    /**
+     * Sets state of encryption.
+     *
+     * @param stateOfEncryption the state of encryption
+     */
     public void setStateOfEncryption(int stateOfEncryption) {
         this.stateOfEncryption = stateOfEncryption;
     }

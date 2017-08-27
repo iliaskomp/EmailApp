@@ -7,11 +7,16 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * Created by IliasKomp on 13/02/17.
+ * Helper for formatting date
  */
-
 public class DateFormatHelper {
 
+    /**
+     * Gets formattted date string from full date.
+     *
+     * @param date the date
+     * @return the formattted date string from full date
+     */
     public static String getFormatttedDateStringFromFullDate(Date date) {
         String dateString = date.toString();
         SimpleDateFormat spf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
@@ -27,6 +32,12 @@ public class DateFormatHelper {
         return dateString;
     }
 
+    /**
+     * Gets formatted date object from formatted date string.
+     *
+     * @param dateString the formatted date string
+     * @return the formatted date object
+     */
     public static Date getFormattedDateFromFormattedDateString(String dateString) {
         DateFormat format = new SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH);
         Date date = null;
@@ -38,11 +49,23 @@ public class DateFormatHelper {
         return date;
     }
 
+    /**
+     * Gets formatted date from full date.
+     *
+     * @param date the date
+     * @return the formatted date from full date
+     */
     public static Date getFormattedDateFromFullDate(Date date) {
         String formattedDateString = getFormatttedDateStringFromFullDate(date);
         return getFormattedDateFromFormattedDateString(formattedDateString);
     }
 
+    /**
+     * Gets full date from full date string.
+     *
+     * @param dateString the date string
+     * @return the full date from full date string
+     */
     public static Date getFullDateFromFullDateString(String dateString) {
         DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
         Date date = null;
@@ -53,11 +76,4 @@ public class DateFormatHelper {
         }
         return date;
     }
-
-    // format date from full date
-    // xxx format date from format date string
-    // format date string from format date
-    // xxx format date string from full date
-    // xxx full date from full date string
-
 }

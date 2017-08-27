@@ -14,14 +14,20 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Created by IliasKomp on 19/03/17.
+ * Sent folder database that implements the Email Database.
+ * This class provides easy access for converted database elements to objects.
  */
-
 public class SentDB implements EmailDB {
     private static SentDB sSentDB;
     private Context mContext;
     private static SQLiteDatabase sDatabase;
 
+    /**
+     * Get sent database.
+     *
+     * @param context the context
+     * @return the sent db
+     */
     public static SentDB get(Context context) {
         if (sSentDB == null) {
             sSentDB = new SentDB(context);

@@ -28,12 +28,12 @@ import com.iliaskomp.emailapp.utils.DateFormatHelper;
 
 import java.util.List;
 
-//import com.iliaskomp.emailapp.network.AsyncResponseForFetchEmail;
 
 /**
- * Created by IliasKomp on 13/02/17.
+ * Email List Fragment.
+ * Presents the email list screen in the app.
+ * Used by inbox and sent folder screens.
  */
-
 public class EmailListFragment extends Fragment implements FetchMail.AsyncResponseForFetchEmail {
     private static final String ARGS_FOLDER = "folderName";
     private static final String ARGS_EMAIL = "email";
@@ -47,7 +47,15 @@ public class EmailListFragment extends Fragment implements FetchMail.AsyncRespon
     private static String mPassword;
 
 
+    /**
+     * The interface Callbacks.
+     */
     public interface Callbacks {
+        /**
+         * On email selected.
+         *
+         * @param email the email
+         */
         void onEmailSelected(EmailModel email);
     }
 
@@ -144,6 +152,14 @@ public class EmailListFragment extends Fragment implements FetchMail.AsyncRespon
         fetchMail.execute(mFolderName);
     }
 
+    /**
+     * New instance of an email list fragment.
+     *
+     * @param folder   the folder
+     * @param email    the email
+     * @param password the password
+     * @return the email list fragment
+     */
     public static EmailListFragment newInstance(String folder, String email, String password) {
         EmailListFragment fragment = new EmailListFragment();
         Bundle args = new Bundle();
@@ -163,6 +179,11 @@ public class EmailListFragment extends Fragment implements FetchMail.AsyncRespon
         private TextView mTextViewSubject;
         private TextView mTextViewMessage;
 
+        /**
+         * Instantiates a new Email holder.
+         *
+         * @param itemView the item view
+         */
         public EmailHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
@@ -185,6 +206,11 @@ public class EmailListFragment extends Fragment implements FetchMail.AsyncRespon
 //            startActivity(intent);
         }
 
+        /**
+         * Bind email.
+         *
+         * @param email the email
+         */
         public void bindEmail(EmailModel email) {
             mEmail = email;
 
@@ -198,6 +224,11 @@ public class EmailListFragment extends Fragment implements FetchMail.AsyncRespon
     private class EmailAdapter extends RecyclerView.Adapter<EmailHolder> {
         private List<EmailModel> mEmails;
 
+        /**
+         * Instantiates a new Email adapter.
+         *
+         * @param emails the emails
+         */
         public EmailAdapter(List<EmailModel> emails) {
             mEmails = emails;
         }
@@ -222,6 +253,11 @@ public class EmailListFragment extends Fragment implements FetchMail.AsyncRespon
             return mEmails.size();
         }
 
+        /**
+         * Sets emails.
+         *
+         * @param emails the emails
+         */
         public void setEmails(List<EmailModel> emails) {
             mEmails = emails;
         }

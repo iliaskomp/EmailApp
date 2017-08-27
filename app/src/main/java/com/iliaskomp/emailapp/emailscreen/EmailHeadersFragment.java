@@ -16,9 +16,9 @@ import com.iliaskomp.emailapp.models.InboxDB;
 import java.util.UUID;
 
 /**
- * Created by IliasKomp on 14/02/17.
+ * A headers fragment.
+ * A user is presented with the headers of the current email
  */
-
 public class EmailHeadersFragment extends DialogFragment {
     private static final String ARG_EMAIL_ID = "com.iliaskomp.email_id";
 
@@ -40,6 +40,13 @@ public class EmailHeadersFragment extends DialogFragment {
                 .create();
     }
 
+    /**
+     * Static new intent method.
+     * Other classes call this method when they send an intent to this class.
+     *
+     * @param emailId the email id
+     * @return the email headers fragment
+     */
     public static EmailHeadersFragment newInstance(UUID emailId) {
         Bundle args = new Bundle();
         args.putSerializable(ARG_EMAIL_ID, emailId);

@@ -8,15 +8,24 @@ import com.iliaskomp.emailapp.models.KompEntry;
 import java.util.UUID;
 
 /**
- * Created by IliasKomp on 28/05/17.
+ * Converts database objects to java objects for easier access.
  */
-
 public class KompCursorWrapper extends CursorWrapper {
 
+    /**
+     * Instantiates a new Komp cursor wrapper.
+     *
+     * @param cursor the cursor
+     */
     public KompCursorWrapper(Cursor cursor) {
         super(cursor);
     }
 
+    /**
+     * Gets komp entry.
+     *
+     * @return the komp entry
+     */
     public KompEntry getKompEntry() {
         String uuidString = getString(getColumnIndex(KompSchema.UsersTable.Cols.UUID));
         String myEmailString = getString(getColumnIndex(KompSchema.UsersTable.Cols.MY_EMAIL));

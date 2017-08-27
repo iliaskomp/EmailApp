@@ -6,13 +6,23 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 
 /**
- * Created by IliasKomp on 28/05/17.
+ * Komp base helper. Creates the database.
  */
-
 public class KompBaseHelper extends SQLiteOpenHelper {
+    /**
+     * The constant VERSION.
+     */
     public static final int VERSION = 1;
+    /**
+     * The constant DATABASE_NAME.
+     */
     public static final String DATABASE_NAME = "kompEncryptionBase.db";
 
+    /**
+     * Instantiates a new Komp base helper.
+     *
+     * @param context the context
+     */
     public KompBaseHelper(Context context) {
         super(context, DATABASE_NAME, null , VERSION);
     }

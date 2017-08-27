@@ -17,9 +17,9 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Created by IliasKomp on 14/02/17.
+ * Email pager activity that calls the fragment for presenting the screen.
+ * Additional functionality is that the user can swipe left and right to go the previous or next email.
  */
-
 public class EmailPagerActivity extends AppCompatActivity {
     private static final String EXTRA_EMAIL_ID = "com.iliaskomp.email_id";
     private static final String EXTRA_EMAIL_NAME = "com.iliaskomp.email_name";
@@ -64,6 +64,16 @@ public class EmailPagerActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Static new intent method.
+     * Other classes call this method when they send an intent to this class.
+     *
+     * @param contextPackage the context package
+     * @param emailId        the email id
+     * @param emailName      the email name
+     * @param password       the password
+     * @return the intent
+     */
     public static Intent newIntent(Context contextPackage, UUID emailId, String emailName, String password) {
         Intent intent = new Intent(contextPackage, EmailPagerActivity.class);
         intent.putExtra(EXTRA_EMAIL_ID, emailId);

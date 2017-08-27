@@ -5,13 +5,23 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 /**
- * Created by IliasKomp on 15/02/17.
+ * Inbox base helper. Creates the database.
  */
-
 public class InboxBaseHelper extends SQLiteOpenHelper {
+    /**
+     * The constant VERSION.
+     */
     public static final int VERSION = 1;
+    /**
+     * The constant DATABASE_NAME.
+     */
     public static final String DATABASE_NAME = "inboxEmailBase.db";
 
+    /**
+     * Instantiates a new Inbox base helper.
+     *
+     * @param context the context
+     */
     public InboxBaseHelper(Context context) {
         super(context, DATABASE_NAME, null , VERSION);
     }

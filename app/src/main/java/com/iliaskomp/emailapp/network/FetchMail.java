@@ -44,23 +44,35 @@ import javax.mail.Store;
 import javax.mail.internet.MimeMessage;
 
 /**
- * Created by iliaskomp on 11/02/17.
+ * Fetches emails for the user's email and for a specific folder.
  */
-
 public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskReturnValue> {
     private static final String LOG_TAG = "FetchMail";
 
+    /**
+     * The Delegate.
+     */
     public AsyncResponseForFetchEmail delegate = null;
     private Context mContext;
     private String mProtocol;
     private ProgressDialog mProgressDialog;
 
 
-
+    /**
+     * The interface Async response for fetch email.
+     */
     public interface AsyncResponseForFetchEmail {
+        /**
+         * Called when the process is finished
+         *
+         * @param db the db
+         */
         void processFinish(EmailDB db);
     }
 
+    /**
+     * Values to be returned by the AsyncTask's doInBackground method.
+     */
     class FetchMailTaskReturnValue {
         private EmailDB mEmailDb;
         private List<MimeMessage> mEmailsToAutoReply;
@@ -79,6 +91,12 @@ public class FetchMail extends AsyncTask<String, Void, FetchMail.FetchMailTaskRe
         }
     }
 
+    /**
+     * Instantiates a new Fetch mail.
+     *
+     * @param context  the context
+     * @param protocol the protocol
+     */
     public FetchMail(Context context, String protocol) {
         mContext = context;
         mProtocol = protocol;

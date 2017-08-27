@@ -9,15 +9,24 @@ import com.iliaskomp.emailapp.utils.DateFormatHelper;
 import java.util.UUID;
 
 /**
- * Created by IliasKomp on 15/02/17.
+ * Converts database objects to java objects for easier access.
  */
-
 public class EmailCursorWrapper extends CursorWrapper {
 
+    /**
+     * Instantiates a new Email cursor wrapper.
+     *
+     * @param cursor the cursor
+     */
     public EmailCursorWrapper(Cursor cursor) {
         super(cursor);
     }
 
+    /**
+     * Gets email from inbox table.
+     *
+     * @return the inbox email
+     */
     public EmailModel getInboxEmail() {
         String uuidString = getString(getColumnIndex(EmailDbSchema.InboxTable.Cols.UUID));
         String senderString = getString(getColumnIndex(EmailDbSchema.InboxTable.Cols.SENDER));
@@ -38,6 +47,11 @@ public class EmailCursorWrapper extends CursorWrapper {
         return email;
     }
 
+    /**
+     * Gets email from sent table.
+     *
+     * @return the sent email
+     */
     public EmailModel getSentEmail() {
         String uuidString = getString(getColumnIndex(EmailDbSchema.SentTable.Cols.UUID));
         String senderString = getString(getColumnIndex(EmailDbSchema.SentTable.Cols.SENDER));
